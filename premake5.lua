@@ -5,6 +5,11 @@ configurations { "Debug", "Release", "Dist" }
 
 flags { "MultiProcessorCompile" }
 
+group "Dependencies"
+include "FusionEngine/Dependencies/GLFW"
+group "Core"
 include "FusionEngine"
-include "Sandbox"
 include "FusionForge"
+group "Tool"
+include "Sandbox"
+group ""

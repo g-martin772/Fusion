@@ -27,10 +27,12 @@
     includedirs {
         "src",
         "dependencies/spdlog/include",
+        "dependencies/glfw/include",
         "%{VULKAN_SDK}/Include"
     }
     
     links {
+        "glfw",
         "%{VULKAN_SDK}/Lib/vulkan-1.lib"
     }
 

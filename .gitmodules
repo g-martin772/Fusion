@@ -1,3 +1,6 @@
 [submodule "FusionEngine/dependencies/spdlog"]
 	path = FusionEngine/dependencies/spdlog
 	url = https://github.com/gabime/spdlog.git
+[submodule "FusionEngine/dependencies/GLFW"]
+	path = FusionEngine/dependencies/GLFW
+	url = https://github.com/g-martin772/glfw.git
