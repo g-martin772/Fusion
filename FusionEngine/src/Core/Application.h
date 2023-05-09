@@ -3,12 +3,15 @@
 
 #include "Base.h"
 
-FE_API class Application
+namespace FusionEngine
 {
-public:
-    void Init();
-    void Run();
-    void Shutdown();
-private:
-    bool m_Running = true;
-};
+    FE_API class Application
+    {
+    public:
+        void Init();
+        void Run();
+        void Shutdown();
+    private:
+        bool m_Running = true;
+    };
+}

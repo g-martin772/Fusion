@@ -1,20 +1,27 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
-void Application::Init()
-{
-    printf("startup\n");
-}
+#include "Log.h"
 
-void Application::Run()
+namespace FusionEngine
 {
-    while(m_Running)
+    void Application::Init()
     {
-        printf("running\n");
+        Log::Init();
+        FE_INFO("Startup");
+    }
+
+    void Application::Run()
+    {
+        while(m_Running)
+        {
+            FE_INFO("Running");
+        }
+    }
+
+    void Application::Shutdown()
+    {
+        FE_INFO("Shutdown");
     }
 }
 
-void Application::Shutdown()
-{
-    printf("end\n");
-}

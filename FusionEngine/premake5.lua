@@ -23,7 +23,8 @@
     }
 
     includedirs {
-        "src"
+        "src",
+        "dependencies/spdlog/include"
     }
 
     -- postbuildcommands {

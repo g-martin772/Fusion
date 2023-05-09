@@ -1,0 +1,3 @@
+[submodule "FusionEngine/dependencies/spdlog"]
+	path = FusionEngine/dependencies/spdlog
+	url = https://github.com/gabime/spdlog.git
