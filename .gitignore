@@ -1,3 +1,9 @@
 ﻿.idea/
 bin/
 obj/
+__pycache__/
+
+
+*.sln
+*.vcxproj
+*.csproj
