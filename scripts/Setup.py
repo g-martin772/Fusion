@@ -11,6 +11,9 @@ if not CheckVulkan():
 
 os.chdir('./../')
 
+subprocess.call(["git", "submodule", "update", "--recursive", "--remote"])
+subprocess.call(["git", "submodule", "update", "--init", "--recursive"])
+
 print("\nRunning premake...")
 
 if platform.system() == 'Windows':
