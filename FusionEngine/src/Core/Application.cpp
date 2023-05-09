@@ -5,26 +5,37 @@
 
 namespace FusionEngine
 {
+    static Application* s_Application;
+    
+    Application* Application::Get()
+    {
+        return s_Application;
+    }
+
     void Application::Init()
     {
+        s_Application = this;
+        
         Log::Init();
         FE_INFO("Startin Fusion Engine");
-        uint32_t version;
-        vk::enumerateInstanceVersion(&version);
-        FE_INFO("{0}.{1}.{2}", VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version));
+
+        m_Window = Window::Create();
+        m_Window->Init();
     }
 
     void Application::Run()
     {
         while(m_Running)
         {
-            
+            m_Window->OnUpdate();
         }
     }
 
     void Application::Shutdown()
     {
-        FE_INFO("Shutdown");
+        FE_INFO("Fusion Engine Shutdown");
+        m_Window->ShutDown();
+        
     }
 }
 
