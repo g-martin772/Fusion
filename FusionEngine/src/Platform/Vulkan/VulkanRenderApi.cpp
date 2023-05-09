@@ -24,6 +24,7 @@ void VulkanRenderApi::CreateInstance()
     // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap44.html#extendingvulkan-coreversions-versionnumbers
     uint32_t version;
     vk:vkEnumerateInstanceVersion(&version);
+    FE_INFO("Vulkan Version: {0}.{1}.{2}", VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version));
 
     vk::ApplicationInfo appInfo(
         "Fusion Engine",
@@ -38,9 +39,9 @@ void VulkanRenderApi::CreateInstance()
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
     std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
     #ifdef FE_DEBUG
-    FE_INFO("Requesting following Vulkan extensions:");
+    FE_TRACE("Requesting following Vulkan extensions:");
     for (const char * extension : extensions)
-        FE_INFO("\t{0}", extension);
+        FE_TRACE("\t{0}", extension);
     #endif
     
     
