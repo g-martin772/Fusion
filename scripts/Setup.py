@@ -5,6 +5,10 @@ import platform
 from ValidateModules import Validate
 Validate()
 
+from Vulkan import CheckVulkan
+if not CheckVulkan():
+    exit(1)
+
 os.chdir('./../')
 
 print("\nRunning premake...")

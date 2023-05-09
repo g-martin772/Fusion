@@ -21,10 +21,17 @@
         "_CRT_SECURE_NO_WARNINGS",
         "GLFW_INCLUDE_NONE"
     }
+    
+    VULKAN_SDK = os.getenv("VULKAN_SDK")
 
     includedirs {
         "src",
-        "dependencies/spdlog/include"
+        "dependencies/spdlog/include",
+        "%{VULKAN_SDK}/Include"
+    }
+    
+    links {
+        "%{VULKAN_SDK}/Lib/vulkan-1.lib"
     }
 
     -- postbuildcommands {
