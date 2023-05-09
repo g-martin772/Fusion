@@ -7,6 +7,9 @@
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
     objdir ("%{wks.location}/obj/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 
+    pchheader "fepch.h"
+    pchsource "src/fepch.cpp"
+
     files { 
         "src/**.h", 
         "src/**.cpp",
