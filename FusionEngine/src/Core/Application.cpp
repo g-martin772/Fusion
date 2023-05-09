@@ -1,8 +1,6 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
-#include "Log.h"
-
 namespace FusionEngine
 {
     void Application::Init()
@@ -16,6 +14,7 @@ namespace FusionEngine
         while(m_Running)
         {
             FE_INFO("Running");
+            FE_ASSERT(false, "Some error");
         }
     }
 
