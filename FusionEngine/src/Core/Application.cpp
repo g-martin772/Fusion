@@ -1,7 +1,7 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
-#include <vulkan/vulkan.hpp>
+#include "Renderer/RenderCommand.h"
 
 namespace FusionEngine
 {
@@ -21,6 +21,8 @@ namespace FusionEngine
 
         m_Window = Window::Create();
         m_Window->Init();
+
+        RenderCommand::Init();
     }
 
     void Application::Run()
@@ -34,8 +36,8 @@ namespace FusionEngine
     void Application::Shutdown()
     {
         FE_INFO("Fusion Engine Shutdown");
+        RenderCommand::ShutDown();
         m_Window->ShutDown();
-        
     }
 }
 

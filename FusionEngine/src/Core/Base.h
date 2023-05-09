@@ -24,7 +24,7 @@ namespace FusionEngine
     }
 
     template<typename T, typename ... Args>
-    constexpr Ref<T> MakeUnique(Args&& ... args)
+    constexpr Unique<T> MakeUnique(Args&& ... args)
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
