@@ -22,6 +22,8 @@ namespace FusionEngine
         CreateLogicalDevice();
         CreateGraphicsQueue();
         CreatePresentQueue();
+
+        CreateSwapChain();
     }
 
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -30,6 +32,7 @@ namespace FusionEngine
 
     void VulkanRenderApi::ShutDown()
     {
+        m_LogicalDevice.destroySwapchainKHR(m_SwapChain);   
         m_LogicalDevice.destroy();
 
         m_Instance.destroySurfaceKHR(m_Surface);
@@ -268,8 +271,13 @@ namespace FusionEngine
                 1,
                 &queuePriority));
 
-        vk::PhysicalDeviceFeatures deviceFeatures;
-        //request device features here
+        std::vector<const char*> deviceExtensions {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+        
+        vk::PhysicalDeviceFeatures deviceFeatures {
+            //request device features here
+        };
 
         vk::DeviceCreateInfo deviceInfo(
             vk::DeviceCreateFlags(),
@@ -277,8 +285,8 @@ namespace FusionEngine
             queueInfos.data(),
             static_cast<uint32_t>(m_EnabledLayers.size()),
             m_EnabledLayers.data(),
-            0,
-            nullptr,
+            static_cast<uint32_t>(deviceExtensions.size()),
+            deviceExtensions.data(),
             &deviceFeatures);
 
         try
@@ -304,6 +312,102 @@ namespace FusionEngine
     {
         FE_INFO("Creating Present Queue...");
         m_GraphicsQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
+        FE_INFO("Success");
+    }
+
+    void VulkanRenderApi::QuerySwapchainSupport()
+    {
+        m_SwapChainCapabilities.Capabilities = m_PhysicalDevice.getSurfaceCapabilitiesKHR(m_Surface);
+
+        FE_TRACE("Surface Capabilities:");
+        FE_TRACE("\tMinimum image count: {0}", m_SwapChainCapabilities.Capabilities.minImageCount);
+        FE_TRACE("\tMaximum image count: {0}", m_SwapChainCapabilities.Capabilities.maxImageCount);
+        FE_TRACE("\tCurrent Extent: {0}, {1}", m_SwapChainCapabilities.Capabilities.currentExtent.width, m_SwapChainCapabilities.Capabilities.currentExtent.height);
+        FE_TRACE("\tMinimum Extent: {0}, {1}", m_SwapChainCapabilities.Capabilities.minImageExtent.width, m_SwapChainCapabilities.Capabilities.minImageExtent.height);
+        FE_TRACE("\tMaximum Extent: {0}, {1}", m_SwapChainCapabilities.Capabilities.maxImageExtent.width, m_SwapChainCapabilities.Capabilities.maxImageExtent.height);
+        FE_TRACE("\tMaximum image array layers: {0}", m_SwapChainCapabilities.Capabilities.maxImageArrayLayers);
+
+        m_SwapChainCapabilities.Formats = m_PhysicalDevice.getSurfaceFormatsKHR(m_Surface);
+
+        FE_TRACE("Surface Formats:");
+        bool pickedFormat = false;
+        for(vk::SurfaceFormatKHR format : m_SwapChainCapabilities.Formats)
+        {
+            FE_TRACE("\tPixelFormat: {0}", vk::to_string(format.format));
+            FE_TRACE("\tColorSpace: {0}", vk::to_string(format.colorSpace));
+            if (format.format == vk::Format::eB8G8R8Unorm && format.colorSpace == vk::ColorSpaceKHR::eSrgbNonlinear)
+            {
+                pickedFormat = true;
+                m_SurfaceFormat = format;
+            }
+        }
+        
+        if (!pickedFormat)
+            m_SurfaceFormat = m_SwapChainCapabilities.Formats[0];
+
+        m_SwapChainCapabilities.PresentModes = m_PhysicalDevice.getSurfacePresentModesKHR(m_Surface);
+
+        FE_TRACE("Surface Present Modes:");
+        for(vk::PresentModeKHR presentMode : m_SwapChainCapabilities.PresentModes)
+        {
+            FE_TRACE("\t{0}", vk::to_string(presentMode));
+            if (presentMode == vk::PresentModeKHR::eMailbox)
+                m_PresentMode = presentMode;
+        }
+
+        m_SwapchainExtent = m_SwapChainCapabilities.Capabilities.currentExtent;
+    }
+
+    void VulkanRenderApi::CreateSwapChain()
+    {
+        QuerySwapchainSupport();
+        // https://vulkan.lunarg.com/doc/view/latest/windows/tutorial/html/05-init_swapchain.html
+
+        #undef min // who broke the std lib again ... ohhr
+        uint32_t imageCount = std::min(
+            m_SwapChainCapabilities.Capabilities.maxImageCount,
+            m_SwapChainCapabilities.Capabilities.minImageCount + 1
+        );
+
+        FE_INFO("Creating Swapchain...");
+        vk::SwapchainCreateInfoKHR createInfo(
+            vk::SwapchainCreateFlagsKHR(),
+            m_Surface,
+            imageCount,
+            m_SurfaceFormat.format,
+            m_SurfaceFormat.colorSpace,
+            m_SwapchainExtent,
+            m_SwapChainCapabilities.Capabilities.maxImageArrayLayers,
+            vk::ImageUsageFlagBits::eColorAttachment);
+
+        if(m_GraphicsFamily.value() != m_PresentFamily.value())
+        {
+            createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
+            createInfo.queueFamilyIndexCount = 2;
+            const uint32_t queueFamilyIndices[] = { m_GraphicsFamily.value(), m_PresentFamily.value() };
+            createInfo.pQueueFamilyIndices = queueFamilyIndices;
+        }
+        else
+        {
+            createInfo.imageSharingMode = vk::SharingMode::eExclusive;
+        }
+
+        createInfo.preTransform = m_SwapChainCapabilities.Capabilities.currentTransform;
+        createInfo.compositeAlpha = vk::CompositeAlphaFlagBitsKHR::eOpaque;
+        createInfo.presentMode = m_PresentMode;
+        createInfo.clipped = VK_TRUE;
+        createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
+
+        try
+        {
+            m_SwapChain = m_LogicalDevice.createSwapchainKHR(createInfo);
+            m_Images = m_LogicalDevice.getSwapchainImagesKHR(m_SwapChain);
+        }
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating swapchain failed");
+        }
         FE_INFO("Success");
     }
 }
