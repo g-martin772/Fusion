@@ -8,6 +8,7 @@ namespace FusionEngine
     public:
         static void Init();
         static void ShutDown();
+        static void Render();
     private:
         static Unique<RenderApi> s_RenderApi;
     };

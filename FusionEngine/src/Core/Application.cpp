@@ -27,9 +27,24 @@ namespace FusionEngine
 
     void Application::Run()
     {
+        auto startTime = std::chrono::high_resolution_clock::now();
+        int frameCount = 0;
         while(m_Running)
         {
             m_Window->OnUpdate();
+            RenderCommand::Render();
+
+            auto currentTime = std::chrono::high_resolution_clock::now();
+            const auto deltaTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count();
+            frameCount++;
+
+            if (deltaTime >= 1)
+            {
+                const double fps = static_cast<double>(frameCount) / deltaTime;
+                FE_TRACE("Currently running at {0}fps", fps);
+                frameCount = 0;
+                startTime = currentTime;
+            }
         }
     }
 

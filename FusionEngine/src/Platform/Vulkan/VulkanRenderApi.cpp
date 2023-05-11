@@ -1,8 +1,10 @@
 ﻿#include "fepch.h"
 #include "VulkanRenderApi.h"
 
+#include <GLFW/glfw3.h>
+
+#include "VulkanUtils.h"
 #include "Core/Application.h"
-#include "GLFW/glfw3.h"
 #include "IO/File.h"
 
 // https://www.youtube.com/@GetIntoGameDev
@@ -27,6 +29,14 @@ namespace FusionEngine
         CreateSwapChain();
 
     	CreatePipeline();
+
+    	CreateFrameBuffers();
+    	CreateCommandPool();
+    	CreateCommandBuffers();
+
+    	m_InFlightFence = VulkanUtils::CreateFence(m_LogicalDevice);
+    	m_ImageAvailable = VulkanUtils::CreateSemaphore(m_LogicalDevice);
+    	m_RenderFinished = VulkanUtils::CreateSemaphore(m_LogicalDevice);
     }
 
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -35,12 +45,23 @@ namespace FusionEngine
 
     void VulkanRenderApi::ShutDown()
     {
+		m_LogicalDevice.waitIdle();
+    	
+    	m_LogicalDevice.destroySemaphore(m_ImageAvailable);
+    	m_LogicalDevice.destroySemaphore(m_RenderFinished);
+    	m_LogicalDevice.destroyFence(m_InFlightFence);
+    	
+		m_LogicalDevice.destroyCommandPool(m_CommandPool);
+    	
 		m_LogicalDevice.destroyPipeline(m_Pipeline);
     	m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
     	m_LogicalDevice.destroyRenderPass(m_RenderPass);
     	
-        for (vk::ImageView imageView : m_ImageViews)
-            m_LogicalDevice.destroyImageView(imageView);
+        for (size_t i = 0; i < m_Images.size(); i++)
+        {
+            m_LogicalDevice.destroyImageView(m_ImageViews[i]);
+	        m_LogicalDevice.destroyFramebuffer(m_FrameBuffers[i]);
+        }
         
         m_LogicalDevice.destroySwapchainKHR(m_SwapChain);   
         m_LogicalDevice.destroy();
@@ -48,6 +69,57 @@ namespace FusionEngine
         m_Instance.destroySurfaceKHR(m_Surface);
         m_Instance.destroyDebugUtilsMessengerEXT(m_DebugMessenger, nullptr, m_DynamicInstanceDispatcher);
         //m_Instance.destroy(); //throws for whatever reason
+    }
+
+    void VulkanRenderApi::Render()
+    {
+    	auto result1 = m_LogicalDevice.waitForFences(1, &m_InFlightFence, VK_TRUE, UINT64_MAX);
+    	auto result2 = m_LogicalDevice.resetFences(1, &m_InFlightFence);
+
+    	//acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
+    	uint32_t imageIndex{ m_LogicalDevice.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_ImageAvailable, nullptr).value };
+
+    	vk::CommandBuffer commandBuffer = m_CommandBuffers[imageIndex];
+
+    	commandBuffer.reset();
+
+    	RecordDrawCommands(commandBuffer, imageIndex);
+
+    	vk::SubmitInfo submitInfo = {};
+
+    	vk::Semaphore waitSemaphores[] = { m_ImageAvailable };
+    	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    	submitInfo.waitSemaphoreCount = 1;
+    	submitInfo.pWaitSemaphores = waitSemaphores;
+    	submitInfo.pWaitDstStageMask = waitStages;
+
+    	submitInfo.commandBufferCount = 1;
+    	submitInfo.pCommandBuffers = &commandBuffer;
+
+    	vk::Semaphore signalSemaphores[] = { m_RenderFinished };
+    	submitInfo.signalSemaphoreCount = 1;
+    	submitInfo.pSignalSemaphores = signalSemaphores;
+
+    	try {
+    		m_GraphicsQueue.submit(submitInfo, m_InFlightFence);
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Submitting GraphicsQueue failed");
+    	}
+
+    	vk::PresentInfoKHR presentInfo = {};
+    	presentInfo.waitSemaphoreCount = 1;
+    	presentInfo.pWaitSemaphores = signalSemaphores;
+
+    	vk::SwapchainKHR swapChains[] = { m_SwapChain };
+    	presentInfo.swapchainCount = 1;
+    	presentInfo.pSwapchains = swapChains;
+
+    	presentInfo.pImageIndices = &imageIndex;
+
+    	vk::Result result3 = m_PresentQueue.presentKHR(presentInfo);
     }
 
     void VulkanRenderApi::CreateInstance()
@@ -321,7 +393,7 @@ namespace FusionEngine
     void VulkanRenderApi::CreatePresentQueue()
     {
         FE_INFO("Creating Present Queue...");
-        m_GraphicsQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
+        m_PresentQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
         FE_INFO("Success");
     }
 
@@ -654,5 +726,127 @@ namespace FusionEngine
 		//Finally clean up by destroying shader modules
 		m_LogicalDevice.destroyShaderModule(vertexShader);
 		m_LogicalDevice.destroyShaderModule(fragmentShader);
+    }
+
+    void VulkanRenderApi::CreateFrameBuffers()
+    {
+    	for (const auto& imageView : m_ImageViews)
+        {
+
+    		std::vector<vk::ImageView> attachments = {
+	            imageView
+            };
+
+    		vk::FramebufferCreateInfo framebufferInfo;
+    		framebufferInfo.flags = vk::FramebufferCreateFlags();
+    		framebufferInfo.renderPass = m_RenderPass;
+    		framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    		framebufferInfo.pAttachments = attachments.data();
+    		framebufferInfo.width = m_SwapchainExtent.width;
+    		framebufferInfo.height = m_SwapchainExtent.height;
+    		framebufferInfo.layers = 1;
+
+    		try {
+    			m_FrameBuffers.push_back(m_LogicalDevice.createFramebuffer(framebufferInfo));
+    		}
+    		catch (vk::SystemError& err)
+    		{
+    			FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    			FE_ASSERT(false, "Creating Framebuffer failed");
+    		}
+
+    	}
+    }
+
+    void VulkanRenderApi::CreateCommandPool()
+    {
+    	vk::CommandPoolCreateInfo poolInfo;
+    	poolInfo.flags = vk::CommandPoolCreateFlags() | vk::CommandPoolCreateFlagBits::eResetCommandBuffer;
+    	poolInfo.queueFamilyIndex = m_GraphicsFamily.value();
+
+    	try {
+    		m_CommandPool = m_LogicalDevice.createCommandPool(poolInfo);
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Creating CommandPool failed");
+    	}
+    }
+
+    void VulkanRenderApi::CreateCommandBuffers()
+    {
+    	vk::CommandBufferAllocateInfo allocInfo = {};
+    	allocInfo.commandPool = m_CommandPool;
+    	allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    	allocInfo.commandBufferCount = 1;
+
+    	//Make a command buffer for each frame
+    	for (size_t i = 0; i < m_FrameBuffers.size(); ++i) {
+    		try {
+    			FE_INFO("Allocating command buffer for frame {0}", i);
+    			m_CommandBuffers.push_back(m_LogicalDevice.allocateCommandBuffers(allocInfo)[0]);
+    		}
+    		catch (vk::SystemError& err)
+    		{
+    			FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    			FE_ASSERT(false, "Creating Command Buffer failed");
+    		}
+    	}
+		
+
+    	//Make a "main" command buffer for the engine
+    	try {
+    		FE_INFO("Allocating main command buffer");
+    		m_MainCommandBuffer = m_LogicalDevice.allocateCommandBuffers(allocInfo)[0];
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Creating Main Command Buffer failed");
+    	}
+    }
+
+    void VulkanRenderApi::RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
+    {
+    	vk::CommandBufferBeginInfo beginInfo;
+
+    	try {
+    		commandBuffer.begin(beginInfo);
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Beginning Command Buffer failed");
+    	}
+
+    	vk::RenderPassBeginInfo renderPassInfo = {};
+    	renderPassInfo.renderPass = m_RenderPass;
+    	renderPassInfo.framebuffer = m_FrameBuffers[imageIndex];
+    	renderPassInfo.renderArea.offset.x = 0;
+    	renderPassInfo.renderArea.offset.y = 0;
+    	renderPassInfo.renderArea.extent = m_SwapchainExtent;
+
+        const vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
+    	renderPassInfo.clearValueCount = 1;
+    	renderPassInfo.pClearValues = &clearColor;
+
+    	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+
+    	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+
+    	// finally
+    	commandBuffer.draw(3, 1, 0, 0);
+
+    	commandBuffer.endRenderPass();
+
+    	try {
+    		commandBuffer.end();
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Ending Command Buffer failed");
+    	}
     }
 }

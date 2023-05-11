@@ -16,4 +16,9 @@ namespace FusionEngine
     {
         s_RenderApi->ShutDown();
     }
+
+    void RenderCommand::Render()
+    {
+        s_RenderApi->Render();
+    }
 }

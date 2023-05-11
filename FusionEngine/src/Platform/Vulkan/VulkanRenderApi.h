@@ -19,6 +19,8 @@ namespace FusionEngine
         void Init() override;
         void OnWindowResize(uint32_t width, uint32_t height) override;
         void ShutDown() override;
+
+        void Render() override;
     private:
         void CreateInstance();
         void CheckSupportedExtensions(const std::vector<const char*>& extensions) const;
@@ -36,6 +38,12 @@ namespace FusionEngine
         void CreateSwapChain();
 
         void CreatePipeline();
+
+        void CreateFrameBuffers();
+        void CreateCommandPool();
+        void CreateCommandBuffers();
+
+        void RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
     private:
         vk::Instance m_Instance;
         vk::DispatchLoaderDynamic m_DynamicInstanceDispatcher;
@@ -65,6 +73,15 @@ namespace FusionEngine
         vk::PipelineLayout m_PipelineLayout;
         vk::RenderPass m_RenderPass;
         vk::Pipeline m_Pipeline;
+
+        std::vector<vk::Framebuffer> m_FrameBuffers;
+        std::vector<vk::CommandBuffer> m_CommandBuffers;
+
+        vk::CommandPool m_CommandPool;
+        vk::CommandBuffer m_MainCommandBuffer;
+
+        vk::Fence m_InFlightFence;
+        vk::Semaphore m_ImageAvailable, m_RenderFinished;
     };
 
 }

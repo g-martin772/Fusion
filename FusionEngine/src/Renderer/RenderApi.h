@@ -12,5 +12,7 @@ namespace FusionEngine
         virtual void Init() = 0;
         virtual void OnWindowResize(uint32_t width, uint32_t height) = 0;
         virtual void ShutDown() = 0;
+
+        virtual void Render() = 0;
     };
 }
