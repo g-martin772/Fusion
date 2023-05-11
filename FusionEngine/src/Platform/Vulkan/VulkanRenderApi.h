@@ -34,6 +34,8 @@ namespace FusionEngine
 
         void QuerySwapchainSupport();
         void CreateSwapChain();
+
+        void CreatePipeline();
     private:
         vk::Instance m_Instance;
         vk::DispatchLoaderDynamic m_DynamicInstanceDispatcher;
@@ -59,6 +61,10 @@ namespace FusionEngine
         vk::SwapchainKHR m_SwapChain;
         std::vector<vk::Image> m_Images;
         std::vector<vk::ImageView> m_ImageViews;
+
+        vk::PipelineLayout m_PipelineLayout;
+        vk::RenderPass m_RenderPass;
+        vk::Pipeline m_Pipeline;
     };
 
 }

@@ -3,6 +3,7 @@
 
 #include "Core/Application.h"
 #include "GLFW/glfw3.h"
+#include "IO/File.h"
 
 // https://www.youtube.com/@GetIntoGameDev
 
@@ -24,6 +25,8 @@ namespace FusionEngine
         CreatePresentQueue();
 
         CreateSwapChain();
+
+    	CreatePipeline();
     }
 
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -32,6 +35,10 @@ namespace FusionEngine
 
     void VulkanRenderApi::ShutDown()
     {
+		m_LogicalDevice.destroyPipeline(m_Pipeline);
+    	m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
+    	m_LogicalDevice.destroyRenderPass(m_RenderPass);
+    	
         for (vk::ImageView imageView : m_ImageViews)
             m_LogicalDevice.destroyImageView(imageView);
         
@@ -431,5 +438,221 @@ namespace FusionEngine
             FE_ASSERT(false, "Creating swapchain failed");
         }
         FE_INFO("Success");
+    }
+
+
+// These are copy paste implemented and still need to be "adopted" properly
+    
+#pragma region PipelinePfusch
+    vk::ShaderModule createModule(std::filesystem::path filename, vk::Device device) {
+
+        std::vector<char> sourceCode = File::Read(filename);
+        vk::ShaderModuleCreateInfo moduleInfo = {};
+        moduleInfo.flags = vk::ShaderModuleCreateFlags();
+        moduleInfo.codeSize = sourceCode.size();
+        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(sourceCode.data());
+
+        try {
+            return device.createShaderModule(moduleInfo);
+        }
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating Shadermodule failed");
+        }
+    }
+
+    vk::PipelineLayout make_pipeline_layout(vk::Device device) {
+
+		vk::PipelineLayoutCreateInfo layoutInfo;
+		layoutInfo.flags = vk::PipelineLayoutCreateFlags();
+		layoutInfo.setLayoutCount = 0;
+		layoutInfo.pushConstantRangeCount = 0;
+		try {
+			return device.createPipelineLayout(layoutInfo);
+		}
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating Pipeline Layout failed");
+        }
+	}
+
+	vk::RenderPass make_renderpass(vk::Device device, vk::Format swapchainImageFormat) {
+
+		//Define a general attachment, with its load/store operations
+		vk::AttachmentDescription colorAttachment = {};
+		colorAttachment.flags = vk::AttachmentDescriptionFlags();
+		colorAttachment.format = swapchainImageFormat;
+		colorAttachment.samples = vk::SampleCountFlagBits::e1;
+		colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
+		colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+		colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+		colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+		colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
+		colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+		//Declare that attachment to be color buffer 0 of the framebuffer
+		vk::AttachmentReference colorAttachmentRef = {};
+		colorAttachmentRef.attachment = 0;
+		colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+		//Renderpasses are broken down into subpasses, there's always at least one.
+		vk::SubpassDescription subpass = {};
+		subpass.flags = vk::SubpassDescriptionFlags();
+		subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+		subpass.colorAttachmentCount = 1;
+		subpass.pColorAttachments = &colorAttachmentRef;
+
+		//Now create the renderpass
+		vk::RenderPassCreateInfo renderpassInfo = {};
+		renderpassInfo.flags = vk::RenderPassCreateFlags();
+		renderpassInfo.attachmentCount = 1;
+		renderpassInfo.pAttachments = &colorAttachment;
+		renderpassInfo.subpassCount = 1;
+		renderpassInfo.pSubpasses = &subpass;
+		try {
+			return device.createRenderPass(renderpassInfo);
+		}
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating RenderPass failed");
+        }
+	}
+#pragma endregion PipelinePfusch
+
+    void VulkanRenderApi::CreatePipeline()
+    {
+        vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+		pipelineInfo.flags = vk::PipelineCreateFlags();
+
+		//Shader stages, to be populated later
+		std::vector<vk::PipelineShaderStageCreateInfo> shaderStages;
+
+		//Vertex Input
+		vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+		vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
+		vertexInputInfo.vertexBindingDescriptionCount = 0;
+		vertexInputInfo.vertexAttributeDescriptionCount = 0;
+		pipelineInfo.pVertexInputState = &vertexInputInfo;
+
+		//Input Assembly
+		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
+		inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
+		inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
+		pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
+
+		//Vertex Shader
+		FE_INFO("Create vertex shader module");
+		vk::ShaderModule vertexShader = createModule("resources/shaders/vertex.spv", m_LogicalDevice);
+		vk::PipelineShaderStageCreateInfo vertexShaderInfo = {};
+		vertexShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
+		vertexShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
+		vertexShaderInfo.module = vertexShader;
+		vertexShaderInfo.pName = "main";
+		shaderStages.push_back(vertexShaderInfo);
+
+		//Viewport and Scissor
+		vk::Viewport viewport = {};
+		viewport.x = 0.0f;
+		viewport.y = 0.0f;
+		viewport.width = static_cast<float>(m_SwapchainExtent.width);
+		viewport.height = static_cast<float>(m_SwapchainExtent.height);
+		viewport.minDepth = 0.0f;
+		viewport.maxDepth = 1.0f;
+		vk::Rect2D scissor = {};
+		scissor.offset.x = 0.0f;
+		scissor.offset.y = 0.0f;
+		scissor.extent = m_SwapchainExtent;
+		vk::PipelineViewportStateCreateInfo viewportState = {};
+		viewportState.flags = vk::PipelineViewportStateCreateFlags();
+		viewportState.viewportCount = 1;
+		viewportState.pViewports = &viewport;
+		viewportState.scissorCount = 1;
+		viewportState.pScissors = &scissor;
+		pipelineInfo.pViewportState = &viewportState;
+
+		//Rasterizer
+		vk::PipelineRasterizationStateCreateInfo rasterizer = {};
+		rasterizer.flags = vk::PipelineRasterizationStateCreateFlags();
+		rasterizer.depthClampEnable = VK_FALSE; //discard out of bounds fragments, don't clamp them
+		rasterizer.rasterizerDiscardEnable = VK_FALSE; //This flag would disable fragment output
+		rasterizer.polygonMode = vk::PolygonMode::eFill;
+		rasterizer.lineWidth = 1.0f;
+		rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+		rasterizer.frontFace = vk::FrontFace::eClockwise;
+		rasterizer.depthBiasEnable = VK_FALSE; //Depth bias can be useful in shadow maps.
+		pipelineInfo.pRasterizationState = &rasterizer;
+
+		//Fragment Shader
+		FE_INFO("Create fragment shader module");
+		vk::ShaderModule fragmentShader = createModule("resources/shaders/fragment.spv", m_LogicalDevice);
+		vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
+		fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
+		fragmentShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
+		fragmentShaderInfo.module = fragmentShader;
+		fragmentShaderInfo.pName = "main";
+		shaderStages.push_back(fragmentShaderInfo);
+		//Now both shaders have been made, we can declare them to the pipeline info
+		pipelineInfo.stageCount = static_cast<uint32_t>(shaderStages.size());
+		pipelineInfo.pStages = shaderStages.data();
+
+		//Multisampling
+		vk::PipelineMultisampleStateCreateInfo multisampling = {};
+		multisampling.flags = vk::PipelineMultisampleStateCreateFlags();
+		multisampling.sampleShadingEnable = VK_FALSE;
+		multisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+		pipelineInfo.pMultisampleState = &multisampling;
+
+		//Color Blend
+		vk::PipelineColorBlendAttachmentState colorBlendAttachment = {};
+		colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+		colorBlendAttachment.blendEnable = VK_FALSE;
+		vk::PipelineColorBlendStateCreateInfo colorBlending = {};
+		colorBlending.flags = vk::PipelineColorBlendStateCreateFlags();
+		colorBlending.logicOpEnable = VK_FALSE;
+		colorBlending.logicOp = vk::LogicOp::eCopy;
+		colorBlending.attachmentCount = 1;
+		colorBlending.pAttachments = &colorBlendAttachment;
+		colorBlending.blendConstants[0] = 0.0f;
+		colorBlending.blendConstants[1] = 0.0f;
+		colorBlending.blendConstants[2] = 0.0f;
+		colorBlending.blendConstants[3] = 0.0f;
+		pipelineInfo.pColorBlendState = &colorBlending;
+
+		//Pipeline Layout
+		FE_INFO("Create Pipeline Layout");
+		vk::PipelineLayout pipelineLayout = make_pipeline_layout(m_LogicalDevice);
+		pipelineInfo.layout = pipelineLayout;
+
+		//Renderpass
+		FE_INFO("Create RenderPass");
+		vk::RenderPass renderpass = make_renderpass(m_LogicalDevice, m_SurfaceFormat.format);
+		pipelineInfo.renderPass = renderpass;
+		pipelineInfo.subpass = 0;
+
+		//Extra stuff
+		pipelineInfo.basePipelineHandle = nullptr;
+
+		//Make the Pipeline
+		FE_INFO("Create Graphics Pipeline");
+		vk::Pipeline graphicsPipeline;
+		try {
+			graphicsPipeline = (m_LogicalDevice.createGraphicsPipeline(nullptr, pipelineInfo)).value;
+		}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Creating Pipeline failed");
+    	}
+    	
+		m_PipelineLayout = pipelineLayout;
+		m_RenderPass = renderpass;
+		m_Pipeline = graphicsPipeline;
+
+		//Finally clean up by destroying shader modules
+		m_LogicalDevice.destroyShaderModule(vertexShader);
+		m_LogicalDevice.destroyShaderModule(fragmentShader);
     }
 }
