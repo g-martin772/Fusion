@@ -1,8 +1,6 @@
 ﻿#include "fepch.h"
 #include "VulkanRenderApi.h"
 
-#include <set>
-
 #include "GLFW/glfw3.h"
 
 namespace FusionEngine
