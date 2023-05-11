@@ -58,6 +58,7 @@ namespace FusionEngine
         vk::Extent2D m_SwapchainExtent;
         vk::SwapchainKHR m_SwapChain;
         std::vector<vk::Image> m_Images;
+        std::vector<vk::ImageView> m_ImageViews;
     };
 
 }

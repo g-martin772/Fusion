@@ -32,6 +32,9 @@ namespace FusionEngine
 
     void VulkanRenderApi::ShutDown()
     {
+        for (vk::ImageView imageView : m_ImageViews)
+            m_LogicalDevice.destroyImageView(imageView);
+        
         m_LogicalDevice.destroySwapchainKHR(m_SwapChain);   
         m_LogicalDevice.destroy();
 
@@ -402,6 +405,25 @@ namespace FusionEngine
         {
             m_SwapChain = m_LogicalDevice.createSwapchainKHR(createInfo);
             m_Images = m_LogicalDevice.getSwapchainImagesKHR(m_SwapChain);
+
+            for (size_t i = 0; i < m_Images.size(); i++)
+            {
+                vk::ImageViewCreateInfo createInfo;
+                createInfo.image = m_Images[i];
+                createInfo.viewType = vk::ImageViewType::e2D;
+                createInfo.components.r = vk::ComponentSwizzle::eIdentity;
+                createInfo.components.g = vk::ComponentSwizzle::eIdentity;
+                createInfo.components.b = vk::ComponentSwizzle::eIdentity;
+                createInfo.components.a = vk::ComponentSwizzle::eIdentity;
+                createInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+                createInfo.subresourceRange.baseMipLevel = 0;
+                createInfo.subresourceRange.levelCount = 1;
+                createInfo.subresourceRange.baseArrayLayer = 0;
+                createInfo.subresourceRange.layerCount = 1;
+                createInfo.format = m_SurfaceFormat.format;
+                
+                m_ImageViews.push_back(m_LogicalDevice.createImageView(createInfo));
+            }
         }
         catch (vk::SystemError& err)
         {
