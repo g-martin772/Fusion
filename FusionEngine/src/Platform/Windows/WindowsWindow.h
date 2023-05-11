@@ -11,6 +11,7 @@ namespace FusionEngine
         void Init() override;
         void OnUpdate() override;
         void ShutDown() override;
+        void* GetNativeWindow() override { return m_Window; }
     private:
         GLFWwindow* m_Window{};
     };

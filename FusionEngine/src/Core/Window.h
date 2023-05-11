@@ -10,5 +10,6 @@ namespace FusionEngine
         virtual void Init() = 0;
         virtual void OnUpdate() = 0;
         virtual void ShutDown() = 0;
+        virtual void* GetNativeWindow() = 0;
     };
 }

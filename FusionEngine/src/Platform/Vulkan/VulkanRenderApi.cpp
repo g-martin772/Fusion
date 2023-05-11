@@ -1,7 +1,10 @@
 ﻿#include "fepch.h"
 #include "VulkanRenderApi.h"
 
+#include "Core/Application.h"
 #include "GLFW/glfw3.h"
+
+// https://www.youtube.com/@GetIntoGameDev
 
 namespace FusionEngine
 {
@@ -13,7 +16,12 @@ namespace FusionEngine
         m_DynamicInstanceDispatcher = vk::DispatchLoaderDynamic(m_Instance, vkGetInstanceProcAddr);
         CreateDebugMessenger();
 
+        CreateSurface();
+
         CreatePhysicalDevice();
+        CreateLogicalDevice();
+        CreateGraphicsQueue();
+        CreatePresentQueue();
     }
 
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -22,8 +30,11 @@ namespace FusionEngine
 
     void VulkanRenderApi::ShutDown()
     {
+        m_LogicalDevice.destroy();
+
+        m_Instance.destroySurfaceKHR(m_Surface);
         m_Instance.destroyDebugUtilsMessengerEXT(m_DebugMessenger, nullptr, m_DynamicInstanceDispatcher);
-        m_Instance.destroy();
+        //m_Instance.destroy(); //throws for whatever reason
     }
 
     void VulkanRenderApi::CreateInstance()
@@ -31,7 +42,7 @@ namespace FusionEngine
         // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap4.html#initialization-instances
         // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap44.html#extendingvulkan-coreversions-versionnumbers
         uint32_t version;
-        vk:vkEnumerateInstanceVersion(&version);
+        vkEnumerateInstanceVersion(&version);
         FE_INFO("Vulkan Version: {0}.{1}.{2}", VK_VERSION_MAJOR(version), VK_VERSION_MINOR(version), VK_VERSION_PATCH(version));
 
         vk::ApplicationInfo appInfo(
@@ -48,16 +59,13 @@ namespace FusionEngine
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
         extensions.push_back("VK_EXT_debug_utils");
         CheckSupportedExtensions(extensions);
-        
-        std::vector<const char*> layers;
-        layers.push_back("VK_LAYER_KHRONOS_validation");
-        CheckSupportedLayers(layers);
+        CheckSupportedLayers(m_EnabledLayers);
     
         vk::InstanceCreateInfo createInfo(
             vk::InstanceCreateFlags(),
             &appInfo,
-            static_cast<uint32_t>(layers.size()),
-            layers.data(),
+            static_cast<uint32_t>(m_EnabledLayers.size()),
+            m_EnabledLayers.data(),
             static_cast<uint32_t>(extensions.size()),
             extensions.data());
 
@@ -67,8 +75,9 @@ namespace FusionEngine
             m_Instance = vk::createInstance(createInfo);
             FE_INFO("Success");
         }
-        catch (vk::SystemError error)
+        catch (vk::SystemError& err)
         {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
             FE_ASSERT(false, "Failed to create Vulkan Instance");
         }
     }
@@ -153,6 +162,18 @@ namespace FusionEngine
         m_DebugMessenger = m_Instance.createDebugUtilsMessengerEXT(createInfo, nullptr, m_DynamicInstanceDispatcher);
     }
 
+    void VulkanRenderApi::CreateSurface()
+    {
+        VkSurfaceKHR cSurface;
+        GLFWwindow* window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow());
+        if(glfwCreateWindowSurface(m_Instance, window, nullptr, &cSurface) != VK_SUCCESS)
+            FE_ASSERT(false, "Failed to create Vulkan Surface")
+        else
+            FE_INFO("Sucessfully created Vulkan surface");
+
+        m_Surface = cSurface;
+    }
+
     void VulkanRenderApi::CreatePhysicalDevice()
     {
         // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap5.html#devsandqueues-devices
@@ -198,5 +219,91 @@ namespace FusionEngine
 
         FE_ASSERT(m_PhysicalDevice, "No suitable GPU found!");
         FE_INFO("Picked {0} as rendering GPU", m_PhysicalDevice.getProperties().deviceName);
+    }
+
+    void VulkanRenderApi::CreateLogicalDevice()
+    {
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap5.html#VkQueueFamilyProperties
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap5.html#VkQueueFlagBits
+        std::vector<vk::QueueFamilyProperties> queueFamilies = m_PhysicalDevice.getQueueFamilyProperties();
+
+        FE_INFO("Device can support {0} Queue families", queueFamilies.size());
+        
+        for (int i = 0; i < queueFamilies.size(); i++)
+        {
+            vk::QueueFamilyProperties queueFamily = queueFamilies[i];
+            if (queueFamily.queueFlags & vk::QueueFlagBits::eGraphics)
+            {
+                m_GraphicsFamily = i;
+                FE_INFO("Queue Family {0} is suitable for praphics", i);
+            }
+
+            if (m_PhysicalDevice.getSurfaceSupportKHR(i, m_Surface))
+            {
+                m_PresentFamily = i;
+                FE_INFO("Queue Family {0} is suitable for presenting", i);
+            }
+
+            if (m_GraphicsFamily.has_value() && m_PresentFamily.has_value())
+                break;
+        }
+
+        FE_ASSERT(m_GraphicsFamily.has_value(), "Device does not support a praphics queue");
+        FE_ASSERT(m_PresentFamily.has_value(), "Device does not support a present queue");
+
+        FE_INFO("Creating Logical Device...");
+        float queuePriority = 1.0f;
+        std::vector<vk::DeviceQueueCreateInfo> queueInfos;
+        
+        queueInfos.push_back(vk::DeviceQueueCreateInfo(
+            vk::DeviceQueueCreateFlags(),
+            m_GraphicsFamily.value(),
+            1,
+            &queuePriority));
+
+        if (m_GraphicsFamily.value() != m_PresentFamily.value())
+            queueInfos.push_back(vk::DeviceQueueCreateInfo(
+                vk::DeviceQueueCreateFlags(),
+                m_PresentFamily.value(),
+                1,
+                &queuePriority));
+
+        vk::PhysicalDeviceFeatures deviceFeatures;
+        //request device features here
+
+        vk::DeviceCreateInfo deviceInfo(
+            vk::DeviceCreateFlags(),
+            static_cast<uint32_t>(queueInfos.size()),
+            queueInfos.data(),
+            static_cast<uint32_t>(m_EnabledLayers.size()),
+            m_EnabledLayers.data(),
+            0,
+            nullptr,
+            &deviceFeatures);
+
+        try
+        {
+            m_LogicalDevice = m_PhysicalDevice.createDevice(deviceInfo);
+        }
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating logical device failed");
+        }
+        FE_INFO("Success");
+    }
+
+    void VulkanRenderApi::CreateGraphicsQueue()
+    {
+        FE_INFO("Creating Graphics Queue...");
+        m_GraphicsQueue = m_LogicalDevice.getQueue(m_GraphicsFamily.value(), 0);
+        FE_INFO("Success");
+    }
+
+    void VulkanRenderApi::CreatePresentQueue()
+    {
+        FE_INFO("Creating Present Queue...");
+        m_GraphicsQueue = m_LogicalDevice.getQueue(m_PresentFamily.value(), 0);
+        FE_INFO("Success");
     }
 }

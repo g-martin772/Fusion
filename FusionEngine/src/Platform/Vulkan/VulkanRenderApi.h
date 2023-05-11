@@ -18,13 +18,29 @@ namespace FusionEngine
         void CheckSupportedLayers(const std::vector<const char*>& layers) const;
         void CreateDebugMessenger();
 
+        void CreateSurface();
+
         void CreatePhysicalDevice();
+        void CreateLogicalDevice();
+        void CreateGraphicsQueue();
+        void CreatePresentQueue();
     private:
         vk::Instance m_Instance;
         vk::DispatchLoaderDynamic m_DynamicInstanceDispatcher;
         vk::DebugUtilsMessengerEXT m_DebugMessenger;
+        std::vector<const char*> m_EnabledLayers {
+            "VK_LAYER_KHRONOS_validation"
+        };
+
+        vk::SurfaceKHR m_Surface;
 
         vk::PhysicalDevice m_PhysicalDevice;
+        vk::Device m_LogicalDevice;
+
+        vk::Queue m_GraphicsQueue;
+        vk::Queue m_PresentQueue;
+        std::optional<uint32_t> m_GraphicsFamily;
+        std::optional<uint32_t> m_PresentFamily;
     };
 
 }
