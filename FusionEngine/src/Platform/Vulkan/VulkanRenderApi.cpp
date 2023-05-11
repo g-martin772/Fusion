@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "VulkanRenderApi.h"
 
+#include <set>
+
 #include "GLFW/glfw3.h"
 
 namespace FusionEngine
@@ -12,6 +14,8 @@ namespace FusionEngine
 
         m_DynamicInstanceDispatcher = vk::DispatchLoaderDynamic(m_Instance, vkGetInstanceProcAddr);
         CreateDebugMessenger();
+
+        CreatePhysicalDevice();
     }
 
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -149,5 +153,52 @@ namespace FusionEngine
             nullptr);
 
         m_DebugMessenger = m_Instance.createDebugUtilsMessengerEXT(createInfo, nullptr, m_DynamicInstanceDispatcher);
+    }
+
+    void VulkanRenderApi::CreatePhysicalDevice()
+    {
+        // https://registry.khronos.org/vulkan/specs/1.3-extensions/html/chap5.html#devsandqueues-devices
+
+        const std::vector<vk::PhysicalDevice> availableDevices = m_Instance.enumeratePhysicalDevices();
+        FE_INFO("There were {0} physical GPUs found by the engine", availableDevices.size());
+        for (vk::PhysicalDevice device : availableDevices)
+            FE_INFO("\t{0}", device.getProperties().deviceName);
+
+        std::vector<const char*> requiredExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+
+        FE_TRACE("Requesting following Vulkan Device Extensions:");
+        for (const char* extension : requiredExtensions)
+            FE_TRACE("\t{0}", extension);
+
+        uint32_t currentScore = 0;
+        for (vk::PhysicalDevice device : availableDevices)
+        {
+            std::set<std::string> requiredExtensionsSet(requiredExtensions.begin(), requiredExtensions.end());
+
+            for (vk::ExtensionProperties extension : device.enumerateDeviceExtensionProperties())
+            {
+                requiredExtensionsSet.erase(extension.extensionName);
+            }
+            
+            uint32_t score = 0;
+            if (!requiredExtensionsSet.empty())
+               continue;
+
+            if (device.getProperties().deviceType == vk::PhysicalDeviceType::eDiscreteGpu)
+                score += 5000;
+
+            score += device.getProperties().limits.maxImageDimension2D; // around 1000 - 10000
+            
+            if(score > currentScore)
+            {
+                currentScore = score;
+                m_PhysicalDevice = device;
+            }
+        }
+
+        FE_ASSERT(m_PhysicalDevice, "No suitable GPU found!");
+        FE_INFO("Picked {0} as rendering GPU", m_PhysicalDevice.getProperties().deviceName);
     }
 }
