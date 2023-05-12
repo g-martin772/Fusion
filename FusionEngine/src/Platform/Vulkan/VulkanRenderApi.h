@@ -14,6 +14,16 @@ namespace FusionEngine
             std::vector<vk::SurfaceFormatKHR> Formats;
             std::vector<vk::PresentModeKHR> PresentModes;
         };
+
+        struct Frame
+        {
+            vk::Framebuffer FrameBuffer;
+            vk::CommandBuffer CommandBuffer;
+            vk::Image Image;
+            vk::ImageView ImageView;
+            vk::Semaphore ImageAvailable, RenderFinished;
+            vk::Fence InFlightFence;
+        };
         
     public:
         void Init() override;
@@ -67,21 +77,16 @@ namespace FusionEngine
         vk::SurfaceFormatKHR m_SurfaceFormat;
         vk::Extent2D m_SwapchainExtent;
         vk::SwapchainKHR m_SwapChain;
-        std::vector<vk::Image> m_Images;
-        std::vector<vk::ImageView> m_ImageViews;
+
+        std::vector<Frame> m_Frames;
+        uint32_t m_CurrentFrame = 0;
 
         vk::PipelineLayout m_PipelineLayout;
         vk::RenderPass m_RenderPass;
         vk::Pipeline m_Pipeline;
 
-        std::vector<vk::Framebuffer> m_FrameBuffers;
-        std::vector<vk::CommandBuffer> m_CommandBuffers;
-
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
-
-        vk::Fence m_InFlightFence;
-        vk::Semaphore m_ImageAvailable, m_RenderFinished;
     };
 
 }
