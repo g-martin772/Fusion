@@ -18,12 +18,10 @@ namespace FusionEngine
         return buffer;
     }
 
-    void File::Write(const std::filesystem::path& path, std::vector<char>& data)
+    void File::Write(const std::filesystem::path& path, const std::vector<char>& data)
     {
-        if(data.back() != '\0')
-            data.push_back('\0');
-        std::ofstream file(path);
-        file << data.data();
+        std::ofstream file(path, std::ios::binary);
+        file.write(data.data(), data.size());
         file.close();
     }
 

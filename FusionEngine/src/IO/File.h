@@ -6,7 +6,7 @@ namespace FusionEngine
     {
     public:
         static std::vector<char> Read(const std::filesystem::path& path);
-        static void Write(const std::filesystem::path& path, std::vector<char>& data);
+        static void Write(const std::filesystem::path& path, const std::vector<char>& data);
         static bool Exists(const std::filesystem::path& path);
         static void Create(const std::filesystem::path& path);
         static void EnsureCreated(const std::filesystem::path& path);
