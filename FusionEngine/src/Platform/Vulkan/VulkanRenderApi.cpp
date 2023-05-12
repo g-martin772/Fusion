@@ -9,6 +9,8 @@
 #include "IO/File.h"
 #include "Renderer/ShaderLibrary.h"
 
+#undef CreateSemaphore
+
 // https://www.youtube.com/@GetIntoGameDev
 
 namespace FusionEngine
@@ -34,16 +36,17 @@ namespace FusionEngine
 
     	CreateFrameBuffers();
     	CreateCommandPool();
-    	CreateCommandBuffers();
+    	m_MainCommandBuffer = CreateCommandBuffer();
 
     	for (auto& frame : m_Frames)
     	{
+    		frame.CommandBuffer = CreateCommandBuffer();
     		frame.InFlightFence = VulkanUtils::CreateFence(m_LogicalDevice);
-    		frame.ImageAvailable = VulkanUtils::CreateSemaphore(m_LogicalDevice);
-    		frame.RenderFinished = VulkanUtils::CreateSemaphore(m_LogicalDevice);
+    		frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
+    		frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
     	}
     }
-
+	
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
     {
     }
@@ -52,14 +55,7 @@ namespace FusionEngine
     {
 		m_LogicalDevice.waitIdle();
     	
-    	for (auto& frame : m_Frames)
-    	{
-    		m_LogicalDevice.destroyFence(frame.InFlightFence);
-    		m_LogicalDevice.destroySemaphore(frame.ImageAvailable);
-    		m_LogicalDevice.destroySemaphore(frame.RenderFinished);
-    		m_LogicalDevice.destroyImageView(frame.ImageView);
-    		m_LogicalDevice.destroyFramebuffer(frame.FrameBuffer);
-    	}
+    	CleanUpSwapChain();
     	
 		m_LogicalDevice.destroyCommandPool(m_CommandPool);
     	
@@ -78,12 +74,25 @@ namespace FusionEngine
     void VulkanRenderApi::Render()
     {
     	auto result1 = m_LogicalDevice.waitForFences(1, &m_Frames[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
+
+        try
+        {
+	        const auto result = m_LogicalDevice.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_Frames[m_CurrentFrame].ImageAvailable, nullptr);
+        	if (m_CurrentFrame != result.value)
+        	{
+        		FE_WARN("Frames got out of sync, resyncing");
+        		m_CurrentFrame = result.value;
+        	}
+        }
+        catch (vk::OutOfDateKHRError&)
+        {
+        	RecreateSwapChain();
+        	return;
+        }
+
     	auto result2 = m_LogicalDevice.resetFences(1, &m_Frames[m_CurrentFrame].InFlightFence);
 
-    	//acquireNextImageKHR(vk::SwapChainKHR, timeout, semaphore_to_signal, fence)
-    	m_LogicalDevice.acquireNextImageKHR(m_SwapChain, UINT64_MAX, m_Frames[m_CurrentFrame].ImageAvailable, nullptr).value;
-    	
-    	vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+        const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
 
     	commandBuffer.reset();
 
@@ -91,8 +100,8 @@ namespace FusionEngine
 
     	vk::SubmitInfo submitInfo = {};
 
-    	vk::Semaphore waitSemaphores[] = { m_Frames[m_CurrentFrame].ImageAvailable };
-    	vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+        const vk::Semaphore waitSemaphores[] = { m_Frames[m_CurrentFrame].ImageAvailable };
+        constexpr vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
     	submitInfo.waitSemaphoreCount = 1;
     	submitInfo.pWaitSemaphores = waitSemaphores;
     	submitInfo.pWaitDstStageMask = waitStages;
@@ -100,7 +109,7 @@ namespace FusionEngine
     	submitInfo.commandBufferCount = 1;
     	submitInfo.pCommandBuffers = &commandBuffer;
 
-    	vk::Semaphore signalSemaphores[] = { m_Frames[m_CurrentFrame].RenderFinished };
+        const vk::Semaphore signalSemaphores[] = { m_Frames[m_CurrentFrame].RenderFinished };
     	submitInfo.signalSemaphoreCount = 1;
     	submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -117,18 +126,26 @@ namespace FusionEngine
     	presentInfo.waitSemaphoreCount = 1;
     	presentInfo.pWaitSemaphores = signalSemaphores;
 
-    	vk::SwapchainKHR swapChains[] = { m_SwapChain };
+        const vk::SwapchainKHR swapChains[] = { m_SwapChain };
     	presentInfo.swapchainCount = 1;
     	presentInfo.pSwapchains = swapChains;
 
     	presentInfo.pImageIndices = &m_CurrentFrame;
-
-    	vk::Result result3 = m_PresentQueue.presentKHR(presentInfo);
-
-    	if(m_CurrentFrame == m_Frames.size() - 1)
-    		m_CurrentFrame = 0;
-        else
-			m_CurrentFrame++;
+    	
+        try
+        {
+	        const auto result = m_PresentQueue.presentKHR(presentInfo);
+        	if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+        	{
+        		RecreateSwapChain();
+        	}
+        }
+        catch (vk::OutOfDateKHRError&)
+        {
+        	RecreateSwapChain();
+        }
+    	
+    	m_CurrentFrame = (m_CurrentFrame + 1) % m_Frames.size();
     }
 
     void VulkanRenderApi::CreateInstance()
@@ -523,8 +540,65 @@ namespace FusionEngine
         FE_INFO("Success");
     }
 
+    void VulkanRenderApi::RecreateSwapChain()
+    {
+		int width = 0, heith = 0;
 
-// These are copy paste implemented and still need to be "adopted" properly
+		if(width <= 0 || heith <= 0)
+		{
+    		glfwGetFramebufferSize(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow()), &width, &heith);
+			glfwWaitEvents();
+		}
+    	
+    	FE_INFO("Recreating Swapchain");
+    	CleanUpSwapChain();
+    	CreateSwapChain();
+    	CreateFrameBuffers();
+    	for (auto& frame : m_Frames)
+    	{
+    		frame.CommandBuffer = CreateCommandBuffer();
+    		frame.InFlightFence = VulkanUtils::CreateFence(m_LogicalDevice);
+    		frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
+    		frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
+    	}
+    }
+
+    void VulkanRenderApi::CleanUpSwapChain()
+    {
+    	m_LogicalDevice.waitIdle();
+    	
+    	for (auto& frame : m_Frames)
+    	{
+    		m_LogicalDevice.destroyFence(frame.InFlightFence);
+    		m_LogicalDevice.destroySemaphore(frame.ImageAvailable);
+    		m_LogicalDevice.destroySemaphore(frame.RenderFinished);
+    		m_LogicalDevice.destroyImageView(frame.ImageView);
+    		m_LogicalDevice.destroyFramebuffer(frame.FrameBuffer);
+    	}
+    }
+
+    vk::CommandBuffer VulkanRenderApi::CreateCommandBuffer()
+    {
+    	vk::CommandBufferAllocateInfo allocInfo = {};
+    	allocInfo.commandPool = m_CommandPool;
+    	allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    	allocInfo.commandBufferCount = 1;
+    	
+    	try {
+    		FE_INFO("Allocating command buffer");
+    		return m_LogicalDevice.allocateCommandBuffers(allocInfo)[0];
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Creating Command Buffer failed");
+    	}
+
+    	return nullptr;
+    }
+
+
+    // These are copy paste implemented and still need to be "adopted" properly
     
 #pragma region PipelinePfusch
     vk::ShaderModule createModule(std::vector<char> spriv, vk::Device device) {
@@ -649,11 +723,17 @@ namespace FusionEngine
 		vk::PipelineViewportStateCreateInfo viewportState = {};
 		viewportState.flags = vk::PipelineViewportStateCreateFlags();
 		viewportState.viewportCount = 1;
-		viewportState.pViewports = &viewport;
+		viewportState.pViewports = nullptr;
 		viewportState.scissorCount = 1;
-		viewportState.pScissors = &scissor;
+		viewportState.pScissors = nullptr;
 		pipelineInfo.pViewportState = &viewportState;
 
+    	vk::DynamicState dynamicStates[] = { vk::DynamicState::eViewport, vk::DynamicState::eScissor };
+    	vk::PipelineDynamicStateCreateInfo dynamicStateInfo = {};
+    	dynamicStateInfo.dynamicStateCount = 2;
+    	dynamicStateInfo.pDynamicStates = dynamicStates;
+		pipelineInfo.pDynamicState = &dynamicStateInfo;
+    	
 		//Rasterizer
 		vk::PipelineRasterizationStateCreateInfo rasterizer = {};
 		rasterizer.flags = vk::PipelineRasterizationStateCreateFlags();
@@ -741,7 +821,7 @@ namespace FusionEngine
     {
     	for (auto& frame : m_Frames)
         {
-
+			FE_INFO("Creating FrameBuffer");
     		std::vector<vk::ImageView> attachments = {
     			frame.ImageView
             };
@@ -783,38 +863,6 @@ namespace FusionEngine
     	}
     }
 
-    void VulkanRenderApi::CreateCommandBuffers()
-    {
-    	vk::CommandBufferAllocateInfo allocInfo = {};
-    	allocInfo.commandPool = m_CommandPool;
-    	allocInfo.level = vk::CommandBufferLevel::ePrimary;
-    	allocInfo.commandBufferCount = 1;
-
-    	//Make a command buffer for each frame
-    	for (auto& frame : m_Frames) {
-    		try {
-    			frame.CommandBuffer = m_LogicalDevice.allocateCommandBuffers(allocInfo)[0];
-    		}
-    		catch (vk::SystemError& err)
-    		{
-    			FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
-    			FE_ASSERT(false, "Creating Command Buffer failed");
-    		}
-    	}
-		
-
-    	//Make a "main" command buffer for the engine
-    	try {
-    		FE_INFO("Allocating main command buffer");
-    		m_MainCommandBuffer = m_LogicalDevice.allocateCommandBuffers(allocInfo)[0];
-    	}
-    	catch (vk::SystemError& err)
-    	{
-    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
-    		FE_ASSERT(false, "Creating Main Command Buffer failed");
-    	}
-    }
-
     void VulkanRenderApi::RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
     {
     	vk::CommandBufferBeginInfo beginInfo;
@@ -842,6 +890,20 @@ namespace FusionEngine
     	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
 
     	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+
+    	vk::Viewport viewport = {};
+    	viewport.x = 0.0f;
+    	viewport.y = 0.0f;
+    	viewport.width = static_cast<float>(m_SwapchainExtent.width);
+    	viewport.height = static_cast<float>(m_SwapchainExtent.height);
+    	viewport.minDepth = 0.0f;
+    	viewport.maxDepth = 1.0f;
+    	vk::Rect2D scissor = {};
+    	scissor.offset.x = 0.0f;
+    	scissor.offset.y = 0.0f;
+    	scissor.extent = m_SwapchainExtent;
+    	commandBuffer.setViewport(0, 1, &viewport);
+    	commandBuffer.setScissor(0, 1, &scissor);
 
     	// finally
     	commandBuffer.draw(3, 1, 0, 0);

@@ -13,7 +13,7 @@ namespace FusionEngine
             FE_ASSERT(false, "Failed to initialize glfw!");
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         
         m_Window = glfwCreateWindow(1200, 700, "Fusion Engine", nullptr, nullptr);
 

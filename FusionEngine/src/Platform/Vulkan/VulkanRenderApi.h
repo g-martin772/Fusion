@@ -48,12 +48,14 @@ namespace FusionEngine
 
         void QuerySwapchainSupport();
         void CreateSwapChain();
+        void RecreateSwapChain();
+        void CleanUpSwapChain();
 
         void CreatePipeline(const Ref<VulkanShader>& shader);
 
         void CreateFrameBuffers();
         void CreateCommandPool();
-        void CreateCommandBuffers();
+        vk::CommandBuffer CreateCommandBuffer();
 
         void RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
     private:
