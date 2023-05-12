@@ -6,7 +6,7 @@
 
 namespace FusionEngine
 {
-    Ref<Shader> Shader::Create(std::string name)
+    Ref<Shader> Shader::Create(const std::string& name)
     {
         switch (RenderApi::GetApi()) {
             case RenderApi::Api::Vulkan: return MakeRef<VulkanShader>(name);

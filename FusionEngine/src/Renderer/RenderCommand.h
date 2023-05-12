@@ -9,7 +9,9 @@ namespace FusionEngine
         static void Init();
         static void ShutDown();
         static void Render();
+
+        static const Ref<RenderApi>& GetRenderApi();
     private:
-        static Unique<RenderApi> s_RenderApi;
+        static Ref<RenderApi> s_RenderApi;
     };
 }

@@ -37,7 +37,7 @@ namespace FusionEngine
         return output;
     }
     
-    VulkanShader::VulkanShader(const std::string& name): Shader(name)
+    VulkanShader::VulkanShader(const std::string& name) : Shader(name)
     {
         const std::filesystem::path vertexSourceFilePath = fmt::format("{0}/{1}_vertex.glsl", sourceDirectory, name);
         const std::filesystem::path vertexSpirvFilePath = fmt::format("{0}/{1}_vertex.spv", cacheDirectory, name);
@@ -55,14 +55,5 @@ namespace FusionEngine
         else
             m_FragmentShader = CompileShader(fragmentSourceFilePath, fragmentSpirvFilePath, shaderc_fragment_shader);
             
-    }
-
-    void VulkanShader::Load()
-    {
-    }
-
-    void VulkanShader::Bind()
-    {
-    }
-    
+    } 
 }

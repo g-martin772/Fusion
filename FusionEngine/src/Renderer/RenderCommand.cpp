@@ -5,7 +5,7 @@
 
 namespace FusionEngine
 {
-    Unique<RenderApi> RenderCommand::s_RenderApi = RenderApi::Create();
+    Ref<RenderApi> RenderCommand::s_RenderApi = RenderApi::Create();
     
     void RenderCommand::Init()
     {
@@ -20,5 +20,10 @@ namespace FusionEngine
     void RenderCommand::Render()
     {
         s_RenderApi->Render();
+    }
+
+    const Ref<RenderApi>& RenderCommand::GetRenderApi()
+    {
+        return s_RenderApi;
     }
 }

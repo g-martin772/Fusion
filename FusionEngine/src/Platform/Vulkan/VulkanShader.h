@@ -8,9 +8,6 @@ namespace FusionEngine
     public:
         explicit VulkanShader(const std::string& name);
 
-        void Load() override;
-        void Bind() override;
-
         [[nodiscard]] std::vector<char> GetVertexShader() const { return m_VertexShader; }
         [[nodiscard]] std::vector<char> GetFragmentShader() const { return m_FragmentShader; }
     private:

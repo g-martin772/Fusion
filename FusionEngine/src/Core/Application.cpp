@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
+#include "Renderer/Pipeline.h"
 #include "Renderer/RenderCommand.h"
 
 namespace FusionEngine
@@ -23,6 +24,8 @@ namespace FusionEngine
         m_Window->Init();
 
         RenderCommand::Init();
+
+        m_PipeLine = Pipeline::Create(Shader::Create("test"));
     }
 
     void Application::Run()
@@ -32,6 +35,7 @@ namespace FusionEngine
         while(m_Running)
         {
             m_Window->OnUpdate();
+            m_PipeLine->Bind();
             RenderCommand::Render();
 
             auto currentTime = std::chrono::high_resolution_clock::now();

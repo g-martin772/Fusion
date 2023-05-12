@@ -51,7 +51,7 @@ namespace FusionEngine
         void RecreateSwapChain();
         void CleanUpSwapChain();
 
-        void CreatePipeline(const Ref<VulkanShader>& shader);
+        void CreateRenderPass();
 
         void CreateFrameBuffers();
         void CreateCommandPool();
@@ -91,6 +91,9 @@ namespace FusionEngine
 
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
+
+        
+        friend class VulkanPipeline;
     };
 
 }

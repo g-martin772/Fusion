@@ -1,8 +1,10 @@
 ﻿#pragma once
 #include <iostream>
+#include <memory>
 
 #include "Base.h"
 #include "Window.h"
+#include "Renderer/Pipeline.h"
 
 namespace FusionEngine
 {
@@ -21,5 +23,6 @@ namespace FusionEngine
         bool m_Running = true;
 
         Ref<Window> m_Window;
+        Ref<Pipeline> m_PipeLine;
     };
 }
