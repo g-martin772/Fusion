@@ -4,6 +4,8 @@
 // https://github.com/KhronosGroup/Vulkan-Hpp/blob/main/README.md
 #include <vulkan/vulkan.hpp>
 
+#include "VulkanShader.h"
+
 namespace FusionEngine
 {
     class VulkanRenderApi : public RenderApi
@@ -47,7 +49,7 @@ namespace FusionEngine
         void QuerySwapchainSupport();
         void CreateSwapChain();
 
-        void CreatePipeline();
+        void CreatePipeline(const Ref<VulkanShader>& shader);
 
         void CreateFrameBuffers();
         void CreateCommandPool();

@@ -3,9 +3,11 @@
 
 #include <GLFW/glfw3.h>
 
+#include "VulkanShader.h"
 #include "VulkanUtils.h"
 #include "Core/Application.h"
 #include "IO/File.h"
+#include "Renderer/ShaderLibrary.h"
 
 // https://www.youtube.com/@GetIntoGameDev
 
@@ -28,7 +30,7 @@ namespace FusionEngine
 
         CreateSwapChain();
 
-    	CreatePipeline();
+    	CreatePipeline(MakeRef<VulkanShader>("test"));
 
     	CreateFrameBuffers();
     	CreateCommandPool();
@@ -525,13 +527,11 @@ namespace FusionEngine
 // These are copy paste implemented and still need to be "adopted" properly
     
 #pragma region PipelinePfusch
-    vk::ShaderModule createModule(std::filesystem::path filename, vk::Device device) {
-
-        std::vector<char> sourceCode = File::Read(filename);
+    vk::ShaderModule createModule(std::vector<char> spriv, vk::Device device) {
         vk::ShaderModuleCreateInfo moduleInfo = {};
         moduleInfo.flags = vk::ShaderModuleCreateFlags();
-        moduleInfo.codeSize = sourceCode.size();
-        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(sourceCode.data());
+        moduleInfo.codeSize = spriv.size();
+        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(spriv.data());
 
         try {
             return device.createShaderModule(moduleInfo);
@@ -603,7 +603,7 @@ namespace FusionEngine
 	}
 #pragma endregion PipelinePfusch
 
-    void VulkanRenderApi::CreatePipeline()
+    void VulkanRenderApi::CreatePipeline(const Ref<VulkanShader>& shader)
     {
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.flags = vk::PipelineCreateFlags();
@@ -626,7 +626,7 @@ namespace FusionEngine
 
 		//Vertex Shader
 		FE_INFO("Create vertex shader module");
-		vk::ShaderModule vertexShader = createModule("resources/shaders/vertex.spv", m_LogicalDevice);
+		vk::ShaderModule vertexShader = createModule(shader->GetVertexShader(), m_LogicalDevice);
 		vk::PipelineShaderStageCreateInfo vertexShaderInfo = {};
 		vertexShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		vertexShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
@@ -668,7 +668,7 @@ namespace FusionEngine
 
 		//Fragment Shader
 		FE_INFO("Create fragment shader module");
-		vk::ShaderModule fragmentShader = createModule("resources/shaders/fragment.spv", m_LogicalDevice);
+		vk::ShaderModule fragmentShader = createModule(shader->GetFragmentShader(), m_LogicalDevice);
 		vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
 		fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		fragmentShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
