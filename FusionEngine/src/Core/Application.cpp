@@ -13,7 +13,7 @@ namespace FusionEngine
         return s_Application;
     }
 
-    void Application::Init()
+    Application::Application()
     {
         s_Application = this;
         
@@ -24,8 +24,6 @@ namespace FusionEngine
         m_Window->Init();
 
         RenderCommand::Init();
-
-        m_PipeLine = Pipeline::Create(Shader::Create("test"));
     }
 
     void Application::Run()
@@ -34,10 +32,6 @@ namespace FusionEngine
         int frameCount = 0;
         while(m_Running)
         {
-            m_Window->OnUpdate();
-            m_PipeLine->Bind();
-            RenderCommand::Render();
-
             auto currentTime = std::chrono::high_resolution_clock::now();
             const auto deltaTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count();
             frameCount++;
@@ -49,6 +43,11 @@ namespace FusionEngine
                 frameCount = 0;
                 startTime = currentTime;
             }
+            
+            for (Layer* layer : m_LayerStack)
+                layer->OnUpdate();
+
+            m_Window->OnUpdate();
         }
     }
 
@@ -57,6 +56,23 @@ namespace FusionEngine
         FE_INFO("Fusion Engine Shutdown");
         RenderCommand::ShutDown();
         m_Window->ShutDown();
+    }
+
+    void Application::Close()
+    {
+        m_Running = false;
+    }
+
+    void Application::PushLayer(Layer* layer)
+    {
+        m_LayerStack.PushLayer(layer);
+        layer->OnAttach();
+    }
+
+    void Application::PushOverlay(Layer* layer)
+    {
+        m_LayerStack.PushOverlay(layer);
+        layer->OnAttach();
     }
 }
 

@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "Base.h"
+#include "LayerStack.h"
 #include "Window.h"
 #include "Renderer/Pipeline.h"
 
@@ -13,9 +14,14 @@ namespace FusionEngine
     public:
         static Application* Get();
         
-        void Init();
+        Application();
         void Run();
         void Shutdown();
+
+        void Close();
+
+        void PushLayer(Layer* layer);
+        void PushOverlay(Layer* layer);
 
         void SetRunning(const bool state) { m_Running = state; }
         Ref<Window> GetWindow() { return m_Window; }
@@ -23,6 +29,6 @@ namespace FusionEngine
         bool m_Running = true;
 
         Ref<Window> m_Window;
-        Ref<Pipeline> m_PipeLine;
+        LayerStack m_LayerStack;
     };
 }

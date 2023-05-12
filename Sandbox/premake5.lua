@@ -20,7 +20,8 @@
     
     includedirs {
         "src",
-        "%{wks.location}/FusionEngine/src"
+        "%{wks.location}/FusionEngine/src",
+        "%{wks.location}/FusionEngine/dependencies/spdlog/include"
     }
 
     links {
