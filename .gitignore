@@ -8,5 +8,6 @@ __pycache__/
 *.vcxproj
 *.csproj
 *.filters
+*.spv
 
 VulkanSDK.exe
