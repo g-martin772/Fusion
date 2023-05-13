@@ -54,6 +54,13 @@ namespace FusionEngine
     void Application::Shutdown()
     {
         FE_INFO("Fusion Engine Shutdown");
+
+        for (Layer* layer : m_LayerStack)
+        {
+            layer->OnDetach();
+            delete layer;
+        }
+
         RenderCommand::ShutDown();
         m_Window->ShutDown();
     }

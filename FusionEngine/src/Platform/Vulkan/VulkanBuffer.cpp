@@ -50,6 +50,7 @@ namespace FusionEngine
 
     VulkanBuffer::~VulkanBuffer()
     {
+        m_RenderApi->m_LogicalDevice.waitIdle();
         m_RenderApi->m_LogicalDevice.destroyBuffer(m_Buffer);
         m_RenderApi->m_LogicalDevice.freeMemory(m_Memory);
     }
