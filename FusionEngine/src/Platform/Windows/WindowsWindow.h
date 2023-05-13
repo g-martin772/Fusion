@@ -14,6 +14,7 @@ namespace FusionEngine
         void* GetNativeWindow() override { return m_Window; }
     private:
         GLFWwindow* m_Window{};
+        std::thread m_EventThread;
     };
 
 }

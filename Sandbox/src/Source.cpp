@@ -4,14 +4,9 @@
 
 using namespace FusionEngine;
 
-class FusionForgeApplication : public Application
-{
-    
-};
-
 Application* CreateApplication()
 {
-    auto* app = new FusionForgeApplication();
+    auto* app = new Application();
     app->PushLayer(new SandboxLayer);
     return app;
 }

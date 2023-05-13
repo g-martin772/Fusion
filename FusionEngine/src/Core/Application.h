@@ -23,7 +23,6 @@ namespace FusionEngine
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* layer);
 
-        void SetRunning(const bool state) { m_Running = state; }
         Ref<Window> GetWindow() { return m_Window; }
     private:
         bool m_Running = true;

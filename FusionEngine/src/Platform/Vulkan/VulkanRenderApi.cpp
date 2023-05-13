@@ -47,6 +47,9 @@ namespace FusionEngine
 	
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
     {
+    	m_SwapchainExtent.width = width;
+    	m_SwapchainExtent.height = height;
+    	RecreateSwapChain();
     }
 
     void VulkanRenderApi::ShutDown()
@@ -84,6 +87,7 @@ namespace FusionEngine
         }
         catch (vk::OutOfDateKHRError&)
         {
+        	FE_WARN("Swapchain out of date");
         	RecreateSwapChain();
         	return;
         }
@@ -135,11 +139,13 @@ namespace FusionEngine
 	        const auto result = m_PresentQueue.presentKHR(presentInfo);
         	if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
         	{
+        		FE_WARN("Swapchain out of date or Suboptimal");
         		RecreateSwapChain();
         	}
         }
         catch (vk::OutOfDateKHRError&)
         {
+        	FE_WARN("Swapchain out of date");
         	RecreateSwapChain();
         }
     	
@@ -461,7 +467,8 @@ namespace FusionEngine
                 m_PresentMode = presentMode;
         }
 
-        m_SwapchainExtent = m_SwapChainCapabilities.Capabilities.currentExtent;
+    	if(m_SwapchainExtent.width == 0 || m_SwapchainExtent.height == 0)
+			m_SwapchainExtent = m_SwapChainCapabilities.Capabilities.currentExtent;
     }
 
     void VulkanRenderApi::CreateSwapChain()

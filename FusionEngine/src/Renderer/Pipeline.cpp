@@ -6,10 +6,10 @@
 
 namespace FusionEngine
 {
-    Ref<Pipeline> Pipeline::Create(const Ref<Shader>& shader)
+    Ref<Pipeline> Pipeline::Create(const Pipeline::PipelineSpecification& specification)
     {
         switch (RenderApi::GetApi()) {
-            case RenderApi::Api::Vulkan: return MakeRef<VulkanPipeline>(shader);
+            case RenderApi::Api::Vulkan: return MakeRef<VulkanPipeline>(specification);
         }
 
         FE_ASSERT(false, "No Graphics API selected");

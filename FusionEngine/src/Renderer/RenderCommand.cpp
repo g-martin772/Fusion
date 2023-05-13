@@ -22,6 +22,11 @@ namespace FusionEngine
         s_RenderApi->Render();
     }
 
+    void RenderCommand::ResizeWindow(uint32_t width, uint32_t height)
+    {
+        s_RenderApi->OnWindowResize(width, height);
+    }
+
     const Ref<RenderApi>& RenderCommand::GetRenderApi()
     {
         return s_RenderApi;

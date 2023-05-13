@@ -5,7 +5,10 @@
 
 void SandboxLayer::OnAttach()
 {
-    m_PipeLine = FusionEngine::Pipeline::Create(FusionEngine::Shader::Create("test"));
+    FusionEngine::Pipeline::PipelineSpecification spec;
+    spec.Shader = FusionEngine::Shader::Create("test");
+    spec.WireFrame = false;
+    m_PipeLine = FusionEngine::Pipeline::Create(spec);
 }
 
 void SandboxLayer::OnUpdate()

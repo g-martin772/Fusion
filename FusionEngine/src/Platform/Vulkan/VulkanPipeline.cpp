@@ -6,9 +6,19 @@
 
 namespace FusionEngine
 {
-    VulkanPipeline::VulkanPipeline(const Ref<Shader>& shader)
+	vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const Pipeline::DrawMode mode)
+	{
+		switch (mode) {
+			case Pipeline::DrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
+			case Pipeline::DrawMode::Lines: vk::PrimitiveTopology::eLineList;
+			case Pipeline::DrawMode::Points: vk::PrimitiveTopology::ePointList;
+		}
+		return vk::PrimitiveTopology::eTriangleList;
+	}
+	
+    VulkanPipeline::VulkanPipeline(const PipelineSpecification& spec)
     {
-        m_Shader = std::dynamic_pointer_cast<VulkanShader>(shader);
+        m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.Shader);
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
@@ -27,12 +37,12 @@ namespace FusionEngine
 		//Input Assembly
 		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
 		inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
-		inputAssemblyInfo.topology = vk::PrimitiveTopology::eTriangleList;
+		inputAssemblyInfo.topology = FusionDrawModeToVkPrimitiveTopology(spec.DrawMode);
 		pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
 
 		//Vertex Shader
 		FE_INFO("Create vertex shader module");
-		vk::ShaderModule vertexShader = CreateModule(m_Shader->GetVertexShader());
+		vk::ShaderModule vertexShader = CreateShaderModule(m_Shader->GetVertexShader());
 		vk::PipelineShaderStageCreateInfo vertexShaderInfo = {};
 		vertexShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		vertexShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
@@ -61,7 +71,7 @@ namespace FusionEngine
 		rasterizer.flags = vk::PipelineRasterizationStateCreateFlags();
 		rasterizer.depthClampEnable = VK_FALSE; //discard out of bounds fragments, don't clamp them
 		rasterizer.rasterizerDiscardEnable = VK_FALSE; //This flag would disable fragment output
-		rasterizer.polygonMode = vk::PolygonMode::eFill;
+		rasterizer.polygonMode = spec.WireFrame ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
 		rasterizer.lineWidth = 1.0f;
 		rasterizer.cullMode = vk::CullModeFlagBits::eBack;
 		rasterizer.frontFace = vk::FrontFace::eClockwise;
@@ -70,7 +80,7 @@ namespace FusionEngine
 
 		//Fragment Shader
 		FE_INFO("Create fragment shader module");
-		vk::ShaderModule fragmentShader = CreateModule(m_Shader->GetFragmentShader());
+		vk::ShaderModule fragmentShader = CreateShaderModule(m_Shader->GetFragmentShader());
 		vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
 		fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		fragmentShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
@@ -139,7 +149,7 @@ namespace FusionEngine
     	m_RenderApi->m_Pipeline = m_Pipeline;
     }
 	
-	vk::ShaderModule VulkanPipeline::CreateModule(const std::vector<char>& spirv) const
+	vk::ShaderModule VulkanPipeline::CreateShaderModule(const std::vector<char>& spirv) const
 	{
         vk::ShaderModuleCreateInfo moduleInfo = {};
         moduleInfo.flags = vk::ShaderModuleCreateFlags();

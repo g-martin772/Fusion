@@ -14,11 +14,11 @@ namespace FusionEngine
     class VulkanPipeline : public Pipeline
     {
     public:
-        VulkanPipeline(const Ref<Shader>& shader);
+        VulkanPipeline(const PipelineSpecification& spec);
         
         void Bind() override;
     private:
-        vk::ShaderModule CreateModule(const std::vector<char>& spirv) const;
+        vk::ShaderModule CreateShaderModule(const std::vector<char>& spirv) const;
         vk::PipelineLayout MakePipelineLayout() const;
     private:
         Ref<VulkanShader> m_Shader;
