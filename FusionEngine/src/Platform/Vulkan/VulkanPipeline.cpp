@@ -6,16 +6,52 @@
 
 namespace FusionEngine
 {
-	vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const Pipeline::DrawMode mode)
+	namespace Utils
 	{
-		switch (mode) {
-			case Pipeline::DrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
-			case Pipeline::DrawMode::Lines: vk::PrimitiveTopology::eLineList;
-			case Pipeline::DrawMode::Points: vk::PrimitiveTopology::ePointList;
+		vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const DrawMode mode)
+		{
+			switch (mode) {
+			case DrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
+			case DrawMode::Lines: vk::PrimitiveTopology::eLineList;
+			case DrawMode::Points: vk::PrimitiveTopology::ePointList;
+			}
+			return vk::PrimitiveTopology::eTriangleList;
 		}
-		return vk::PrimitiveTopology::eTriangleList;
+
+		vk::Format FusionVertexAttributeToVkFormat(const VertexBuffer::Attribute attribute)
+		{
+			switch (attribute) {
+			case VertexBuffer::Attribute::Bool: return vk::Format::eR8Sint;
+			case VertexBuffer::Attribute::Char: return vk::Format::eR8Uint;
+			case VertexBuffer::Attribute::Short: return vk::Format::eR16Sint;
+			case VertexBuffer::Attribute::UShort: return vk::Format::eR16Uint;
+			case VertexBuffer::Attribute::Int: return vk::Format::eR32Sint;
+			case VertexBuffer::Attribute::UInt: return vk::Format::eR32Uint;
+			case VertexBuffer::Attribute::Float: return vk::Format::eR32Sfloat;
+			case VertexBuffer::Attribute::Vec2: return vk::Format::eR32G32Sfloat;
+			case VertexBuffer::Attribute::Vec3: return vk::Format::eR32G32B32Sfloat;
+			case VertexBuffer::Attribute::Vec4: return vk::Format::eR32G32B32A32Sfloat;
+			}
+		}
+
+		uint32_t FusionVertexAttributeToByteSize(VertexBuffer::Attribute attribute)
+		{
+			switch (attribute) {
+			case VertexBuffer::Attribute::Bool:	return sizeof(bool);
+			case VertexBuffer::Attribute::Char:	return sizeof(char);
+			case VertexBuffer::Attribute::UShort: return sizeof(uint16_t);
+			case VertexBuffer::Attribute::Short:	return sizeof(int16_t);
+			case VertexBuffer::Attribute::Int:	return sizeof(int32_t);
+			case VertexBuffer::Attribute::UInt:	return sizeof(uint32_t);
+			case VertexBuffer::Attribute::Float:	return sizeof(float);
+			case VertexBuffer::Attribute::Vec2:	return 2 * sizeof(float);
+			case VertexBuffer::Attribute::Vec3:	return 3 * sizeof(float);
+			case VertexBuffer::Attribute::Vec4:	return 4 * sizeof(float);
+			}
+		}
 	}
 	
+
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& spec)
     {
         m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.Shader);
@@ -30,14 +66,32 @@ namespace FusionEngine
 		//Vertex Input
 		vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
 		vertexInputInfo.flags = vk::PipelineVertexInputStateCreateFlags();
-		vertexInputInfo.vertexBindingDescriptionCount = 0;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
+		uint32_t attributeCount = 0, bindingCount = 0;
+		std::vector<vk::VertexInputBindingDescription> vertexInputBindingDescriptions;
+		std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
+		for (const Ref<VertexBuffer>& vertexBuffer : spec.VertexBuffers)
+		{
+			uint32_t location = 0, offset = 0;
+			for (VertexBuffer::Attribute attribute : vertexBuffer->GetVertexAttributes())
+			{
+				vertexInputAttributeDescriptions.emplace_back(location, bindingCount, Utils::FusionVertexAttributeToVkFormat(attribute), offset);
+				offset += Utils::FusionVertexAttributeToByteSize(attribute);
+				attributeCount++;
+				location++;
+			}
+			vertexInputBindingDescriptions.emplace_back(bindingCount, offset, vk::VertexInputRate::eVertex);
+			bindingCount++;
+		}
+		vertexInputInfo.vertexBindingDescriptionCount = bindingCount;
+		vertexInputInfo.pVertexBindingDescriptions = vertexInputBindingDescriptions.data();
+		vertexInputInfo.vertexAttributeDescriptionCount = attributeCount;
+		vertexInputInfo.pVertexAttributeDescriptions = vertexInputAttributeDescriptions.data();
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 
 		//Input Assembly
 		vk::PipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
 		inputAssemblyInfo.flags = vk::PipelineInputAssemblyStateCreateFlags();
-		inputAssemblyInfo.topology = FusionDrawModeToVkPrimitiveTopology(spec.DrawMode);
+		inputAssemblyInfo.topology = Utils::FusionDrawModeToVkPrimitiveTopology(spec.DrawMode);
 		pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
 
 		//Vertex Shader

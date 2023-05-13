@@ -11,4 +11,5 @@ public:
     void OnDetach() override;
 private:
     FusionEngine::Ref<FusionEngine::Pipeline> m_PipeLine;
+    std::shared_ptr<FusionEngine::VertexBuffer> m_VBO;
 };

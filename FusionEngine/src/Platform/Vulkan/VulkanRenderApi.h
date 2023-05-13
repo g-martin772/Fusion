@@ -92,8 +92,11 @@ namespace FusionEngine
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
 
+        vk::Buffer m_CurrentVertexBuffer;
+        vk::DeviceSize m_CurrentVertexBufferOffset = 0;
         
         friend class VulkanPipeline;
+        friend class VulkanVertexBuffer;
     };
 
 }

@@ -31,9 +31,9 @@
     filter "system:windows"
         systemversion "latest"
     
-    defines {
-        "FE_WINDOWS"
-    }
+        defines {
+            "FE_WINDOWS"
+        }
     
     filter "configurations:Debug"
         defines { "FE_DEBUG" }

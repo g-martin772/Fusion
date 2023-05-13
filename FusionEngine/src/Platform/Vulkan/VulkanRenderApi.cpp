@@ -734,6 +734,7 @@ namespace FusionEngine
     	commandBuffer.setScissor(0, 1, &scissor);
 
     	// finally
+    	commandBuffer.bindVertexBuffers(0, 1, &m_CurrentVertexBuffer, &m_CurrentVertexBufferOffset);
     	commandBuffer.draw(3, 1, 0, 0);
 
     	commandBuffer.endRenderPass();
