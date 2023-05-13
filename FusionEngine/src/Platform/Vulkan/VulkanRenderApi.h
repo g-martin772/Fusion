@@ -97,6 +97,7 @@ namespace FusionEngine
         
         friend class VulkanPipeline;
         friend class VulkanVertexBuffer;
+        friend class VulkanShader; 
     };
 
 }

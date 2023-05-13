@@ -18,7 +18,6 @@ namespace FusionEngine
         
         void Bind() override;
     private:
-        vk::ShaderModule CreateShaderModule(const std::vector<char>& spirv) const;
         vk::PipelineLayout MakePipelineLayout() const;
     private:
         Ref<VulkanShader> m_Shader;

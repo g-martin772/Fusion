@@ -5,6 +5,9 @@
 
 #include <shaderc/shaderc.hpp>
 
+#include "VulkanRenderApi.h"
+#include "Renderer/RenderCommand.h"
+
 namespace FusionEngine
 {
     static std::string cacheDirectory = "resources/shaders";
@@ -39,6 +42,8 @@ namespace FusionEngine
     
     VulkanShader::VulkanShader(const std::string& name) : Shader(name)
     {
+        m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
+        
         const std::filesystem::path vertexSourceFilePath = fmt::format("{0}/{1}_vertex.glsl", sourceDirectory, name);
         const std::filesystem::path vertexSpirvFilePath = fmt::format("{0}/{1}_vertex.spv", cacheDirectory, name);
 
@@ -54,6 +59,26 @@ namespace FusionEngine
             m_FragmentShader = File::Read(fragmentSpirvFilePath);
         else
             m_FragmentShader = CompileShader(fragmentSourceFilePath, fragmentSpirvFilePath, shaderc_fragment_shader);
-            
-    } 
+
+        m_VertexShaderModule = CreateShaderModule(m_VertexShader);
+        m_FragmentShaderModule = CreateShaderModule(m_FragmentShader);
+    }
+
+    vk::ShaderModule VulkanShader::CreateShaderModule(const std::vector<char>& spirv) const
+    {
+        vk::ShaderModuleCreateInfo moduleInfo = {};
+        moduleInfo.flags = vk::ShaderModuleCreateFlags();
+        moduleInfo.codeSize = spirv.size();
+        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(spirv.data());
+
+        try {
+            return m_RenderApi->m_LogicalDevice.createShaderModule(moduleInfo);
+        }
+        catch (vk::SystemError& err)
+        {
+            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+            FE_ASSERT(false, "Creating Shadermodule failed");
+        }
+        return nullptr;
+    }
 }

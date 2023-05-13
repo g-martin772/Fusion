@@ -96,7 +96,7 @@ namespace FusionEngine
 
 		//Vertex Shader
 		FE_INFO("Create vertex shader module");
-		vk::ShaderModule vertexShader = CreateShaderModule(m_Shader->GetVertexShader());
+		vk::ShaderModule vertexShader = m_Shader->GetVertexShaderModule();
 		vk::PipelineShaderStageCreateInfo vertexShaderInfo = {};
 		vertexShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		vertexShaderInfo.stage = vk::ShaderStageFlagBits::eVertex;
@@ -134,7 +134,7 @@ namespace FusionEngine
 
 		//Fragment Shader
 		FE_INFO("Create fragment shader module");
-		vk::ShaderModule fragmentShader = CreateShaderModule(m_Shader->GetFragmentShader());
+		vk::ShaderModule fragmentShader = m_Shader->GetFragmentShaderModule();
 		vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
 		fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
 		fragmentShaderInfo.stage = vk::ShaderStageFlagBits::eFragment;
@@ -201,24 +201,6 @@ namespace FusionEngine
     {
         m_RenderApi->m_PipelineLayout = m_PipelineLayout;
     	m_RenderApi->m_Pipeline = m_Pipeline;
-    }
-	
-	vk::ShaderModule VulkanPipeline::CreateShaderModule(const std::vector<char>& spirv) const
-	{
-        vk::ShaderModuleCreateInfo moduleInfo = {};
-        moduleInfo.flags = vk::ShaderModuleCreateFlags();
-        moduleInfo.codeSize = spirv.size();
-        moduleInfo.pCode = reinterpret_cast<const uint32_t*>(spirv.data());
-
-        try {
-            return m_RenderApi->m_LogicalDevice.createShaderModule(moduleInfo);
-        }
-        catch (vk::SystemError& err)
-        {
-            FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
-            FE_ASSERT(false, "Creating Shadermodule failed");
-        }
-		return nullptr;
     }
 
     vk::PipelineLayout VulkanPipeline::MakePipelineLayout() const
