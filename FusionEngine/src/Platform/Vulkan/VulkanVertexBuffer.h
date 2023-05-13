@@ -5,6 +5,7 @@
 
 namespace FusionEngine
 {
+    class VulkanBuffer;
     class VulkanRenderApi;
     enum class DrawMode;
 }
@@ -17,16 +18,12 @@ namespace FusionEngine
         VulkanVertexBuffer(const std::vector<Attribute>& attributes, DrawMode drawmode);
         ~VulkanVertexBuffer() override;
 
-        vk::Buffer GetBuffer() const { return m_Buffer; }
         void SetData(void* data) override;
         void Bind() override;
 
+        VulkanBuffer* Buffer;
     private:
         Ref<VulkanRenderApi> m_RenderApi;
-        
-        vk::Buffer m_Buffer;
-        vk::DeviceMemory m_Memory;
-        uint32_t m_Size = 0;
     };
     
 }

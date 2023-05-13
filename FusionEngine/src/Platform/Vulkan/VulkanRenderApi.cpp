@@ -58,7 +58,6 @@ namespace FusionEngine
     	
 		m_LogicalDevice.destroyCommandPool(m_CommandPool);
 
-    	// TODO: Move to pipeline
 		m_LogicalDevice.destroyPipeline(m_Pipeline);
     	m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
     	
