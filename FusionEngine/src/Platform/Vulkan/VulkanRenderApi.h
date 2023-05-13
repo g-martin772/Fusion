@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.hpp>
 
 #include "VulkanShader.h"
+#include "VulkanSwapChain.h"
 
 namespace FusionEngine
 {
@@ -34,31 +35,12 @@ namespace FusionEngine
 
         void Render() override;
     private:
+        // Instance
         void CreateInstance();
         void CheckSupportedExtensions(const std::vector<const char*>& extensions) const;
         void CheckSupportedLayers(const std::vector<const char*>& layers) const;
         void CreateDebugMessenger();
 
-        void CreateSurface();
-
-        void CreatePhysicalDevice();
-        void CreateLogicalDevice();
-        void CreateGraphicsQueue();
-        void CreatePresentQueue();
-
-        void QuerySwapchainSupport();
-        void CreateSwapChain();
-        void RecreateSwapChain();
-        void CleanUpSwapChain();
-
-        void CreateRenderPass();
-
-        void CreateFrameBuffers();
-        void CreateCommandPool();
-        vk::CommandBuffer CreateCommandBuffer();
-
-        void RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
-    private:
         vk::Instance m_Instance;
         vk::DispatchLoaderDynamic m_DynamicInstanceDispatcher;
         vk::DebugUtilsMessengerEXT m_DebugMessenger;
@@ -66,8 +48,12 @@ namespace FusionEngine
             "VK_LAYER_KHRONOS_validation"
         };
 
-        vk::SurfaceKHR m_Surface;
-
+        // Device
+        void CreatePhysicalDevice();
+        void CreateLogicalDevice();
+        void CreateGraphicsQueue();
+        void CreatePresentQueue();
+        
         vk::PhysicalDevice m_PhysicalDevice;
         vk::Device m_LogicalDevice;
 
@@ -75,29 +61,38 @@ namespace FusionEngine
         vk::Queue m_PresentQueue;
         std::optional<uint32_t> m_GraphicsFamily;
         std::optional<uint32_t> m_PresentFamily;
+        
 
-        SwapChainCapabilities m_SwapChainCapabilities;
-        vk::PresentModeKHR m_PresentMode = vk::PresentModeKHR::eFifo;
-        vk::SurfaceFormatKHR m_SurfaceFormat;
-        vk::Extent2D m_SwapchainExtent;
-        vk::SwapchainKHR m_SwapChain;
-
-        std::vector<Frame> m_Frames;
+        // SwapChain
+        VulkanSwapChain* m_SwapChain;
+        std::vector<VulkanRenderApi::Frame> m_Frames;
         uint32_t m_CurrentFrame = 0;
+        
 
-        vk::PipelineLayout m_PipelineLayout;
-        vk::RenderPass m_RenderPass;
-        vk::Pipeline m_Pipeline;
+        // RenderPass
+        void CreateRenderPass();
+
+        // CommandBuffers
+        void CreateCommandPool();
+        vk::CommandBuffer CreateCommandBuffer();
+        void RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
 
+        // Pipeline
+        vk::PipelineLayout m_PipelineLayout;
+        vk::RenderPass m_RenderPass;
+        vk::Pipeline m_Pipeline;
+
         vk::Buffer m_CurrentVertexBuffer;
         vk::DeviceSize m_CurrentVertexBufferOffset = 0;
         
+        // External
         friend class VulkanPipeline;
         friend class VulkanVertexBuffer;
-        friend class VulkanShader; 
+        friend class VulkanShader;
+        friend class VulkanSwapChain;
     };
 
 }

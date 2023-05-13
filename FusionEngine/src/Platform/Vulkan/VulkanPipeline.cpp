@@ -56,6 +56,7 @@ namespace FusionEngine
     {
         m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.Shader);
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
+		m_Spec = spec;
 
         vk::GraphicsPipelineCreateInfo pipelineInfo = {};
 		pipelineInfo.flags = vk::PipelineCreateFlags();

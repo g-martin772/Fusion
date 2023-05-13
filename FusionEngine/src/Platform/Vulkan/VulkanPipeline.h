@@ -26,6 +26,7 @@ namespace FusionEngine
         vk::Pipeline m_Pipeline;
         
         Ref<VulkanRenderApi> m_RenderApi;
+        PipelineSpecification m_Spec;
     };
     
 }

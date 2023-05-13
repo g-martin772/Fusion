@@ -6,7 +6,7 @@ namespace FusionEngine
 {
     namespace VulkanUtils
     {
-        vk::Semaphore CreateSemaphore(const vk::Device device)
+        inline vk::Semaphore CreateSemaphore(const vk::Device device)
         {
             vk::SemaphoreCreateInfo semaphoreInfo = {};
             semaphoreInfo.flags = vk::SemaphoreCreateFlags();
@@ -23,7 +23,7 @@ namespace FusionEngine
             }
         }
 
-        vk::Fence CreateFence(const vk::Device device)
+        inline vk::Fence CreateFence(const vk::Device device)
         {
             vk::FenceCreateInfo fenceInfo = {};
             fenceInfo.flags = vk::FenceCreateFlags() | vk::FenceCreateFlagBits::eSignaled;
