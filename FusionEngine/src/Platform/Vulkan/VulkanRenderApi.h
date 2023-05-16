@@ -11,13 +11,6 @@ namespace FusionEngine
 {
     class VulkanRenderApi : public RenderApi
     {
-        struct SwapChainCapabilities
-        {
-            vk::SurfaceCapabilitiesKHR Capabilities;
-            std::vector<vk::SurfaceFormatKHR> Formats;
-            std::vector<vk::PresentModeKHR> PresentModes;
-        };
-
         struct Frame
         {
             vk::Framebuffer FrameBuffer;
