@@ -15,7 +15,7 @@ namespace FusionEngine
     class VulkanVertexBuffer : public VertexBuffer
     {
     public:
-        VulkanVertexBuffer(const std::vector<Attribute>& attributes, DrawMode drawmode);
+        VulkanVertexBuffer(const std::vector<Attribute>& attributes, uint32_t size);
         ~VulkanVertexBuffer() override;
 
         void SetData(void* data) override;

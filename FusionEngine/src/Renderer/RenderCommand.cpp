@@ -17,9 +17,19 @@ namespace FusionEngine
         s_RenderApi->ShutDown();
     }
 
-    void RenderCommand::Render()
+    void RenderCommand::BeginFrame()
     {
-        s_RenderApi->Render();
+        s_RenderApi->BeginFrame();
+    }
+    
+    void RenderCommand::Draw(uint32_t vertexCount)
+    {
+        s_RenderApi->Draw(vertexCount);
+    }
+    
+    void RenderCommand::EndFrame()
+    {
+        s_RenderApi->EndFrame();
     }
 
     void RenderCommand::ResizeWindow(uint32_t width, uint32_t height)

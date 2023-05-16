@@ -25,15 +25,10 @@ namespace FusionEngine
         
     }
     
-    VulkanVertexBuffer::VulkanVertexBuffer(const std::vector<Attribute>& attributes, const DrawMode drawmode) 
+    VulkanVertexBuffer::VulkanVertexBuffer(const std::vector<Attribute>& attributes, uint32_t size) 
     {
         m_VertexAttributes = attributes;
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
-
-        uint32_t size = 0;
-        for (const Attribute attribute : attributes)
-            size += Utils::FusionVertexAttributeToByteSize(attribute);
-        size *= Utils::GetDrawModeVertexCount(drawmode);
         
         Buffer = new VulkanBuffer(size, vk::MemoryPropertyFlagBits::eHostVisible | vk::MemoryPropertyFlagBits::eHostCoherent, vk::BufferUsageFlagBits::eVertexBuffer);
     }

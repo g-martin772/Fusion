@@ -8,7 +8,10 @@ namespace FusionEngine
     public:
         static void Init();
         static void ShutDown();
-        static void Render();
+
+        static void BeginFrame();
+        static void Draw(uint32_t vertexCount);
+        static void EndFrame();
 
         static void ResizeWindow(uint32_t width, uint32_t height);
 

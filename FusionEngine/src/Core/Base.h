@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <memory>
+
 #ifdef FUSION_ENGINE
     #define FE_API //__declspec(dllexport)
 #else

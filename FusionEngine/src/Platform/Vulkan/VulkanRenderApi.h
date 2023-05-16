@@ -33,7 +33,9 @@ namespace FusionEngine
         void OnWindowResize(uint32_t width, uint32_t height) override;
         void ShutDown() override;
 
-        void Render() override;
+        void BeginFrame() override;
+        void Draw(uint32_t vertexCount) override;
+        void EndFrame() override;
     private:
         // Instance
         void CreateInstance();
@@ -75,7 +77,6 @@ namespace FusionEngine
         // CommandBuffers
         void CreateCommandPool();
         vk::CommandBuffer CreateCommandBuffer();
-        void RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex);
 
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
@@ -86,7 +87,7 @@ namespace FusionEngine
         vk::Pipeline m_Pipeline;
 
         vk::Buffer m_CurrentVertexBuffer;
-        vk::DeviceSize m_CurrentVertexBufferOffset = 0;
+        vk::DeviceSize m_CurrentVertexBufferOffsets[1] = {0};
         
         // External
         friend class VulkanPipeline;

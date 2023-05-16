@@ -3,6 +3,7 @@
 
 #include "Renderer/Pipeline.h"
 #include "Renderer/RenderCommand.h"
+#include "Renderer/Renderer2D.h"
 
 namespace FusionEngine
 {
@@ -24,6 +25,7 @@ namespace FusionEngine
         m_Window->Init();
 
         RenderCommand::Init();
+        Renderer2D::Init();
     }
 
     void Application::Run()
@@ -61,6 +63,7 @@ namespace FusionEngine
             delete layer;
         }
 
+        Renderer2D::ShutDown();
         RenderCommand::ShutDown();
         m_Window->ShutDown();
     }

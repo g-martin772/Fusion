@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <string>
+
 namespace FusionEngine
 {
     class Layer

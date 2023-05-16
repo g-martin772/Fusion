@@ -17,11 +17,14 @@
         "_CRT_SECURE_NO_WARNINGS",
         "GLFW_INCLUDE_NONE"
     }
+
+    VULKAN_SDK = os.getenv("VULKAN_SDK")
     
     includedirs {
         "src",
         "%{wks.location}/FusionEngine/src",
-        "%{wks.location}/FusionEngine/dependencies/spdlog/include"
+        "%{wks.location}/FusionEngine/dependencies/spdlog/include",
+        "%{VULKAN_SDK}/Include"
     }
 
     links {

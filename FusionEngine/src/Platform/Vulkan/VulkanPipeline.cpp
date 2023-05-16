@@ -70,10 +70,10 @@ namespace FusionEngine
 		uint32_t attributeCount = 0, bindingCount = 0;
 		std::vector<vk::VertexInputBindingDescription> vertexInputBindingDescriptions;
 		std::vector<vk::VertexInputAttributeDescription> vertexInputAttributeDescriptions;
-		for (const Ref<VertexBuffer>& vertexBuffer : spec.VertexBuffers)
+		for (std::vector<VertexBuffer::Attribute> vertexBufferLayout : spec.VertexBufferLayouts)
 		{
 			uint32_t location = 0, offset = 0;
-			for (VertexBuffer::Attribute attribute : vertexBuffer->GetVertexAttributes())
+			for (VertexBuffer::Attribute attribute : vertexBufferLayout)
 			{
 				vertexInputAttributeDescriptions.emplace_back(location, bindingCount, Utils::FusionVertexAttributeToVkFormat(attribute), offset);
 				offset += Utils::FusionVertexAttributeToByteSize(attribute);

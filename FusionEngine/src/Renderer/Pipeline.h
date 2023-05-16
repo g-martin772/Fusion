@@ -1,17 +1,10 @@
 ﻿#pragma once
+#include "RenderApi.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
 
 namespace FusionEngine
 {
-    enum class DrawMode
-    {
-        None = 0,
-        Triangles,
-        Lines,
-        Points
-    };
-    
     class Pipeline
     {
     public:
@@ -21,7 +14,7 @@ namespace FusionEngine
             Ref<Shader> Shader;
             bool WireFrame = false;
 
-            std::vector<Ref<VertexBuffer>> VertexBuffers;
+            std::vector<std::vector<VertexBuffer::Attribute>> VertexBufferLayouts;
         };
     public:
         static Ref<Pipeline> Create(const PipelineSpecification& specification);

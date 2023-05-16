@@ -7,10 +7,10 @@
 
 namespace FusionEngine
 {
-    Ref<VertexBuffer> VertexBuffer::Create(const std::vector<Attribute>& attributes, DrawMode drawmode = DrawMode::Triangles)
+    Ref<VertexBuffer> VertexBuffer::Create(const std::vector<Attribute>& attributes, uint32_t size)
     {
         switch (RenderApi::GetApi()) {
-            case RenderApi::Api::Vulkan: return MakeRef<VulkanVertexBuffer>(attributes, drawmode);
+            case RenderApi::Api::Vulkan: return MakeRef<VulkanVertexBuffer>(attributes, size);
         }
     }
 }

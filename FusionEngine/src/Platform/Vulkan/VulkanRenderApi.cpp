@@ -69,7 +69,7 @@ namespace FusionEngine
         //m_Instance.destroy(); //throws for whatever reason
     }
 
-    void VulkanRenderApi::Render()
+    void VulkanRenderApi::BeginFrame()
     {
     	auto result1 = m_LogicalDevice.waitForFences(1, &m_Frames[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
 
@@ -91,24 +91,84 @@ namespace FusionEngine
 
     	auto result2 = m_LogicalDevice.resetFences(1, &m_Frames[m_CurrentFrame].InFlightFence);
 
-        const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
-
+    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
     	commandBuffer.reset();
 
-    	RecordDrawCommands(commandBuffer, m_CurrentFrame);
+    	try
+    	{
+    		const vk::CommandBufferBeginInfo beginInfo;
+    		commandBuffer.begin(beginInfo);
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Beginning Command Buffer failed");
+    	}
 
+    	vk::RenderPassBeginInfo renderPassInfo = {};
+    	renderPassInfo.renderPass = m_RenderPass;
+    	renderPassInfo.framebuffer = m_Frames[m_CurrentFrame].FrameBuffer;
+    	renderPassInfo.renderArea.offset.x = 0;
+    	renderPassInfo.renderArea.offset.y = 0;
+    	renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
+
+    	const vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
+    	renderPassInfo.clearValueCount = 1;
+    	renderPassInfo.pClearValues = &clearColor;
+
+    	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+
+    	vk::Viewport viewport = {};
+    	viewport.x = 0.0f;
+    	viewport.y = 0.0f;
+    	viewport.width = static_cast<float>(m_SwapChain->GetSwapChainExtent().width);
+    	viewport.height = static_cast<float>(m_SwapChain->GetSwapChainExtent().height);
+    	viewport.minDepth = 0.0f;
+    	viewport.maxDepth = 1.0f;
+    	vk::Rect2D scissor = {};
+    	scissor.offset.x = 0.0f;
+    	scissor.offset.y = 0.0f;
+    	scissor.extent = m_SwapChain->GetSwapChainExtent();
+    	commandBuffer.setViewport(0, 1, &viewport);
+    	commandBuffer.setScissor(0, 1, &scissor);
+
+    	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
+    }
+
+    void VulkanRenderApi::Draw(uint32_t vertexCount)
+    {
+    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+    	
+    	commandBuffer.bindVertexBuffers(0, 1, &m_CurrentVertexBuffer, m_CurrentVertexBufferOffsets);
+    	commandBuffer.draw(vertexCount, 1, 0, 0);
+    }
+
+    void VulkanRenderApi::EndFrame()
+    {
+    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+    	commandBuffer.endRenderPass();
+
+    	try {
+    		commandBuffer.end();
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Ending Command Buffer failed");
+    	}
+    	
     	vk::SubmitInfo submitInfo = {};
 
-        const vk::Semaphore waitSemaphores[] = { m_Frames[m_CurrentFrame].ImageAvailable };
-        constexpr vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
+    	const vk::Semaphore waitSemaphores[] = { m_Frames[m_CurrentFrame].ImageAvailable };
+    	constexpr vk::PipelineStageFlags waitStages[] = { vk::PipelineStageFlagBits::eColorAttachmentOutput };
     	submitInfo.waitSemaphoreCount = 1;
     	submitInfo.pWaitSemaphores = waitSemaphores;
     	submitInfo.pWaitDstStageMask = waitStages;
 
     	submitInfo.commandBufferCount = 1;
-    	submitInfo.pCommandBuffers = &commandBuffer;
+    	submitInfo.pCommandBuffers = &m_Frames[m_CurrentFrame].CommandBuffer;
 
-        const vk::Semaphore signalSemaphores[] = { m_Frames[m_CurrentFrame].RenderFinished };
+    	const vk::Semaphore signalSemaphores[] = { m_Frames[m_CurrentFrame].RenderFinished };
     	submitInfo.signalSemaphoreCount = 1;
     	submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -125,26 +185,26 @@ namespace FusionEngine
     	presentInfo.waitSemaphoreCount = 1;
     	presentInfo.pWaitSemaphores = signalSemaphores;
 
-        const vk::SwapchainKHR swapChains[] = { m_SwapChain->GetSwapChain() };
+    	const vk::SwapchainKHR swapChains[] = { m_SwapChain->GetSwapChain() };
     	presentInfo.swapchainCount = 1;
     	presentInfo.pSwapchains = swapChains;
 
     	presentInfo.pImageIndices = &m_CurrentFrame;
     	
-        try
-        {
-	        const auto result = m_PresentQueue.presentKHR(presentInfo);
-        	if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
-        	{
-        		FE_WARN("Swapchain out of date or Suboptimal");
-        		m_SwapChain->RecreateSwapChain();
-        	}
-        }
-        catch (vk::OutOfDateKHRError&)
-        {
-        	FE_WARN("Swapchain out of date");
-        	m_SwapChain->RecreateSwapChain();
-        }
+    	try
+    	{
+    		const auto result = m_PresentQueue.presentKHR(presentInfo);
+    		if(result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+    		{
+    			FE_WARN("Swapchain out of date or Suboptimal");
+    			m_SwapChain->RecreateSwapChain();
+    		}
+    	}
+    	catch (vk::OutOfDateKHRError&)
+    	{
+    		FE_WARN("Swapchain out of date");
+    		m_SwapChain->RecreateSwapChain();
+    	}
     	
     	m_CurrentFrame = (m_CurrentFrame + 1) % m_Frames.size();
     }
@@ -488,64 +548,6 @@ namespace FusionEngine
     	{
     		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
     		FE_ASSERT(false, "Creating CommandPool failed");
-    	}
-    }
-
-    void VulkanRenderApi::RecordDrawCommands(vk::CommandBuffer commandBuffer, uint32_t imageIndex)
-    {
-    	vk::CommandBufferBeginInfo beginInfo;
-
-    	try {
-    		commandBuffer.begin(beginInfo);
-    	}
-    	catch (vk::SystemError& err)
-    	{
-    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
-    		FE_ASSERT(false, "Beginning Command Buffer failed");
-    	}
-
-    	vk::RenderPassBeginInfo renderPassInfo = {};
-    	renderPassInfo.renderPass = m_RenderPass;
-    	renderPassInfo.framebuffer = m_Frames[imageIndex].FrameBuffer;
-    	renderPassInfo.renderArea.offset.x = 0;
-    	renderPassInfo.renderArea.offset.y = 0;
-    	renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
-
-        const vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
-    	renderPassInfo.clearValueCount = 1;
-    	renderPassInfo.pClearValues = &clearColor;
-
-    	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
-
-    	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
-
-    	vk::Viewport viewport = {};
-    	viewport.x = 0.0f;
-    	viewport.y = 0.0f;
-    	viewport.width = static_cast<float>(m_SwapChain->GetSwapChainExtent().width);
-    	viewport.height = static_cast<float>(m_SwapChain->GetSwapChainExtent().height);
-    	viewport.minDepth = 0.0f;
-    	viewport.maxDepth = 1.0f;
-    	vk::Rect2D scissor = {};
-    	scissor.offset.x = 0.0f;
-    	scissor.offset.y = 0.0f;
-    	scissor.extent = m_SwapChain->GetSwapChainExtent();
-    	commandBuffer.setViewport(0, 1, &viewport);
-    	commandBuffer.setScissor(0, 1, &scissor);
-
-    	// finally
-    	commandBuffer.bindVertexBuffers(0, 1, &m_CurrentVertexBuffer, &m_CurrentVertexBufferOffset);
-    	commandBuffer.draw(3, 1, 0, 0);
-
-    	commandBuffer.endRenderPass();
-
-    	try {
-    		commandBuffer.end();
-    	}
-    	catch (vk::SystemError& err)
-    	{
-    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
-    		FE_ASSERT(false, "Ending Command Buffer failed");
     	}
     }
 }

@@ -1,36 +1,33 @@
-﻿#include "fepch.h"
-#include "SandboxLayer.h"
+﻿#include "SandboxLayer.h"
 
-#include "Renderer/RenderCommand.h"
+#include "Renderer/Renderer2D.h"
 
 using namespace FusionEngine;
 
 void SandboxLayer::OnAttach()
 {
-    m_VBO = VertexBuffer::Create({ VertexBuffer::Attribute::Vec2, VertexBuffer::Attribute::Vec4 }, DrawMode::Triangles);
-    
-    Pipeline::PipelineSpecification spec;
-    spec.Shader = Shader::Create("test");
-    spec.WireFrame = false;
-    spec.VertexBuffers = { m_VBO };
-
-    m_PipeLine = Pipeline::Create(spec);
 }
 
 void SandboxLayer::OnUpdate()
 {
-    m_PipeLine->Bind();
+    Renderer2D::BeginScene();
 
-    static std::vector<float> vertices = {
-         0.0f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-         0.5f,  0.5f, 0.5f, 0.0f, 0.5f, 1.0f,
-        -0.5f,  0.5f, 1.0f, 1.0f, 1.0f, 1.0f
-    };
+    float i = -1.0f, j = -1.0f;
+    while (i < 1.0f)
+    {
+        i += 0.03f;
+        j = -1.0f;
+        while (j < 1.0f)
+        {
+            j += 0.03f;
+            Renderer2D::DrawQuad({j, i, 0.0f}, {0.01, 0.01}, {j, i, 0.5f, 0.0f});
+        }
+    }
 
-    m_VBO->SetData(vertices.data());
-    m_VBO->Bind();
-    
-    RenderCommand::Render();
+    //Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});
+    //Renderer2D::DrawQuad({0.2f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});
+
+    Renderer2D::EndScene();
 }
 
 void SandboxLayer::OnDetach()
