@@ -2,56 +2,11 @@
 #include "VulkanPipeline.h"
 
 #include "VulkanRenderApi.h"
+#include "VulkanUtils.h"
 #include "Renderer/RenderCommand.h"
 
 namespace FusionEngine
 {
-	namespace Utils
-	{
-		vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const DrawMode mode)
-		{
-			switch (mode) {
-			case DrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
-			case DrawMode::Lines: vk::PrimitiveTopology::eLineList;
-			case DrawMode::Points: vk::PrimitiveTopology::ePointList;
-			}
-			return vk::PrimitiveTopology::eTriangleList;
-		}
-
-		vk::Format FusionVertexAttributeToVkFormat(const VertexBuffer::Attribute attribute)
-		{
-			switch (attribute) {
-			case VertexBuffer::Attribute::Bool: return vk::Format::eR8Sint;
-			case VertexBuffer::Attribute::Char: return vk::Format::eR8Uint;
-			case VertexBuffer::Attribute::Short: return vk::Format::eR16Sint;
-			case VertexBuffer::Attribute::UShort: return vk::Format::eR16Uint;
-			case VertexBuffer::Attribute::Int: return vk::Format::eR32Sint;
-			case VertexBuffer::Attribute::UInt: return vk::Format::eR32Uint;
-			case VertexBuffer::Attribute::Float: return vk::Format::eR32Sfloat;
-			case VertexBuffer::Attribute::Vec2: return vk::Format::eR32G32Sfloat;
-			case VertexBuffer::Attribute::Vec3: return vk::Format::eR32G32B32Sfloat;
-			case VertexBuffer::Attribute::Vec4: return vk::Format::eR32G32B32A32Sfloat;
-			}
-		}
-
-		uint32_t FusionVertexAttributeToByteSize(VertexBuffer::Attribute attribute)
-		{
-			switch (attribute) {
-			case VertexBuffer::Attribute::Bool:	return sizeof(bool);
-			case VertexBuffer::Attribute::Char:	return sizeof(char);
-			case VertexBuffer::Attribute::UShort: return sizeof(uint16_t);
-			case VertexBuffer::Attribute::Short:	return sizeof(int16_t);
-			case VertexBuffer::Attribute::Int:	return sizeof(int32_t);
-			case VertexBuffer::Attribute::UInt:	return sizeof(uint32_t);
-			case VertexBuffer::Attribute::Float:	return sizeof(float);
-			case VertexBuffer::Attribute::Vec2:	return 2 * sizeof(float);
-			case VertexBuffer::Attribute::Vec3:	return 3 * sizeof(float);
-			case VertexBuffer::Attribute::Vec4:	return 4 * sizeof(float);
-			}
-		}
-	}
-	
-
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& spec)
     {
         m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.Shader);
@@ -169,6 +124,10 @@ namespace FusionEngine
 		colorBlending.blendConstants[3] = 0.0f;
 		pipelineInfo.pColorBlendState = &colorBlending;
 
+		// DescriptorSet Layout
+		FE_INFO("Create DescriptorSet Layout");
+		m_DescriptorSetLayout = MakeDescriptorSetLayout();
+		
 		//Pipeline Layout
 		FE_INFO("Create Pipeline Layout");
 		m_PipelineLayout = MakePipelineLayout();
@@ -198,7 +157,14 @@ namespace FusionEngine
 		m_RenderApi->m_LogicalDevice.destroyShaderModule(fragmentShader);
     }
 
-	void VulkanPipeline::Bind()
+    VulkanPipeline::~VulkanPipeline()
+    {
+		m_RenderApi->m_LogicalDevice.destroyPipeline(m_Pipeline);
+		m_RenderApi->m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
+		m_RenderApi->m_LogicalDevice.destroyDescriptorSetLayout(m_DescriptorSetLayout);
+    }
+
+    void VulkanPipeline::Bind()
     {
         m_RenderApi->m_PipelineLayout = m_PipelineLayout;
     	m_RenderApi->m_Pipeline = m_Pipeline;
@@ -208,8 +174,14 @@ namespace FusionEngine
     {
 		vk::PipelineLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::PipelineLayoutCreateFlags();
-		layoutInfo.setLayoutCount = 0;
+
+		// DescriptorSetLayouts
+		layoutInfo.setLayoutCount = 1;
+		layoutInfo.pSetLayouts = &m_DescriptorSetLayout;
+
+		// Push constants
 		layoutInfo.pushConstantRangeCount = 0;
+		
 		try {
 			return m_RenderApi->m_LogicalDevice.createPipelineLayout(layoutInfo);
 		}
@@ -220,4 +192,36 @@ namespace FusionEngine
         }
 		return nullptr;
 	}
+
+    vk::DescriptorSetLayout VulkanPipeline::MakeDescriptorSetLayout() const
+	{
+		std::vector<vk::DescriptorSetLayoutBinding> layoutBindings;
+		layoutBindings.reserve(m_Spec.DescriptorSetLayouts.size());
+
+		for (const DescriptorSetLayout& binding : m_Spec.DescriptorSetLayouts)
+		{
+			vk::DescriptorSetLayoutBinding layoutBinding;
+			layoutBinding.binding = binding.Index;
+			layoutBinding.descriptorType = Utils::FusionDescriptorTypeToVkDescriptorType(binding.Type);
+			layoutBinding.descriptorCount = binding.Count;
+			layoutBinding.stageFlags = Utils::FusionShaderTypeToVkShaderType(binding.Stage);
+			layoutBindings.push_back(layoutBinding);
+		}
+		
+		vk::DescriptorSetLayoutCreateInfo layoutInfo;
+		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlagBits();
+		layoutInfo.bindingCount = layoutBindings.size();
+		layoutInfo.pBindings = layoutBindings.data();
+
+
+		try {
+			return m_RenderApi->m_LogicalDevice.createDescriptorSetLayout(layoutInfo);
+		}
+		catch (vk::SystemError& err)
+		{
+			FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+			FE_ASSERT(false, "Creating Descriptor Set Layout failed");
+			return nullptr;
+		}
+    }
 }

@@ -4,6 +4,7 @@
 // https://github.com/KhronosGroup/Vulkan-Hpp/blob/main/README.md
 #include <vulkan/vulkan.hpp>
 
+#include "VulkanResourceManager.h"
 #include "VulkanShader.h"
 #include "VulkanSwapChain.h"
 
@@ -81,6 +82,9 @@ namespace FusionEngine
 
         vk::Buffer m_CurrentVertexBuffer;
         vk::DeviceSize m_CurrentVertexBufferOffsets[1] = {0};
+
+        // Resources
+        VulkanResourceManager* m_ResourceManager;
         
         // External
         friend class VulkanPipeline;
@@ -88,6 +92,8 @@ namespace FusionEngine
         friend class VulkanShader;
         friend class VulkanSwapChain;
         friend class VulkanBuffer;
+        friend class VulkanUniformBuffer;
+        friend class VulkanResourceManager;
     };
 
 }

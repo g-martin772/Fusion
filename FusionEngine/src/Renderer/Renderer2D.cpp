@@ -1,15 +1,27 @@
 ﻿#include "fepch.h"
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 #include "Renderer2D.h"
 #include "Pipeline.h"
 #include "RenderCommand.h"
 #include "Shader.h"
+#include "UniformBuffer.h"
 
 namespace FusionEngine
 {
+    struct CameraData
+    {
+        glm::mat4 View, Projection, ViewProjection;
+    };
+    
     struct RenderData2D
     {
         Ref<Shader> QuadShader;
         Ref<Pipeline> QuadPipeline;
+        Ref<UniformBuffer> CameraUniformBuffer;
+        CameraData* CameraData;
 
         uint32_t QuadVertexSize = 6 * (3*sizeof(float) + 4*sizeof(float));
         std::vector<VertexBuffer::Attribute> QuadVertexBufferLayout;
@@ -18,7 +30,7 @@ namespace FusionEngine
         char* QuadBufferCurrent;
 
         uint32_t QuadCount = 0;
-        uint32_t MaxQuads = 10000;
+        uint32_t MaxQuads = 200000;
     };
 
     static RenderData2D* s_Data;
@@ -34,11 +46,27 @@ namespace FusionEngine
             VertexBuffer::Attribute::Vec3,
             VertexBuffer::Attribute::Vec4
         };
+
+        s_Data->CameraUniformBuffer = UniformBuffer::Create("Camera", sizeof(CameraData), 0, ShaderType::Vertex);
+        s_Data->CameraData = new CameraData;
+
+        glm::vec3 cameraPosition(1.2f, 0.2f, -1.0f); 
+        glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);    
+        glm::vec3 cameraUp(0.0f, 0.0f, -1.0f);        
+
+        s_Data->CameraData->View = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
+        s_Data->CameraData->Projection = glm::perspective(glm::radians(45.0f), static_cast<float>(1200) / static_cast<float>(800), 0.1f, 10.0f);
+        s_Data->CameraData->Projection[1][1] *= -1;
+        s_Data->CameraData->ViewProjection = s_Data->CameraData->Projection * s_Data->CameraData->View;
+
+        s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
+        s_Data->CameraUniformBuffer->Bind();
         
         Pipeline::PipelineSpecification quadPipeSpec;
         quadPipeSpec.Shader = s_Data->QuadShader;
         quadPipeSpec.WireFrame = false;
         quadPipeSpec.VertexBufferLayouts = { s_Data->QuadVertexBufferLayout };
+        quadPipeSpec.DescriptorSetLayouts = {{0, 1, ShaderType::Vertex, Pipeline::DescriptorType::UniformBuffer}};
         s_Data->QuadPipeline = Pipeline::Create(quadPipeSpec);
 
         s_Data->QuadVertexBuffer = VertexBuffer::Create(s_Data->QuadVertexBufferLayout, 6 * s_Data->MaxQuads * s_Data->QuadVertexSize);
@@ -48,6 +76,7 @@ namespace FusionEngine
 
     void Renderer2D::ShutDown()
     {
+        delete s_Data->CameraData;
         delete[] s_Data->QuadBufferStart;
         delete s_Data;
     }

@@ -36,6 +36,7 @@ namespace FusionEngine
     	CreateCommandPool();
     	m_MainCommandBuffer = CreateCommandBuffer();
 
+    	m_ResourceManager = new VulkanResourceManager(static_cast<uint32_t>(m_Frames.size()));
     	for (auto& frame : m_Frames)
     	{
     		frame.CommandBuffer = CreateCommandBuffer();
@@ -53,13 +54,11 @@ namespace FusionEngine
     void VulkanRenderApi::ShutDown()
     {
 		m_LogicalDevice.waitIdle();
-    	
+
+    	delete m_ResourceManager;
     	delete m_SwapChain;
     	
 		m_LogicalDevice.destroyCommandPool(m_CommandPool);
-
-		m_LogicalDevice.destroyPipeline(m_Pipeline);
-    	m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
     	
     	m_LogicalDevice.destroyRenderPass(m_RenderPass);
            
@@ -131,7 +130,16 @@ namespace FusionEngine
     	scissor.extent = m_SwapChain->GetSwapChainExtent();
     	commandBuffer.setViewport(0, 1, &viewport);
     	commandBuffer.setScissor(0, 1, &scissor);
-
+    	
+		if(m_ResourceManager->HasFrameDescriptorSet(m_CurrentFrame))
+			commandBuffer.bindDescriptorSets(
+				vk::PipelineBindPoint::eGraphics, m_PipelineLayout,
+				0,
+				1,
+				&m_ResourceManager->GetFrameDescriptorSet(m_CurrentFrame),
+				0,
+				nullptr);
+    	
     	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
     }
 

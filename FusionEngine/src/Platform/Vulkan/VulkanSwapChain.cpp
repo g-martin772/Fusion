@@ -173,6 +173,8 @@ namespace FusionEngine
         CleanUpSwapChain();
         CreateSwapChain();
         CreateFrameBuffers();
+
+        m_RenderApi->m_ResourceManager->SetFrameCount(m_RenderApi->m_Frames.size());
         for (auto& frame : m_RenderApi->m_Frames)
         {
             frame.CommandBuffer = m_RenderApi->CreateCommandBuffer();
