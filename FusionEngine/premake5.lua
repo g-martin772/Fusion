@@ -34,7 +34,6 @@
     links {
         "glfw",
         "%{VULKAN_SDK}/Lib/vulkan-1.lib",
-        "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
     }
 
     -- postbuildcommands {
@@ -52,14 +51,26 @@
         defines { "FE_DEBUG" }
         runtime "Debug"
         symbols "On"
+
+        links {
+            "%{VULKAN_SDK}/Lib/shaderc_combinedd.lib"
+        }
     
     filter "configurations:Release"
         defines { "FE_RELEASE" }
         runtime "Release"
         optimize "On"
 
+        links {
+            "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+        }
+
     filter "configurations:Dist"
         defines { "FE_DIST" }
         runtime "Release"
         optimize "On"
+
+        links {
+            "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+        }
 
