@@ -26,13 +26,13 @@ void SandboxLayer::OnUpdate()
         }
     }
 
-    if(Input::IsKeyPressed(KeyCode::A))
-        FE_TRACE("A is pressed");
+    //if(Input::IsKeyPressed(KeyCode::A))
+    //    FE_TRACE("A is pressed");
 
-    if(Input::IsMouseButtonPressed(MouseCode::Left))
-        FE_TRACE("Left MB is pressed");
+    //if(Input::IsMouseButtonPressed(MouseCode::Left))
+    //    FE_TRACE("Left MB is pressed");
 
-    FE_TRACE("Mouse pos: {0}, {1}", Input::GetMouseX(), Input::GetMouseY());
+    //FE_TRACE("Mouse pos: {0}, {1}", Input::GetMouseX(), Input::GetMouseY());
     
     //Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});
     //Renderer2D::DrawQuad({0.2f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});

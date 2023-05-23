@@ -8,12 +8,13 @@
 #include "RenderCommand.h"
 #include "Shader.h"
 #include "UniformBuffer.h"
+#include "Core/Camera/Camera.h"
 
 namespace FusionEngine
 {
     struct CameraData
     {
-        glm::mat4 View, Projection, ViewProjection;
+        glm::mat4 ViewProjection;
     };
     
     struct RenderData2D
@@ -22,6 +23,7 @@ namespace FusionEngine
         Ref<Pipeline> QuadPipeline;
         Ref<UniformBuffer> CameraUniformBuffer;
         CameraData* CameraData;
+        Ref<Camera> Camera;
 
         uint32_t QuadVertexSize = 6 * (3*sizeof(float) + 4*sizeof(float));
         std::vector<VertexBuffer::Attribute> QuadVertexBufferLayout;
@@ -50,16 +52,8 @@ namespace FusionEngine
         s_Data->CameraUniformBuffer = UniformBuffer::Create("Camera", sizeof(CameraData), 0, ShaderType::Vertex);
         s_Data->CameraData = new CameraData;
 
-        glm::vec3 cameraPosition(1.2f, 0.2f, -1.0f); 
-        glm::vec3 cameraTarget(0.0f, 0.0f, 0.0f);    
-        glm::vec3 cameraUp(0.0f, 0.0f, -1.0f);        
-
-        s_Data->CameraData->View = glm::lookAt(cameraPosition, cameraTarget, cameraUp);
-        s_Data->CameraData->Projection = glm::perspective(glm::radians(45.0f), static_cast<float>(1200) / static_cast<float>(800), 0.1f, 10.0f);
-        s_Data->CameraData->Projection[1][1] *= -1;
-        s_Data->CameraData->ViewProjection = s_Data->CameraData->Projection * s_Data->CameraData->View;
-
-        s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
+        s_Data->Camera = MakeRef<Camera>();
+        
         s_Data->CameraUniformBuffer->Bind();
         
         Pipeline::PipelineSpecification quadPipeSpec;
@@ -83,6 +77,8 @@ namespace FusionEngine
 
     void Renderer2D::BeginScene()
     {
+        s_Data->CameraData->ViewProjection = s_Data->Camera->GetViewProjectionMatrix();
+        s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
         s_Data->QuadPipeline->Bind();
         RenderCommand::BeginFrame();
     }
