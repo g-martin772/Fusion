@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
+#include "Input.h"
 #include "Renderer/Pipeline.h"
 #include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer2D.h"
@@ -23,6 +24,7 @@ namespace FusionEngine
 
         m_Window = Window::Create();
         m_Window->Init();
+        Input::Init();
 
         RenderCommand::Init();
         Renderer2D::Init();
@@ -65,6 +67,7 @@ namespace FusionEngine
 
         Renderer2D::ShutDown();
         RenderCommand::ShutDown();
+        Input::Shutdown();
         m_Window->ShutDown();
     }
 
