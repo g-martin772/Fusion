@@ -11,5 +11,7 @@ namespace FusionEngine
         switch (RenderApi::GetApi()) {
             case RenderApi::Api::Vulkan: return MakeRef<VulkanUniformBuffer>(name, size, binding, shaderType);
         }
+        FE_ASSERT(false, "Invalid Render API");
+        return nullptr;
     }
 }

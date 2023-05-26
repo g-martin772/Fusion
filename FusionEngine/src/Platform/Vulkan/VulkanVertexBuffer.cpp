@@ -12,17 +12,6 @@ namespace FusionEngine
     namespace Utils
     {
         uint32_t FusionVertexAttributeToByteSize(VertexBuffer::Attribute attribute);
-
-        uint32_t GetDrawModeVertexCount(DrawMode drawmode)
-        {
-            switch (drawmode) {
-                case DrawMode::None: return 1;
-                case DrawMode::Triangles: return 3;
-                case DrawMode::Lines: return 2;
-                case DrawMode::Points: return 1;
-            }
-        }
-        
     }
     
     VulkanVertexBuffer::VulkanVertexBuffer(const std::vector<Attribute>& attributes, uint32_t size) 

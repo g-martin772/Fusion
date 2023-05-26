@@ -210,7 +210,7 @@ namespace FusionEngine
 		
 		vk::DescriptorSetLayoutCreateInfo layoutInfo;
 		layoutInfo.flags = vk::DescriptorSetLayoutCreateFlagBits();
-		layoutInfo.bindingCount = layoutBindings.size();
+		layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
 		layoutInfo.pBindings = layoutBindings.data();
 
 

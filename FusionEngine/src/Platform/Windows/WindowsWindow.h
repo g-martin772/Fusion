@@ -1,7 +1,9 @@
 ﻿#pragma once
 #include "Core/Window.h"
 
-class GLFWwindow;
+extern "C"{
+    struct GLFWwindow;
+}
 
 namespace FusionEngine
 {

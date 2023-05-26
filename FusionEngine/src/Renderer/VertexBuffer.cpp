@@ -12,5 +12,7 @@ namespace FusionEngine
         switch (RenderApi::GetApi()) {
             case RenderApi::Api::Vulkan: return MakeRef<VulkanVertexBuffer>(attributes, size);
         }
+        FE_ASSERT(false, "Invalid Render API");
+        return nullptr;
     }
 }

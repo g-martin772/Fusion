@@ -4,7 +4,7 @@
 
 extern FusionEngine::Application* CreateApplication();
 
-inline int main(int argc, char** argv)
+int main(int argc, char** argv)
 {
     FusionEngine::Application* app = CreateApplication();
     

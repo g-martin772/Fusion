@@ -3,7 +3,7 @@
 #include "Core/KeyCodes.h"
 
 extern "C" {
-    class GLFWwindow;
+    struct GLFWwindow;
 }
 
 namespace FusionEngine
