@@ -51,8 +51,6 @@ namespace FusionEngine
 
         s_Data->CameraUniformBuffer = UniformBuffer::Create("Camera", sizeof(CameraData), 0, ShaderType::Vertex);
         s_Data->CameraData = new CameraData;
-
-        s_Data->Camera = MakeRef<Camera>();
         
         s_Data->CameraUniformBuffer->Bind();
         
@@ -75,8 +73,9 @@ namespace FusionEngine
         delete s_Data;
     }
 
-    void Renderer2D::BeginScene()
+    void Renderer2D::BeginScene(const Ref<Camera>& camera)
     {
+        s_Data->Camera = camera;
         s_Data->CameraData->ViewProjection = s_Data->Camera->GetViewProjectionMatrix();
         s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
         s_Data->QuadPipeline->Bind();

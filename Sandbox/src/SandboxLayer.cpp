@@ -2,27 +2,33 @@
 
 #include "Core/Input.h"
 #include "Core/Log.h"
+#include "Core/Camera/OrthographicCameraController.h"
 #include "Renderer/Renderer2D.h"
 
 using namespace FusionEngine;
 
 void SandboxLayer::OnAttach()
 {
+    m_Camera = FusionEngine::MakeRef<OrthographicCameraController>(0.0f, 1.0f, 0.0f, 1.0f);
+    //m_Camera = MakeRef<Camera>();
 }
 
 void SandboxLayer::OnUpdate()
 {
-    Renderer2D::BeginScene();
+    // TODO: Make time system
+    float time = 0.01f;
+    m_Camera->OnUpdate(time);
+    Renderer2D::BeginScene(m_Camera);
 
     float i = -1.0f, j = -1.0f;
     while (i < 1.0f)
     {
-        i += 0.005f;
+        i += 0.01f;
         j = -1.0f;
         while (j < 1.0f)
         {
-            j += 0.005f;
-            Renderer2D::DrawQuad({j, i, 0.0f}, {0.002, 0.002}, {1.0f, i, j, 1.0f});
+            j += 0.01f;
+            Renderer2D::DrawQuad({j, i, 0.0f}, {0.004, 0.004}, {1.0f, i, j, 1.0f});
         }
     }
 

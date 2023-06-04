@@ -14,7 +14,7 @@ namespace FusionEngine
         virtual glm::mat4 GetViewMatrix();
         virtual glm::mat4 GetProjectionMatrix();
         virtual glm::mat4 GetViewProjectionMatrix();
-    private:
+    protected:
         bool m_InvalidView = true, m_InvalidProj = true;
         glm::mat4 m_View, m_Proj, m_ViewProj;
     };
