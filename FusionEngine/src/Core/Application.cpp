@@ -22,6 +22,8 @@ namespace FusionEngine
         Log::Init();
         FE_INFO("Startin Fusion Engine");
 
+        m_Time = MakeRef<Time>();
+
         m_Window = Window::Create();
         m_Window->Init();
         Input::Init();
@@ -32,24 +34,12 @@ namespace FusionEngine
 
     void Application::Run()
     {
-        auto startTime = std::chrono::high_resolution_clock::now();
-        int frameCount = 0;
         while(m_Running)
         {
-            auto currentTime = std::chrono::high_resolution_clock::now();
-            const auto deltaTime = std::chrono::duration_cast<std::chrono::seconds>(currentTime - startTime).count();
-            frameCount++;
-
-            if (deltaTime >= 1)
-            {
-                const double fps = static_cast<double>(frameCount) / deltaTime;
-                FE_TRACE("Currently running at {0}fps", fps);
-                frameCount = 0;
-                startTime = currentTime;
-            }
+            m_Time->OnUpdate();
             
             for (Layer* layer : m_LayerStack)
-                layer->OnUpdate();
+                layer->OnUpdate(m_Time);
 
             m_Window->OnUpdate();
         }

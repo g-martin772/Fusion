@@ -4,6 +4,7 @@
 
 #include "Base.h"
 #include "LayerStack.h"
+#include "Time.h"
 #include "Window.h"
 #include "Renderer/Pipeline.h"
 
@@ -27,6 +28,7 @@ namespace FusionEngine
     private:
         bool m_Running = true;
 
+        Ref<Time> m_Time;
         Ref<Window> m_Window;
         LayerStack m_LayerStack;
     };

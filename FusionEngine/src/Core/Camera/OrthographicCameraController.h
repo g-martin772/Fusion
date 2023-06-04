@@ -8,7 +8,7 @@ namespace FusionEngine
     public:
         OrthographicCameraController(float left, float right, float bottom, float top);
         
-        void OnUpdate(float deltaTime) override;
+        void OnUpdate(double deltaTime) override;
         glm::mat4 GetViewMatrix() override;
         glm::mat4 GetProjectionMatrix() override;
     private:

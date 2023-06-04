@@ -13,10 +13,10 @@ namespace FusionEngine
         m_InvalidProj = true;
     }
 
-    void OrthographicCameraController::OnUpdate(const float deltaTime)
+    void OrthographicCameraController::OnUpdate(const double deltaTime)
     {
         static constexpr float camera_speed = 2.0f;
-        static constexpr float zoom_speed = 0.1f;
+        static constexpr float zoom_speed = 0.3f;
 
         bool viewChanged = false;
 

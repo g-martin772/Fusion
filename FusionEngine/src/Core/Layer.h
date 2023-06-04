@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "Time.h"
+
 namespace FusionEngine
 {
     class Layer
@@ -12,7 +14,7 @@ namespace FusionEngine
 
         virtual void OnAttach() {}
         virtual void OnDetach() {}
-        virtual void OnUpdate() {}
+        virtual void OnUpdate(Ref<Time> time) {}
 
         [[nodiscard]] const std::string& GetName() const { return m_DebugName; }
     protected:

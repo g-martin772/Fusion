@@ -8,7 +8,7 @@ class SandboxLayer : public FusionEngine::Layer
 {
 public:
     void OnAttach() override;
-    void OnUpdate() override;
+    void OnUpdate(FusionEngine::Ref<FusionEngine::Time> time) override;
     void OnDetach() override;
 private:
     FusionEngine::Ref<FusionEngine::Camera> m_Camera;

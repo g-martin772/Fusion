@@ -13,11 +13,9 @@ void SandboxLayer::OnAttach()
     //m_Camera = MakeRef<Camera>();
 }
 
-void SandboxLayer::OnUpdate()
+void SandboxLayer::OnUpdate(const Ref<Time> time)
 {
-    // TODO: Make time system
-    float time = 0.01f;
-    m_Camera->OnUpdate(time);
+    m_Camera->OnUpdate(time->GetDeltaTime());
     Renderer2D::BeginScene(m_Camera);
 
     float i = -1.0f, j = -1.0f;
