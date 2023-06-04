@@ -32,13 +32,13 @@ namespace FusionEngine
     {
         double x;
         glfwGetCursorPos(m_WindowHandle, &x, nullptr);
-        return x;
+        return static_cast<float>(x);
     }
 
     float WindowsInput::GetMouseYImpl()
     {
         double y;
         glfwGetCursorPos(m_WindowHandle, nullptr, &y);
-        return y;
+        return static_cast<float>(y);
     }
 }

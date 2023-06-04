@@ -125,8 +125,8 @@ namespace FusionEngine
     	viewport.minDepth = 0.0f;
     	viewport.maxDepth = 1.0f;
     	vk::Rect2D scissor = {};
-    	scissor.offset.x = 0.0f;
-    	scissor.offset.y = 0.0f;
+    	scissor.offset.x = 0;
+    	scissor.offset.y = 0;
     	scissor.extent = m_SwapChain->GetSwapChainExtent();
     	commandBuffer.setViewport(0, 1, &viewport);
     	commandBuffer.setScissor(0, 1, &scissor);
