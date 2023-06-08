@@ -16,7 +16,7 @@ namespace FusionEngine
     void OrthographicCameraController::OnUpdate(const double deltaTime)
     {
         static constexpr float camera_speed = 2.0f;
-        static constexpr float zoom_speed = 0.3f;
+        static constexpr float zoom_speed = 1.0f;
 
         bool viewChanged = false;
 
@@ -61,8 +61,9 @@ namespace FusionEngine
         if (m_InvalidView)
         {
             m_InvalidView = false;
-            m_View = glm::translate(glm::mat4(1.0f), m_CameraPosition) *
-                     glm::scale(glm::mat4(1.0f), glm::vec3(m_CameraZoom, m_CameraZoom, 1.0f));
+            m_View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
+                     glm::scale(glm::mat4(1.0f), glm::vec3(m_CameraZoom, m_CameraZoom, 1.0f)) *
+                     glm::translate(glm::mat4(1.0f), m_CameraPosition);
         }
 
         return m_View;

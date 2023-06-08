@@ -378,6 +378,7 @@ namespace FusionEngine
 
         FE_ASSERT(m_PhysicalDevice, "No suitable GPU found!");
         FE_INFO("Picked {0} as rendering GPU", m_PhysicalDevice.getProperties().deviceName);
+    	FE_INFO("Max indices: {0}", m_PhysicalDevice.getProperties().limits.maxDrawIndexedIndexValue);
     }
 
     void VulkanRenderApi::CreateLogicalDevice()

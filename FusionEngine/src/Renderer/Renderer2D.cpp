@@ -27,7 +27,7 @@ namespace FusionEngine
         CameraData* CameraData;
         Ref<Camera> Camera;
 
-        uint32_t QuadVertexSize = 4 * (3*sizeof(float) + 4*sizeof(float));
+        uint32_t QuadVertexSize = 4 * (sizeof(glm::vec3) + sizeof(glm::vec4));
         std::vector<VertexBuffer::Attribute> QuadVertexBufferLayout;
         Ref<VertexBuffer> QuadVertexBuffer;
         char* QuadBufferStart;
@@ -39,7 +39,7 @@ namespace FusionEngine
         uint32_t* QuadIndexBufferCurrent;
 
         uint32_t QuadCount = 0;
-        uint32_t MaxQuads = 200000;
+        uint32_t MaxQuads = 2000000;
     };
 
     static RenderData2D* s_Data;
@@ -71,7 +71,7 @@ namespace FusionEngine
         s_Data->QuadBufferStart = new char[4 * s_Data->QuadVertexSize * s_Data->MaxQuads];
         s_Data->QuadBufferCurrent = s_Data->QuadBufferStart;
 
-        s_Data->QuadIndexBuffer = IndexBuffer::Create(s_Data->MaxQuads * s_Data->QuadIndexSize);
+        s_Data->QuadIndexBuffer = IndexBuffer::Create(s_Data->MaxQuads * 4 * 6);
         s_Data->QuadIndexBufferStart = new uint32_t[6 * s_Data->MaxQuads];
         s_Data->QuadIndexBufferCurrent = s_Data->QuadIndexBufferStart;
     }
@@ -141,8 +141,8 @@ namespace FusionEngine
         s_Data->QuadIndexBuffer->SetData(s_Data->QuadIndexBufferStart);
         s_Data->QuadIndexBuffer->Bind();
         s_Data->QuadIndexBufferCurrent = s_Data->QuadIndexBufferStart;
-        int count = s_Data->QuadCount;
-        RenderCommand::DrawIndexed(s_Data->QuadCount * 4);
+        
+        RenderCommand::DrawIndexed(s_Data->QuadCount * 6);
         s_Data->QuadCount = 0;
     }
 }
