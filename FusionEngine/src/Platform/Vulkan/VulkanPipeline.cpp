@@ -166,8 +166,16 @@ namespace FusionEngine
 
     void VulkanPipeline::Bind()
     {
-        m_RenderApi->m_PipelineLayout = m_PipelineLayout;
-    	m_RenderApi->m_Pipeline = m_Pipeline;
+    	if(m_RenderApi->m_ResourceManager->HasFrameDescriptorSet(m_RenderApi->m_CurrentFrame))
+    		m_RenderApi->m_Frames[m_RenderApi->m_CurrentFrame].CommandBuffer.bindDescriptorSets(
+				vk::PipelineBindPoint::eGraphics, m_PipelineLayout,
+				0,
+				1,
+				&m_RenderApi->m_ResourceManager->GetFrameDescriptorSet(m_RenderApi->m_CurrentFrame),
+				0,
+				nullptr);
+    	
+        m_RenderApi->m_Frames[m_RenderApi->m_CurrentFrame].CommandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
     }
 
     vk::PipelineLayout VulkanPipeline::MakePipelineLayout() const

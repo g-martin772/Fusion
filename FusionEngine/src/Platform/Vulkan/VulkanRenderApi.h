@@ -29,6 +29,7 @@ namespace FusionEngine
 
         void BeginFrame() override;
         void Draw(uint32_t vertexCount) override;
+        void DrawIndexed(uint32_t indexCount) override;
         void EndFrame() override;
     private:
         // Instance
@@ -76,12 +77,7 @@ namespace FusionEngine
         vk::CommandBuffer m_MainCommandBuffer;
 
         // Pipeline
-        vk::PipelineLayout m_PipelineLayout;
         vk::RenderPass m_RenderPass;
-        vk::Pipeline m_Pipeline;
-
-        vk::Buffer m_CurrentVertexBuffer;
-        vk::DeviceSize m_CurrentVertexBufferOffsets[1] = {0};
 
         // Resources
         VulkanResourceManager* m_ResourceManager;
@@ -89,6 +85,7 @@ namespace FusionEngine
         // External
         friend class VulkanPipeline;
         friend class VulkanVertexBuffer;
+        friend class VulkanIndexBuffer;
         friend class VulkanShader;
         friend class VulkanSwapChain;
         friend class VulkanBuffer;

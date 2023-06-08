@@ -130,25 +130,16 @@ namespace FusionEngine
     	scissor.extent = m_SwapChain->GetSwapChainExtent();
     	commandBuffer.setViewport(0, 1, &viewport);
     	commandBuffer.setScissor(0, 1, &scissor);
-    	
-		if(m_ResourceManager->HasFrameDescriptorSet(m_CurrentFrame))
-			commandBuffer.bindDescriptorSets(
-				vk::PipelineBindPoint::eGraphics, m_PipelineLayout,
-				0,
-				1,
-				&m_ResourceManager->GetFrameDescriptorSet(m_CurrentFrame),
-				0,
-				nullptr);
-    	
-    	commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, m_Pipeline);
     }
 
     void VulkanRenderApi::Draw(uint32_t vertexCount)
     {
-    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
-    	
-    	commandBuffer.bindVertexBuffers(0, 1, &m_CurrentVertexBuffer, m_CurrentVertexBufferOffsets);
-    	commandBuffer.draw(vertexCount, 1, 0, 0);
+    	m_Frames[m_CurrentFrame].CommandBuffer.draw(vertexCount, 1, 0, 0);
+    }
+
+    void VulkanRenderApi::DrawIndexed(uint32_t indexCount)
+    {
+    	m_Frames[m_CurrentFrame].CommandBuffer.drawIndexed(indexCount, 1, 0, 0, 0);
     }
 
     void VulkanRenderApi::EndFrame()

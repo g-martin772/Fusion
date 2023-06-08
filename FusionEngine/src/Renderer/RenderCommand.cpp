@@ -26,7 +26,12 @@ namespace FusionEngine
     {
         s_RenderApi->Draw(vertexCount);
     }
-    
+
+    void RenderCommand::DrawIndexed(uint32_t indexCount)
+    {
+        s_RenderApi->DrawIndexed(indexCount);
+    }
+
     void RenderCommand::EndFrame()
     {
         s_RenderApi->EndFrame();
