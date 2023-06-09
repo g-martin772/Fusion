@@ -83,7 +83,7 @@ namespace FusionEngine
 		rasterizer.rasterizerDiscardEnable = VK_FALSE; //This flag would disable fragment output
 		rasterizer.polygonMode = spec.WireFrame ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+		rasterizer.cullMode = vk::CullModeFlagBits::eNone;
 		rasterizer.frontFace = vk::FrontFace::eClockwise;
 		rasterizer.depthBiasEnable = VK_FALSE; //Depth bias can be useful in shadow maps.
 		pipelineInfo.pRasterizationState = &rasterizer;

@@ -37,6 +37,7 @@ namespace FusionEngine
         while(m_Running)
         {
             m_Time->OnUpdate();
+            Input::OnUpdate();
 
             RenderCommand::BeginFrame();
             

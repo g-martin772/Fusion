@@ -18,6 +18,9 @@ namespace FusionEngine
         glm::vec2 GetMousePositionImpl() override;
         float GetMouseXImpl() override;
         float GetMouseYImpl() override;
+        void OnUpdateImpl() override;
+        void CaptureMouseImpl(bool capture) override;
+
     private:
         GLFWwindow* m_WindowHandle;
     };

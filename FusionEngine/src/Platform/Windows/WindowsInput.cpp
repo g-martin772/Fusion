@@ -41,4 +41,23 @@ namespace FusionEngine
         glfwGetCursorPos(m_WindowHandle, nullptr, &y);
         return static_cast<float>(y);
     }
+
+    void WindowsInput::OnUpdateImpl()
+    {
+        glfwPollEvents();
+        m_MousePosition = GetMousePositionImpl();
+    }
+
+    void WindowsInput::CaptureMouseImpl(bool capture)
+    {
+        if (capture)
+        {
+            glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        }
+        else
+        {
+            glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        }
+    }
 }

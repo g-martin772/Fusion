@@ -4,13 +4,14 @@
 #include "Core/Input.h"
 #include "Core/Log.h"
 #include "Core/Camera/OrthographicCameraController.h"
+#include "Core/Camera/PerspectiveCameraController.h"
 #include "Renderer/Renderer2D.h"
 
 using namespace FusionEngine;
 
 void SandboxLayer::OnAttach()
 {
-    m_Camera = FusionEngine::MakeRef<OrthographicCameraController>(-1.0f, 1.0f, -1.0f, 1.0f);
+    m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
     //m_Camera = MakeRef<Camera>();
 }
 
