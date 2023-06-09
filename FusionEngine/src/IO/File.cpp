@@ -18,6 +18,26 @@ namespace FusionEngine
         return buffer;
     }
 
+    std::vector<std::string> File::ReadLines(const std::filesystem::path& path)
+    {
+        if (!Exists(path))
+            FE_ASSERT(false, "File not found!");
+
+        std::ifstream file(path);
+        std::vector<std::string> lines;
+        std::string line;
+    
+        while (std::getline(file, line))
+        {
+            lines.push_back(line);
+        }
+
+        file.close();
+
+        return lines;
+    }
+
+
     void File::Write(const std::filesystem::path& path, const std::vector<char>& data)
     {
         std::ofstream file(path, std::ios::binary);

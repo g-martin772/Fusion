@@ -5,50 +5,45 @@
 #include "Core/Log.h"
 #include "Core/Camera/OrthographicCameraController.h"
 #include "Core/Camera/PerspectiveCameraController.h"
+#include "IO/FileLoaders/ObjModel.h"
+#include "Renderer/Renderer.h"
 #include "Renderer/Renderer2D.h"
 
 using namespace FusionEngine;
 
+
 void SandboxLayer::OnAttach()
 {
     m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
-    //m_Camera = MakeRef<Camera>();
+    m_DinoModel = MakeRef<ObjModel>("assets/models/dino/dino.obj");
+    //m_Dice = MakeRef<ObjModel>("assets/models/dice/dice.obj");
 }
 
 void SandboxLayer::OnUpdate(const Ref<Time> time)
 {
     m_Camera->OnUpdate(time->GetDeltaTime());
-    Renderer2D::BeginScene(m_Camera);
 
-    float i = -1.0f, j = -1.0f;
-    const float stepSize = 0.01f;
-
-    while (i <= 1.0f)
-    {
-        j = -1.0f;
-        while (j <= 1.0f)
-        {
-            //Renderer2D::DrawQuad({ j, i, 0.0f }, { stepSize - 0.006, stepSize - 0.006}, { 0.5f, i, j, 1.0f });
-            j += stepSize;
-        }
-        i += stepSize;
-    }
-
-    ImGui::ShowDemoWindow();
-    ImGui:ImGui::ShowMetricsWindow();
-
-    //if(Input::IsKeyPressed(KeyCode::A))
-    //    FE_TRACE("A is pressed");
-
-    //if(Input::IsMouseButtonPressed(MouseCode::Left))
-    //    FE_TRACE("Left MB is pressed");
-
-    //FE_TRACE("Mouse pos: {0}, {1}", Input::GetMouseX(), Input::GetMouseY());
+    // 2D
     
-    //Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});
+    Renderer2D::BeginScene(m_Camera);
+    
+  
     Renderer2D::DrawQuad({0.0f, 0.0f, 0.0f}, {0.01, 0.01}, {1.0f, 0.0f, 0.0f, 0.0f});
 
     Renderer2D::EndScene();
+
+    // 3D
+    
+    Renderer::BeginScene(m_Camera);
+
+    Renderer::DrawObjModel(m_DinoModel);
+    
+    Renderer::EndScene();
+
+    // UI
+    
+    ImGui::ShowDemoWindow();
+    ImGui:ImGui::ShowMetricsWindow();
 }
 
 void SandboxLayer::OnDetach()
