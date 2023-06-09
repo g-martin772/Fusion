@@ -5,6 +5,7 @@
 
 #include "VulkanUtils.h"
 #include "Core/Application.h"
+#include "UI/ImGui.h"
 
 #undef CreateSemaphore
 
@@ -44,6 +45,9 @@ namespace FusionEngine
     		frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
     		frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
     	}
+
+    	UI::ImGuiInitVulkan(m_Instance, m_LogicalDevice, m_PhysicalDevice, m_RenderPass, m_GraphicsFamily.value(), m_GraphicsQueue, m_SwapChain->GetImageCount());
+    	UI::UploadImGuiFontsVulkan(m_CommandPool, m_MainCommandBuffer, m_LogicalDevice, m_GraphicsQueue);
     }
 	
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -55,6 +59,8 @@ namespace FusionEngine
     {
 		m_LogicalDevice.waitIdle();
 
+		UI::ImGuiShutdownVulkan(m_LogicalDevice);
+    	
     	delete m_ResourceManager;
     	delete m_SwapChain;
     	
@@ -70,6 +76,8 @@ namespace FusionEngine
 
     void VulkanRenderApi::BeginFrame()
     {
+		UI::ImGuiNewFrame();
+    	
     	auto result1 = m_LogicalDevice.waitForFences(1, &m_Frames[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
 
         try
@@ -145,6 +153,9 @@ namespace FusionEngine
     void VulkanRenderApi::EndFrame()
     {
     	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+
+		UI::ImGuiRenderVulkan(commandBuffer);
+    	
     	commandBuffer.endRenderPass();
 
     	try {

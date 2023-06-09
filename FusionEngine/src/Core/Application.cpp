@@ -37,10 +37,13 @@ namespace FusionEngine
         while(m_Running)
         {
             m_Time->OnUpdate();
+
+            RenderCommand::BeginFrame();
             
             for (Layer* layer : m_LayerStack)
                 layer->OnUpdate(m_Time);
 
+            RenderCommand::EndFrame();
             m_Window->OnUpdate();
         }
     }

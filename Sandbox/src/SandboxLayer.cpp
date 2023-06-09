@@ -1,5 +1,6 @@
 ﻿#include "SandboxLayer.h"
 
+#include "imgui.h"
 #include "Core/Input.h"
 #include "Core/Log.h"
 #include "Core/Camera/OrthographicCameraController.h"
@@ -31,6 +32,9 @@ void SandboxLayer::OnUpdate(const Ref<Time> time)
         }
         i += stepSize;
     }
+
+    ImGui::ShowDemoWindow();
+    ImGui:ImGui::ShowMetricsWindow();
 
     //if(Input::IsKeyPressed(KeyCode::A))
     //    FE_TRACE("A is pressed");

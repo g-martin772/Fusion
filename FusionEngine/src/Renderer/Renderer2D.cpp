@@ -89,14 +89,11 @@ namespace FusionEngine
         s_Data->Camera = camera;
         s_Data->CameraData->ViewProjection = s_Data->Camera->GetViewProjectionMatrix();
         s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
-        RenderCommand::BeginFrame();
-        s_Data->QuadPipeline->Bind();
     }
 
     void Renderer2D::EndScene()
     {
         Flush();
-        RenderCommand::EndFrame();
     }
 
     void Renderer2D::DrawQuad(const glm::vec3& pos, const glm::vec2& size, const glm::vec4& color)

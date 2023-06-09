@@ -4,3 +4,7 @@
 [submodule "FusionEngine/dependencies/GLFW"]
 	path = FusionEngine/dependencies/GLFW
 	url = https://github.com/g-martin772/glfw.git
+[submodule "FusionEngine/dependencies/imgui/imgui"]
+	path = FusionEngine/dependencies/imgui/imgui
+	url = https://github.com/g-martin772/imgui.git
+	branch = docking

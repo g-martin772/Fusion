@@ -13,7 +13,7 @@
     files { 
         "src/**.h", 
         "src/**.cpp",
-        "src/**.hpp"
+        "src/**.hpp",
     }
     
     defines {
@@ -28,11 +28,14 @@
         "src",
         "dependencies/spdlog/include",
         "dependencies/glfw/include",
+        "dependencies/imgui",
+        "dependencies/imgui/imgui",
         "%{VULKAN_SDK}/Include"
     }
     
     links {
         "glfw",
+        "imgui",
         "%{VULKAN_SDK}/Lib/vulkan-1.lib",
     }
 
@@ -73,4 +76,5 @@
         links {
             "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
         }
+
 

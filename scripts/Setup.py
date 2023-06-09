@@ -11,6 +11,8 @@ if not CheckVulkan():
 
 os.chdir('./../')
 
+print("\nUpdating git submodules ...")
+
 subprocess.call(["git", "submodule", "update", "--recursive", "--remote"])
 subprocess.call(["git", "submodule", "update", "--init", "--recursive", "--remote"])
 

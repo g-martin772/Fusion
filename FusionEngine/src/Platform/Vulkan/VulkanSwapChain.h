@@ -15,7 +15,8 @@ namespace FusionEngine
         void AcquireSurface();
         void InitializeSwapchain();
         void RecreateSwapChain();
-        
+
+        [[nodiscard]] uint32_t GetImageCount() const { return m_Capabilities.minImageCount + 1; }
         
         [[nodiscard]] vk::SurfaceKHR GetSurface() const { return m_Surface; }
         [[nodiscard]] vk::PresentModeKHR GetPresentMode() const { return m_PresentMode; }

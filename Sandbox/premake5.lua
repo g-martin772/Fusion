@@ -24,6 +24,7 @@
         "src",
         "%{wks.location}/FusionEngine/src",
         "%{wks.location}/FusionEngine/dependencies/spdlog/include",
+        "%{wks.location}/FusionEngine/dependencies/imgui/imgui",
         "%{VULKAN_SDK}/Include"
     }
 
