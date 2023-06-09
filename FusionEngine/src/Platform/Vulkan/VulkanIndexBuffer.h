@@ -14,7 +14,7 @@ namespace FusionEngine
         ~VulkanIndexBuffer() override;
         
         void Bind() override;
-        void SetData(void* data) override;
+        void SetData(void* data, uint32_t size) override;
 
         VulkanBuffer* Buffer;
     private:

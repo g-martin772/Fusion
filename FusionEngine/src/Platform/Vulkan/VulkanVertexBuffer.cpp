@@ -24,14 +24,16 @@ namespace FusionEngine
 
     VulkanVertexBuffer::~VulkanVertexBuffer()
     {
+        m_RenderApi->m_LogicalDevice.unmapMemory(Buffer->GetMemory());
        delete Buffer;
     }
 
-    void VulkanVertexBuffer::SetData(void* data)
+    void VulkanVertexBuffer::SetData(void* data, uint32_t size)
     {
-        void* memoryLocation = m_RenderApi->m_LogicalDevice.mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
-        memcpy(memoryLocation, data, Buffer->GetSize());
-        m_RenderApi->m_LogicalDevice.unmapMemory(Buffer->GetMemory());
+        FE_ASSERT(size <= Buffer->GetSize(), "Data is larger than buffer size");
+        if(!m_MappedMemory)
+            m_MappedMemory = m_RenderApi->m_LogicalDevice.mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
+        memcpy(m_MappedMemory, data, size);
     }
 
     void VulkanVertexBuffer::Bind()

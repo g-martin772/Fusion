@@ -131,11 +131,11 @@ namespace FusionEngine
     {
         s_Data->QuadPipeline->Bind();
         
-        s_Data->QuadVertexBuffer->SetData(s_Data->QuadBufferStart);
+        s_Data->QuadVertexBuffer->SetData(s_Data->QuadBufferStart, s_Data->QuadCount * s_Data->QuadVertexSize);
         s_Data->QuadVertexBuffer->Bind();
         s_Data->QuadBufferCurrent = s_Data->QuadBufferStart;
         
-        s_Data->QuadIndexBuffer->SetData(s_Data->QuadIndexBufferStart);
+        s_Data->QuadIndexBuffer->SetData(s_Data->QuadIndexBufferStart, s_Data->QuadCount * s_Data->QuadIndexSize);
         s_Data->QuadIndexBuffer->Bind();
         s_Data->QuadIndexBufferCurrent = s_Data->QuadIndexBufferStart;
         

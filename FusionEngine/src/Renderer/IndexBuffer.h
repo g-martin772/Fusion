@@ -9,6 +9,6 @@ namespace FusionEngine
         virtual ~IndexBuffer() = default;
 
         virtual void Bind() = 0;
-        virtual void SetData(void* data) = 0;
+        virtual void SetData(void* data, uint32_t size) = 0;
     };
 }
