@@ -15,8 +15,7 @@ using namespace FusionEngine;
 void SandboxLayer::OnAttach()
 {
     m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
-    m_DinoModel = MakeRef<ObjModel>("assets/models/dino/dino.obj");
-    //m_Dice = MakeRef<ObjModel>("assets/models/dice/dice.obj");
+    m_Model = MakeRef<ObjModel>("assets/models/basic/textcube.obj");
 }
 
 void SandboxLayer::OnUpdate(const Ref<Time> time)
@@ -36,14 +35,14 @@ void SandboxLayer::OnUpdate(const Ref<Time> time)
     
     Renderer::BeginScene(m_Camera);
 
-    Renderer::DrawObjModel(m_DinoModel);
+    Renderer::DrawObjModel(m_Model);
     
     Renderer::EndScene();
 
     // UI
     
     ImGui::ShowDemoWindow();
-    ImGui:ImGui::ShowMetricsWindow();
+    ImGui::ShowMetricsWindow();
 }
 
 void SandboxLayer::OnDetach()

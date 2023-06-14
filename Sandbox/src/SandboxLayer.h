@@ -13,6 +13,6 @@ public:
     void OnDetach() override;
 private:
     FusionEngine::Ref<FusionEngine::Camera> m_Camera;
-    FusionEngine::Ref<FusionEngine::ObjModel> m_DinoModel;
+    FusionEngine::Ref<FusionEngine::ObjModel> m_Model;
     FusionEngine::Ref<FusionEngine::ObjModel> m_Dice;
 };

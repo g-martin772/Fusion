@@ -16,10 +16,23 @@ namespace FusionEngine
             if(line[0] == '#')
                 continue;
             
-            if(line[0] == 'v')
+            std::vector<std::string> parts = SplitString(line, " ");
+            
+            if(parts[0] == "v")
+            {
+                m_VertexPositions.push_back(glm::vec3(std::stof(parts[1]), std::stof(parts[2]), std::stof(parts[3])));
+            }
+
+            if(parts[0] == "f")
             {
                 std::vector<std::string> parts = SplitString(line, " ");
-                m_VertexPositions.push_back(glm::vec3(std::stof(parts[1]), std::stof(parts[2]), std::stof(parts[3])));
+                size_t triangleCount = parts.size() - 3;
+                for (size_t i = 0; i < triangleCount; i++)
+                {
+                    m_Indices.push_back(ReadCorner(parts[1]));
+                    m_Indices.push_back(ReadCorner(parts[2 + i]));
+                    m_Indices.push_back(ReadCorner(parts[3 + i]));
+                }
             }
         }
         
@@ -35,14 +48,24 @@ namespace FusionEngine
             vertexDataPtr += sizeof(glm::vec3);
             memcpy(vertexDataPtr, &color, sizeof(glm::vec4));
             vertexDataPtr += sizeof(glm::vec4);
-            m_VertexCount++;
         }
 
         m_VertexBuffer = VertexBuffer::Create({ VertexBuffer::Attribute::Vec3, VertexBuffer::Attribute::Vec4 }, vertexDataSize);
         m_VertexBuffer->SetData(vertexData, vertexDataSize);
+
+        m_IndexBuffer = IndexBuffer::Create(m_IndexCount * sizeof(uint32_t));
+        m_IndexBuffer->SetData(m_Indices.data(), m_IndexCount * sizeof(uint32_t));
     }
 
     ObjModel::~ObjModel()
     {
     }
+
+    uint32_t ObjModel::ReadCorner(const std::string& corner)
+    {
+        std::vector<std::string> values = SplitString(corner, "/");
+        m_IndexCount++;
+        return std::stoul(values[0]) - 1;
+    }
 }
+

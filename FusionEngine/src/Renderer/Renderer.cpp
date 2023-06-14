@@ -45,6 +45,7 @@ namespace FusionEngine
     void Renderer::DrawObjModel(Ref<ObjModel> model)
     {
         model->GetVertexBuffer()->Bind();
-        RenderCommand::Draw(model->GetVertexCount());
+        model->GetIndexBuffer()->Bind();
+        RenderCommand::DrawIndexed(model->GetIndexCount());
     }
 }

@@ -10,12 +10,16 @@ namespace FusionEngine
         size_t end = string.find(delimeter);
         while (end != std::string::npos)
         {
-            if(string[start] != delimeter[0])
-                result.push_back(string.substr(start, end - start));
+            std::string token = string.substr(start, end - start);
+            if(!token.empty() && token != delimeter)
+                result.push_back(token);
             start = end + delimeter.length();
             end = string.find(delimeter, start);
         }
-        result.push_back(string.substr(start, end));
+        
+        std::string token = string.substr(start, end);
+        if(!token.empty() && token != delimeter)
+            result.push_back(token);
         return result;
     }
 }
