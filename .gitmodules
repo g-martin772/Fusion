@@ -8,3 +8,6 @@
 	path = FusionEngine/dependencies/imgui/imgui
 	url = https://github.com/g-martin772/imgui.git
 	branch = docking
+[submodule "FusionEngine/dependencies/EnTT/entt"]
+	path = FusionEngine/dependencies/EnTT/entt
+	url = https://github.com/g-martin772/entt.git

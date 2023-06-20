@@ -21,3 +21,5 @@ if %ERRORLEVEL%==0 (
     echo Python is not installed. Installing.
     winget install --exact --silent --override --id Python.Python --version %PYTHON_VERSION%.0
 )
+echo Setup Finished
+pause

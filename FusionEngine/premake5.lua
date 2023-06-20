@@ -30,6 +30,7 @@
         "dependencies/glfw/include",
         "dependencies/imgui",
         "dependencies/imgui/imgui",
+        "dependencies/EnTT/entt/single_include",
         "%{VULKAN_SDK}/Include"
     }
     
