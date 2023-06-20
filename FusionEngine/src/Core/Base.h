@@ -31,5 +31,3 @@ namespace FusionEngine
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
 }
-
-
