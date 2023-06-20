@@ -3,19 +3,20 @@
 
 namespace FusionEngine
 {
+    struct TimeStep
+    {
+        double Milliseconds;
+        TimeStep(const double milliseconds = 0.0) : Milliseconds(milliseconds) {}
+        operator double() const { return Milliseconds; }
+        operator float() const { return static_cast<float>(Milliseconds); }
+    };
+    
     struct Time
     {
-        Time();
-        ~Time() = default;
-
-        void OnUpdate();
-
-        uint32_t GetFps() const { return m_Fps; }
-        double GetDeltaTime() const { return m_DeltaTime; }
-    
+        void Update();
+        TimeStep GetDeltaTime() const { return m_DeltaTime; }
     private:
         std::chrono::high_resolution_clock::time_point m_StartTime, m_CurrentTime;
-        double m_DeltaTime, m_LastSecond;
-        uint32_t m_Fps, m_FrameCount;
+        TimeStep m_DeltaTime;
     };
 }
