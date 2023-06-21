@@ -29,7 +29,7 @@ namespace FusionEngine
 
         template<typename T>
         void AddComponent(const T& component) const {
-            m_Scene->m_Registry.emplace_or_replace<T>(component);
+            m_Scene->m_Registry.emplace_or_replace<T>(m_EntityHandle, component);
         }
     private:
         Entity(Scene* scene, const entt::entity entityHandle)

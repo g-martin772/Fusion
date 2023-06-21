@@ -1,7 +1,11 @@
 ﻿#include "fepch.h"
 #include "Scene.h"
 
+#include <glm/ext/matrix_transform.hpp>
+
+#include "Components.h"
 #include "Entity.h"
+#include "Renderer/Renderer2D.h"
 
 namespace FusionEngine
 {
@@ -62,5 +66,11 @@ namespace FusionEngine
 
     void Scene::RenderScene(const Ref<Camera>& camera)
     {
+        Renderer2D::BeginScene(camera);
+        for(auto [entity, tc, src] : m_Registry.view<TransformComponent, SpriteRenderComponent>().each())
+        {
+            Renderer2D::DrawQuad(tc.Position, {tc.Scale.x, tc.Scale.y}, src.Color);
+        }
+        Renderer2D::EndScene();
     }
 }
