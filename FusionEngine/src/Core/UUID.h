@@ -22,6 +22,11 @@ namespace FusionEngine
         UUID(const uint64_t low, const uint64_t high)
             : Low(low), High(high) {}
 
+        bool operator== (const UUID& other) const
+        {
+            return Low == other.Low && High == other.High;
+        }
+
         std::string ToString() const { return std::to_string(Low) + std::to_string(High); }
 
         // Why the heck is there no uint128_t

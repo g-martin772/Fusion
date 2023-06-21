@@ -23,13 +23,17 @@ void SandboxLayer::OnAttach()
 
     // Test ECS
     Entity e = m_Scene->CreateEntity("MyTestEntity");
-    UUID uuid = e.GetUuid();
+    UUID uuid = e.GetUUID();
     FE_INFO("UUID: {0}", uuid.ToString());
 
     TransformComponent& tc = e.GetComponent<TransformComponent>();
     tc.Position = {1.0f, 2.0f, 3.0f};
     tc = e.GetComponent<TransformComponent>();
     FE_INFO("Position: {0}, {1}, {2}", tc.Position.x, tc.Position.y, tc.Position.z);
+
+    Entity foundEntity = m_Scene->GetEntityByUUID(uuid);
+    FE_INFO("Found entity with UUID: {0}", foundEntity.GetUUID().ToString());
+    
 }
 
 void SandboxLayer::OnUpdate(const Ref<Time> time)

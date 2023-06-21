@@ -9,10 +9,12 @@ namespace FusionEngine
     class Entity
     {
     public:
+        Entity(){}
         Entity(Scene* scene, UUID uuid = UUID(), std::string_view name = "Entity");
-        ~Entity();
+
+        void Destroy();
         
-        UUID GetUuid() const;
+        UUID GetUUID() const;
         std::string_view GetName() const;
 
         template<typename T>
@@ -30,7 +32,12 @@ namespace FusionEngine
             m_Scene->m_Registry.emplace_or_replace<T>(component);
         }
     private:
+        Entity(Scene* scene, const entt::entity entityHandle)
+            : m_EntityHandle(entityHandle), m_Scene(scene) {}
+    private:
         entt::entity m_EntityHandle = entt::null ;
         Scene* m_Scene;
+
+        friend class Scene;
     };
 }

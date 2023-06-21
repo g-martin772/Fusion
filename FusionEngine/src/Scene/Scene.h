@@ -13,6 +13,9 @@ namespace FusionEngine
     public:
         Entity CreateEntity(const std::string_view name = "Entity", const UUID uuid = UUID());
 
+        Entity GetEntityByUUID(const UUID uuid);
+        Entity GetEntityByName(const std::string_view name);
+
         void StartRuntime();
         void StopRuntime();
 

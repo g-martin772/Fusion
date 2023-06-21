@@ -13,14 +13,15 @@ namespace FusionEngine
         m_Scene->m_Registry.emplace<UUID>(m_EntityHandle, uuid);
         m_Scene->m_Registry.emplace<std::string_view>(m_EntityHandle, name);
         m_Scene->m_Registry.emplace<TransformComponent>(m_EntityHandle);
-    }
+    }   
 
-    Entity::~Entity()
+    void Entity::Destroy()
     {
         m_Scene->m_Registry.destroy(m_EntityHandle);
     }
 
-    UUID Entity::GetUuid() const
+
+    UUID Entity::GetUUID() const
     {
         return m_Scene->m_Registry.get<UUID>(m_EntityHandle);
     }
