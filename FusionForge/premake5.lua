@@ -20,7 +20,11 @@
     
     includedirs {
         "src",
-        "%{wks.location}/FusionEngine/src"
+        "%{wks.location}/FusionEngine/src",
+        "%{wks.location}/FusionEngine/dependencies/spdlog/include",
+        "%{wks.location}/FusionEngine/dependencies/imgui/imgui",
+        "%{wks.location}/FusionEngine/dependencies/EnTT/entt/single_include",
+        "%{VULKAN_SDK}/Include"
     }
 
     links {

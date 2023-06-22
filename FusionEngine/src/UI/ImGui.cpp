@@ -53,6 +53,12 @@ namespace FusionEngine { namespace UI {
         ImGui::CreateContext();
         ImGui::StyleColorsDark();
 
+        ImGuiIO& io = ImGui::GetIO();
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;  
+        
         ImGui_ImplGlfw_InitForVulkan(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow()), true);
         
         ImGui_ImplVulkan_InitInfo initInfo;
@@ -84,6 +90,7 @@ namespace FusionEngine { namespace UI {
 
     void ImGuiNewFrame()
     {
+        //ImGui::UpdatePlatformWindows();
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
@@ -93,6 +100,9 @@ namespace FusionEngine { namespace UI {
     {
         ImGui::Render();
         ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
+
+        ImGui::UpdatePlatformWindows();
+        ImGui::RenderPlatformWindowsDefault();
     }
 
     void UploadImGuiFontsVulkan(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer, vk::Device device, vk::Queue queue)

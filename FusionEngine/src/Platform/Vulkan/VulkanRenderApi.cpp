@@ -46,7 +46,7 @@ namespace FusionEngine
     		frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_LogicalDevice);
     	}
 
-    	UI::ImGuiInitVulkan(m_Instance, m_LogicalDevice, m_PhysicalDevice, m_RenderPass, m_GraphicsFamily.value(), m_GraphicsQueue, m_SwapChain->GetImageCount());
+    	UI::ImGuiInitVulkan(m_Instance, m_LogicalDevice, m_PhysicalDevice, m_ImGuiRenderPass, m_GraphicsFamily.value(), m_GraphicsQueue, m_SwapChain->GetImageCount());
     	UI::UploadImGuiFontsVulkan(m_CommandPool, m_MainCommandBuffer, m_LogicalDevice, m_GraphicsQueue);
     }
 	
@@ -67,6 +67,7 @@ namespace FusionEngine
 		m_LogicalDevice.destroyCommandPool(m_CommandPool);
     	
     	m_LogicalDevice.destroyRenderPass(m_RenderPass);
+    	m_LogicalDevice.destroyRenderPass(m_ImGuiRenderPass);
            
         m_LogicalDevice.destroy();
     	
@@ -154,10 +155,29 @@ namespace FusionEngine
     {
     	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
 
+    	commandBuffer.endRenderPass();
+
+		// Render ImGui
+
+    	vk::RenderPassBeginInfo renderPassInfo = {};
+    	renderPassInfo.renderPass = m_ImGuiRenderPass;
+    	renderPassInfo.framebuffer = m_Frames[m_CurrentFrame].FrameBuffer;
+    	renderPassInfo.renderArea.offset.x = 0;
+    	renderPassInfo.renderArea.offset.y = 0;
+    	renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
+
+    	const vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
+    	renderPassInfo.clearValueCount = 1;
+    	renderPassInfo.pClearValues = &clearColor;
+
+    	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
+
 		UI::ImGuiRenderVulkan(commandBuffer);
     	
     	commandBuffer.endRenderPass();
 
+		// End
+    	 
     	try {
     		commandBuffer.end();
     	}
@@ -538,6 +558,7 @@ namespace FusionEngine
     	renderpassInfo.pSubpasses = &subpass;
     	try {
     		m_RenderPass = m_LogicalDevice.createRenderPass(renderpassInfo);
+    		m_ImGuiRenderPass = m_LogicalDevice.createRenderPass(renderpassInfo);
     	}
     	catch (vk::SystemError& err)
     	{

@@ -6,7 +6,7 @@
 #include "Renderer/Pipeline.h"
 #include "Scene/Scene.h"
 
-class SandboxLayer : public FusionEngine::Layer
+class EditorLayer : public FusionEngine::Layer
 {
 public:
     void OnAttach() override;

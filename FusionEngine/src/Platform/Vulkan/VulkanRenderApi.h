@@ -76,8 +76,9 @@ namespace FusionEngine
         vk::CommandPool m_CommandPool;
         vk::CommandBuffer m_MainCommandBuffer;
 
-        // Pipeline
+        // RenderPass
         vk::RenderPass m_RenderPass;
+        vk::RenderPass m_ImGuiRenderPass;
 
         // Resources
         VulkanResourceManager* m_ResourceManager;
