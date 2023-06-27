@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanSwapChain.h"
 
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "Core/Application.h"
 #include "GLFW/glfw3.h"
@@ -12,28 +13,28 @@ namespace FusionEngine
     VulkanSwapChain::VulkanSwapChain()
     {
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
+
+        // Acquire Surface from GLFWwindow
+        VkSurfaceKHR cSurface;
+        if(const auto window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow());
+            glfwCreateWindowSurface(m_RenderApi->m_Instance->GetInstance(), window, nullptr, &cSurface) != VK_SUCCESS)
+                FE_ASSERT(false, "Failed to create Vulkan Surface")
+            else
+                FE_INFO("Sucessfully created Vulkan surface");
+
+        m_Surface = cSurface;
     }
 
     VulkanSwapChain::~VulkanSwapChain()
     {
         CleanUpSwapChain();
-        m_RenderApi->m_Instance.destroySurfaceKHR(m_Surface);
+        m_RenderApi->m_Instance->GetInstance().destroySurfaceKHR(m_Surface);
     }
 
-    void VulkanSwapChain::AcquireSurface()
+    void VulkanSwapChain::AcquireSurfaceCapabilities()
     {
-        // Acquire Surface from GLFWwindow
-        VkSurfaceKHR cSurface;
-        if(const auto window = static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow());
-            glfwCreateWindowSurface(m_RenderApi->m_Instance, window, nullptr, &cSurface) != VK_SUCCESS)
-            FE_ASSERT(false, "Failed to create Vulkan Surface")
-        else
-            FE_INFO("Sucessfully created Vulkan surface");
-
-        m_Surface = cSurface;
-
-        // Query additional Information
-        m_Capabilities = m_RenderApi->m_PhysicalDevice.getSurfaceCapabilitiesKHR(m_Surface);
+        // Query additional surface Information
+        m_Capabilities = m_RenderApi->m_Device->Physical().getSurfaceCapabilitiesKHR(m_Surface);
 
         FE_TRACE("Surface Capabilities:");
         FE_TRACE("\tMinimum image count: {0}", m_Capabilities.minImageCount);
@@ -43,7 +44,7 @@ namespace FusionEngine
         FE_TRACE("\tMaximum Extent: {0}, {1}", m_Capabilities.maxImageExtent.width, m_Capabilities.maxImageExtent.height);
         FE_TRACE("\tMaximum image array layers: {0}", m_Capabilities.maxImageArrayLayers);
 
-        m_Formats = m_RenderApi->m_PhysicalDevice.getSurfaceFormatsKHR(m_Surface);
+        m_Formats = m_RenderApi->m_Device->Physical().getSurfaceFormatsKHR(m_Surface);
 
         FE_TRACE("Surface Formats:");
         bool pickedFormat = false;
@@ -61,7 +62,7 @@ namespace FusionEngine
         if (!pickedFormat)
             m_SurfaceFormat = m_Formats[0];
 
-        const auto presentModes = m_RenderApi->m_PhysicalDevice.getSurfacePresentModesKHR(m_Surface);
+        const auto presentModes = m_RenderApi->m_Device->Physical().getSurfacePresentModesKHR(m_Surface);
 
         FE_TRACE("Surface Present Modes:");
         for(const vk::PresentModeKHR presentMode : presentModes)
@@ -77,7 +78,7 @@ namespace FusionEngine
     void VulkanSwapChain::InitializeSwapchain()
     {
         if (!m_Surface)
-            AcquireSurface();
+            AcquireSurfaceCapabilities();
         
         CreateSwapChain();
         CreateFrameBuffers();
@@ -104,11 +105,11 @@ namespace FusionEngine
             m_Capabilities.maxImageArrayLayers,
             vk::ImageUsageFlagBits::eColorAttachment);
 
-        if(m_RenderApi->m_GraphicsFamily.value() != m_RenderApi->m_PresentFamily.value())
+        if(m_RenderApi->m_Device->GraphicsFamily().value() != m_RenderApi->m_Device->PresentFamily().value())
         {
             createInfo.imageSharingMode = vk::SharingMode::eConcurrent;
             createInfo.queueFamilyIndexCount = 2;
-            const uint32_t queueFamilyIndices[] = { m_RenderApi->m_GraphicsFamily.value(), m_RenderApi->m_PresentFamily.value() };
+            const uint32_t queueFamilyIndices[] = { m_RenderApi->m_Device->GraphicsFamily().value(), m_RenderApi->m_Device->PresentFamily().value() };
             createInfo.pQueueFamilyIndices = queueFamilyIndices;
         }
         else
@@ -124,8 +125,8 @@ namespace FusionEngine
 
         try
         {
-            m_SwapChain = m_RenderApi->m_LogicalDevice.createSwapchainKHR(createInfo);
-            const std::vector<vk::Image> images = m_RenderApi->m_LogicalDevice.getSwapchainImagesKHR(m_SwapChain);
+            m_SwapChain = m_RenderApi->m_Device->Logical().createSwapchainKHR(createInfo);
+            const std::vector<vk::Image> images = m_RenderApi->m_Device->Logical().getSwapchainImagesKHR(m_SwapChain);
         	m_RenderApi->m_Frames = std::vector<VulkanRenderApi::Frame>(images.size());
         	
             for (size_t i = 0; i < images.size(); i++)
@@ -145,7 +146,7 @@ namespace FusionEngine
                 createInfo.format = m_SurfaceFormat.format;
 
             	m_RenderApi->m_Frames[i].Image = images[i];
-                m_RenderApi->m_Frames[i].ImageView = m_RenderApi->m_LogicalDevice.createImageView(createInfo);
+                m_RenderApi->m_Frames[i].ImageView = m_RenderApi->m_Device->Logical().createImageView(createInfo);
             }
         }
         catch (vk::SystemError& err)
@@ -166,7 +167,7 @@ namespace FusionEngine
             glfwWaitEvents();
         }
 
-        m_Capabilities = m_RenderApi->m_PhysicalDevice.getSurfaceCapabilitiesKHR(m_Surface);
+        m_Capabilities = m_RenderApi->m_Device->Physical().getSurfaceCapabilitiesKHR(m_Surface);
         m_SwapchainExtent = m_Capabilities.currentExtent;
     	
         FE_INFO("Recreating Swapchain");
@@ -178,26 +179,26 @@ namespace FusionEngine
         for (auto& frame : m_RenderApi->m_Frames)
         {
             frame.CommandBuffer = m_RenderApi->CreateCommandBuffer();
-            frame.InFlightFence = VulkanUtils::CreateFence(m_RenderApi->m_LogicalDevice);
-            frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_LogicalDevice);
-            frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_LogicalDevice);
+            frame.InFlightFence = VulkanUtils::CreateFence(m_RenderApi->m_Device->Logical());
+            frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_Device->Logical());
+            frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_Device->Logical());
         }
     }
 
     void VulkanSwapChain::CleanUpSwapChain()
     {
-        m_RenderApi->m_LogicalDevice.waitIdle();
+        m_RenderApi->m_Device->Logical().waitIdle();
     	
         for (const auto& frame : m_RenderApi->m_Frames)
         {
-            m_RenderApi->m_LogicalDevice.destroyFence(frame.InFlightFence);
-            m_RenderApi->m_LogicalDevice.destroySemaphore(frame.ImageAvailable);
-            m_RenderApi->m_LogicalDevice.destroySemaphore(frame.RenderFinished);
-            m_RenderApi->m_LogicalDevice.destroyImageView(frame.ImageView);
-            m_RenderApi->m_LogicalDevice.destroyFramebuffer(frame.FrameBuffer);
+            m_RenderApi->m_Device->Logical().destroyFence(frame.InFlightFence);
+            m_RenderApi->m_Device->Logical().destroySemaphore(frame.ImageAvailable);
+            m_RenderApi->m_Device->Logical().destroySemaphore(frame.RenderFinished);
+            m_RenderApi->m_Device->Logical().destroyImageView(frame.ImageView);
+            m_RenderApi->m_Device->Logical().destroyFramebuffer(frame.FrameBuffer);
         }
 
-        m_RenderApi->m_LogicalDevice.destroySwapchainKHR(m_SwapChain);
+        m_RenderApi->m_Device->Logical().destroySwapchainKHR(m_SwapChain);
     }
 
     void VulkanSwapChain::CreateFrameBuffers()
@@ -219,7 +220,7 @@ namespace FusionEngine
             framebufferInfo.layers = 1;
 
             try {
-                frame.FrameBuffer = m_RenderApi->m_LogicalDevice.createFramebuffer(framebufferInfo);
+                frame.FrameBuffer = m_RenderApi->m_Device->Logical().createFramebuffer(framebufferInfo);
             }
             catch (vk::SystemError& err)
             {

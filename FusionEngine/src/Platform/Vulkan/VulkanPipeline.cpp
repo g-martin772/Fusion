@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanPipeline.h"
 
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "VulkanUtils.h"
 #include "Renderer/RenderCommand.h"
@@ -144,7 +145,7 @@ namespace FusionEngine
 		//Make the Pipeline
 		FE_INFO("Create Graphics Pipeline");
 		try {
-			m_Pipeline = (m_RenderApi->m_LogicalDevice.createGraphicsPipeline(nullptr, pipelineInfo)).value;
+			m_Pipeline = (m_RenderApi->m_Device->Logical().createGraphicsPipeline(nullptr, pipelineInfo)).value;
 		}
     	catch (vk::SystemError& err)
     	{
@@ -153,15 +154,15 @@ namespace FusionEngine
     	}
 
 		//Clean up by destroying shader modules
-		m_RenderApi->m_LogicalDevice.destroyShaderModule(vertexShader);
-		m_RenderApi->m_LogicalDevice.destroyShaderModule(fragmentShader);
+		m_RenderApi->m_Device->Logical().destroyShaderModule(vertexShader);
+		m_RenderApi->m_Device->Logical().destroyShaderModule(fragmentShader);
     }
 
     VulkanPipeline::~VulkanPipeline()
     {
-		m_RenderApi->m_LogicalDevice.destroyPipeline(m_Pipeline);
-		m_RenderApi->m_LogicalDevice.destroyPipelineLayout(m_PipelineLayout);
-		m_RenderApi->m_LogicalDevice.destroyDescriptorSetLayout(m_DescriptorSetLayout);
+		m_RenderApi->m_Device->Logical().destroyPipeline(m_Pipeline);
+		m_RenderApi->m_Device->Logical().destroyPipelineLayout(m_PipelineLayout);
+		m_RenderApi->m_Device->Logical().destroyDescriptorSetLayout(m_DescriptorSetLayout);
     }
 
     void VulkanPipeline::Bind()
@@ -191,7 +192,7 @@ namespace FusionEngine
 		layoutInfo.pushConstantRangeCount = 0;
 		
 		try {
-			return m_RenderApi->m_LogicalDevice.createPipelineLayout(layoutInfo);
+			return m_RenderApi->m_Device->Logical().createPipelineLayout(layoutInfo);
 		}
         catch (vk::SystemError& err)
         {
@@ -223,7 +224,7 @@ namespace FusionEngine
 
 
 		try {
-			return m_RenderApi->m_LogicalDevice.createDescriptorSetLayout(layoutInfo);
+			return m_RenderApi->m_Device->Logical().createDescriptorSetLayout(layoutInfo);
 		}
 		catch (vk::SystemError& err)
 		{

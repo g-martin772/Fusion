@@ -5,6 +5,7 @@
 
 #include <shaderc/shaderc.hpp>
 
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "Renderer/RenderCommand.h"
 
@@ -72,7 +73,7 @@ namespace FusionEngine
         moduleInfo.pCode = reinterpret_cast<const uint32_t*>(spirv.data());
 
         try {
-            return m_RenderApi->m_LogicalDevice.createShaderModule(moduleInfo);
+            return m_RenderApi->m_Device->Logical().createShaderModule(moduleInfo);
         }
         catch (vk::SystemError& err)
         {

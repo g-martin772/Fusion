@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanUniformBuffer.h"
 
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "VulkanUtils.h"
 #include "Renderer/RenderCommand.h"
@@ -34,8 +35,8 @@ namespace FusionEngine
 
     void VulkanUniformBuffer::SetData(void* data)
     {
-        void* memoryLocation = m_RenderApi->m_LogicalDevice.mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
+        void* memoryLocation = m_RenderApi->m_Device->Logical().mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
         memcpy(memoryLocation, data, Buffer->GetSize());
-        m_RenderApi->m_LogicalDevice.unmapMemory(Buffer->GetMemory());
+        m_RenderApi->m_Device->Logical().unmapMemory(Buffer->GetMemory());
     }
 }

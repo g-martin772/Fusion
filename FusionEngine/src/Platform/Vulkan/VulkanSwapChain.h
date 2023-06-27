@@ -12,7 +12,7 @@ namespace FusionEngine
         VulkanSwapChain();
         ~VulkanSwapChain();
 
-        void AcquireSurface();
+        void AcquireSurfaceCapabilities();
         void InitializeSwapchain();
         void RecreateSwapChain();
 

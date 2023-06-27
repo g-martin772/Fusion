@@ -3,6 +3,7 @@
 #include "VulkanVertexBuffer.h"
 
 #include "VulkanBuffer.h"
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "Renderer/Pipeline.h"
 #include "Renderer/RenderCommand.h"
@@ -24,7 +25,7 @@ namespace FusionEngine
 
     VulkanVertexBuffer::~VulkanVertexBuffer()
     {
-        m_RenderApi->m_LogicalDevice.unmapMemory(Buffer->GetMemory());
+        m_RenderApi->m_Device->Logical().unmapMemory(Buffer->GetMemory());
        delete Buffer;
     }
 
@@ -32,7 +33,7 @@ namespace FusionEngine
     {
         FE_ASSERT(size <= Buffer->GetSize(), "Data is larger than buffer size");
         if(!m_MappedMemory)
-            m_MappedMemory = m_RenderApi->m_LogicalDevice.mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
+            m_MappedMemory = m_RenderApi->m_Device->Logical().mapMemory(Buffer->GetMemory(), 0, Buffer->GetSize());
         memcpy(m_MappedMemory, data, size);
     }
 

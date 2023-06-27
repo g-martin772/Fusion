@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanResourceManager.h"
 
+#include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "Renderer/RenderCommand.h"
 
@@ -16,10 +17,10 @@ namespace FusionEngine
 
     VulkanResourceManager::~VulkanResourceManager()
     {
-        m_RenderApi->m_LogicalDevice.destroyDescriptorPool(m_DescriptorPool);
-        m_RenderApi->m_LogicalDevice.destroyDescriptorPool(m_FrameDescriptorPool);
-        m_RenderApi->m_LogicalDevice.destroyDescriptorSetLayout(m_DescriptorSetLayout);
-        m_RenderApi->m_LogicalDevice.destroyDescriptorSetLayout(m_FrameDescriptorSetLayout);
+        m_RenderApi->m_Device->Logical().destroyDescriptorPool(m_DescriptorPool);
+        m_RenderApi->m_Device->Logical().destroyDescriptorPool(m_FrameDescriptorPool);
+        m_RenderApi->m_Device->Logical().destroyDescriptorSetLayout(m_DescriptorSetLayout);
+        m_RenderApi->m_Device->Logical().destroyDescriptorSetLayout(m_FrameDescriptorSetLayout);
     }
 
     void VulkanResourceManager::SetFrameCount(const uint32_t frameCount)
@@ -37,7 +38,7 @@ namespace FusionEngine
 
     void VulkanResourceManager::RecreateResources()
     {
-        m_DescriptorSetLayout = m_RenderApi->m_LogicalDevice.createDescriptorSetLayout(
+        m_DescriptorSetLayout = m_RenderApi->m_Device->Logical().createDescriptorSetLayout(
             vk::DescriptorSetLayoutCreateInfo({},
                 static_cast<uint32_t>(m_LayoutBindings.size()),
                 m_LayoutBindings.data()));
@@ -54,19 +55,19 @@ namespace FusionEngine
             poolSizes.emplace_back(fst, snd);
         }
 
-        m_DescriptorPool = m_RenderApi->m_LogicalDevice.createDescriptorPool(
+        m_DescriptorPool = m_RenderApi->m_Device->Logical().createDescriptorPool(
             vk::DescriptorPoolCreateInfo({},
                 1,
                 static_cast<uint32_t>(poolSizes.size()),
                 poolSizes.data()));
 
-        m_DescriptorSet = m_RenderApi->m_LogicalDevice.allocateDescriptorSets(
+        m_DescriptorSet = m_RenderApi->m_Device->Logical().allocateDescriptorSets(
             vk::DescriptorSetAllocateInfo(m_DescriptorPool, 1, &m_DescriptorSetLayout))[0];
     }
 
     void VulkanResourceManager::RecreateFrameResources()
     {
-        m_FrameDescriptorSetLayout = m_RenderApi->m_LogicalDevice.createDescriptorSetLayout(
+        m_FrameDescriptorSetLayout = m_RenderApi->m_Device->Logical().createDescriptorSetLayout(
             vk::DescriptorSetLayoutCreateInfo({},
                 static_cast<uint32_t>(m_FrameLayoutBindings.size()),
                 m_FrameLayoutBindings.data()));
@@ -83,7 +84,7 @@ namespace FusionEngine
             poolSizes.emplace_back(fst, snd);
         }
 
-        m_FrameDescriptorPool = m_RenderApi->m_LogicalDevice.createDescriptorPool(
+        m_FrameDescriptorPool = m_RenderApi->m_Device->Logical().createDescriptorPool(
             vk::DescriptorPoolCreateInfo({},
                 m_FrameCount,
                 static_cast<uint32_t>(poolSizes.size()),
@@ -91,7 +92,7 @@ namespace FusionEngine
 
         std::vector<vk::DescriptorSetLayout> layouts(m_FrameCount, m_FrameDescriptorSetLayout);
 
-        m_FrameDescriptorSets = m_RenderApi->m_LogicalDevice.allocateDescriptorSets(
+        m_FrameDescriptorSets = m_RenderApi->m_Device->Logical().allocateDescriptorSets(
             vk::DescriptorSetAllocateInfo(m_FrameDescriptorPool, m_FrameCount, layouts.data()));
     }
 
@@ -122,7 +123,7 @@ namespace FusionEngine
         writeDescriptorSet.descriptorCount = 1;
         writeDescriptorSet.pBufferInfo = &bufferInfo;
 
-        m_RenderApi->m_LogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
+        m_RenderApi->m_Device->Logical().updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
     }
 
     void VulkanResourceManager::BindFrameResource(const uint32_t bindingIndex, const VulkanBuffer* buffer) const
@@ -141,7 +142,7 @@ namespace FusionEngine
             writeDescriptorSet.descriptorCount = 1;
             writeDescriptorSet.pBufferInfo = &bufferInfo;
 
-            m_RenderApi->m_LogicalDevice.updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
+            m_RenderApi->m_Device->Logical().updateDescriptorSets(1, &writeDescriptorSet, 0, nullptr);
         }
     }
 }

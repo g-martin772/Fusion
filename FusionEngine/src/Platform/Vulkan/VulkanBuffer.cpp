@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanBuffer.h"
 
+#include "VulkanDevice.h"
 #include "Renderer/RenderCommand.h"
 #include "VulkanRenderApi.h"
 
@@ -18,15 +19,15 @@ namespace FusionEngine
         bufferInfo.usage = usage;
         bufferInfo.sharingMode = sharingMode;
 
-        m_Buffer = m_RenderApi->m_LogicalDevice.createBuffer(bufferInfo);
+        m_Buffer = m_RenderApi->m_Device->Logical().createBuffer(bufferInfo);
 
         // Look for suitable memory on gpu
-        const vk::MemoryRequirements memoryRequirements = m_RenderApi->m_LogicalDevice.getBufferMemoryRequirements(m_Buffer);
+        const vk::MemoryRequirements memoryRequirements = m_RenderApi->m_Device->Logical().getBufferMemoryRequirements(m_Buffer);
         // Alignment?
 
         int32_t memoryTypeIndex = -1;
 
-        const vk::PhysicalDeviceMemoryProperties memoryProperties = m_RenderApi->m_PhysicalDevice.getMemoryProperties();
+        const vk::PhysicalDeviceMemoryProperties memoryProperties = m_RenderApi->m_Device->Physical().getMemoryProperties();
         for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++)
         {
             const bool supported = memoryRequirements.memoryTypeBits & (1 << i);
@@ -44,14 +45,14 @@ namespace FusionEngine
         allocateInfo.allocationSize = memoryRequirements.size;
         allocateInfo.memoryTypeIndex = memoryTypeIndex;
         
-        m_Memory = m_RenderApi->m_LogicalDevice.allocateMemory(allocateInfo);
-        m_RenderApi->m_LogicalDevice.bindBufferMemory(m_Buffer, m_Memory, 0);
+        m_Memory = m_RenderApi->m_Device->Logical().allocateMemory(allocateInfo);
+        m_RenderApi->m_Device->Logical().bindBufferMemory(m_Buffer, m_Memory, 0);
     }
 
     VulkanBuffer::~VulkanBuffer()
     {
-        m_RenderApi->m_LogicalDevice.waitIdle();
-        m_RenderApi->m_LogicalDevice.destroyBuffer(m_Buffer);
-        m_RenderApi->m_LogicalDevice.freeMemory(m_Memory);
+        m_RenderApi->m_Device->Logical().waitIdle();
+        m_RenderApi->m_Device->Logical().destroyBuffer(m_Buffer);
+        m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
     }
 }
