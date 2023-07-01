@@ -10,6 +10,7 @@ namespace FusionEngine
         virtual ~Camera() = default;
 
         virtual void OnUpdate(double deltaTime) {}
+        virtual void OnResize(uint32_t width, uint32_t height) {}
 
         virtual glm::mat4 GetViewMatrix();
         virtual glm::mat4 GetProjectionMatrix();

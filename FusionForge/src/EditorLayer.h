@@ -23,6 +23,7 @@ private:
 
     Ref<Framebuffer> m_ViewportFramebuffer;
     Ref<Image> m_ViewportImage;
+    glm::uvec2 m_ViewportSize;
 
     ImTextureID m_ViewportTextureID;
 };

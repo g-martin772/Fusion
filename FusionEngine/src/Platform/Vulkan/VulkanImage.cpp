@@ -14,24 +14,37 @@ namespace FusionEngine
         m_Width = spec.Width;
         m_Height = spec.Height;
 
+        CreateVulkanObjects();
+    }
+
+    VulkanImage::~VulkanImage()
+    {
+        m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
+        m_RenderApi->m_Device->Logical().destroySampler(m_Sampler);
+        m_RenderApi->m_Device->Logical().destroyImageView(m_ImageView);
+        m_RenderApi->m_Device->Logical().destroyImage(m_Image);
+    }
+
+    void VulkanImage::CreateVulkanObjects()
+    {
         // Image
         
         vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eSampled;
-        if(spec.Usage == ImageUsage::ColorAttachment)
+        if(m_Spec.Usage == ImageUsage::ColorAttachment)
             usage |= vk::ImageUsageFlagBits::eColorAttachment;
-        else if(spec.Usage == ImageUsage::DepthAttachment)
+        else if(m_Spec.Usage == ImageUsage::DepthAttachment)
             usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-        else if(spec.Usage == ImageUsage::DepthStencilAttachment)
+        else if(m_Spec.Usage == ImageUsage::DepthStencilAttachment)
             usage |= vk::ImageUsageFlagBits::eDepthStencilAttachment;
-        else if(spec.Usage == ImageUsage::Storage)
+        else if(m_Spec.Usage == ImageUsage::Storage)
             usage |= vk::ImageUsageFlagBits::eStorage | vk::ImageUsageFlagBits::eTransferDst;
-        else if(spec.Usage == ImageUsage::Texture)
+        else if(m_Spec.Usage == ImageUsage::Texture)
             usage |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eTransferDst;
 
         vk::ImageAspectFlags aspectFlags = vk::ImageAspectFlagBits::eColor;
-        if(spec.Usage == ImageUsage::DepthAttachment)
+        if(m_Spec.Usage == ImageUsage::DepthAttachment)
             aspectFlags = vk::ImageAspectFlagBits::eDepth;
-        else if(spec.Usage == ImageUsage::DepthStencilAttachment)
+        else if(m_Spec.Usage == ImageUsage::DepthStencilAttachment)
             aspectFlags = vk::ImageAspectFlagBits::eDepth | vk::ImageAspectFlagBits::eStencil;
 
         vk::ImageCreateInfo imageCreateInfo = {};
@@ -40,9 +53,9 @@ namespace FusionEngine
         imageCreateInfo.extent.width = m_Width;
         imageCreateInfo.extent.height = m_Height;
         imageCreateInfo.extent.depth = 1;
-        imageCreateInfo.mipLevels = spec.Mips;
-        imageCreateInfo.arrayLayers = spec.Layers;
-        imageCreateInfo.samples = static_cast<vk::SampleCountFlagBits>(spec.Samples);
+        imageCreateInfo.mipLevels = m_Spec.Mips;
+        imageCreateInfo.arrayLayers = m_Spec.Layers;
+        imageCreateInfo.samples = static_cast<vk::SampleCountFlagBits>(m_Spec.Samples);
         imageCreateInfo.tiling = vk::ImageTiling::eOptimal;
         imageCreateInfo.usage = usage;
 
@@ -83,13 +96,13 @@ namespace FusionEngine
 
         vk::ImageViewCreateInfo imageViewCreateInfo = {};
         imageViewCreateInfo.image = m_Image;
-        imageViewCreateInfo.viewType = spec.Layers > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
+        imageViewCreateInfo.viewType = m_Spec.Layers > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
         imageViewCreateInfo.format = GetVulkanFormat();
         imageViewCreateInfo.subresourceRange.aspectMask = aspectFlags;
         imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-        imageViewCreateInfo.subresourceRange.levelCount = spec.Mips;
+        imageViewCreateInfo.subresourceRange.levelCount = m_Spec.Mips;
         imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-        imageViewCreateInfo.subresourceRange.layerCount = spec.Layers;
+        imageViewCreateInfo.subresourceRange.layerCount = m_Spec.Layers;
 
         try {
             m_ImageView = m_RenderApi->m_Device->Logical().createImageView(imageViewCreateInfo);
@@ -103,9 +116,9 @@ namespace FusionEngine
         // Sampler
 
         vk::SamplerCreateInfo samplerCreateInfo = {};
-        samplerCreateInfo.magFilter = spec.Filter == ImageTextureFilter::Linear ? vk::Filter::eLinear : vk::Filter::eNearest;
-        samplerCreateInfo.minFilter = spec.Filter == ImageTextureFilter::Linear ? vk::Filter::eLinear : vk::Filter::eNearest;
-        samplerCreateInfo.mipmapMode = spec.Filter == ImageTextureFilter::Linear ? vk::SamplerMipmapMode::eLinear : vk::SamplerMipmapMode::eNearest;
+        samplerCreateInfo.magFilter = m_Spec.Filter == ImageTextureFilter::Linear ? vk::Filter::eLinear : vk::Filter::eNearest;
+        samplerCreateInfo.minFilter = m_Spec.Filter == ImageTextureFilter::Linear ? vk::Filter::eLinear : vk::Filter::eNearest;
+        samplerCreateInfo.mipmapMode = m_Spec.Filter == ImageTextureFilter::Linear ? vk::SamplerMipmapMode::eLinear : vk::SamplerMipmapMode::eNearest;
         samplerCreateInfo.addressModeU = vk::SamplerAddressMode::eClampToEdge;
         samplerCreateInfo.addressModeV = vk::SamplerAddressMode::eClampToEdge;
         samplerCreateInfo.addressModeW = vk::SamplerAddressMode::eClampToEdge;
@@ -128,23 +141,15 @@ namespace FusionEngine
 
         // ImageDescriptor
 
-        if(spec.Usage == ImageUsage::DepthAttachment || spec.Usage == ImageUsage::DepthStencilAttachment)
+        if(m_Spec.Usage == ImageUsage::DepthAttachment || m_Spec.Usage == ImageUsage::DepthStencilAttachment)
             m_ImageInfo.imageLayout = vk::ImageLayout::eDepthStencilReadOnlyOptimal;
-        else if (spec.Usage == ImageUsage::ColorAttachment)
+        else if (m_Spec.Usage == ImageUsage::ColorAttachment)
             m_ImageInfo.imageLayout = vk::ImageLayout::eShaderReadOnlyOptimal;
         else
             m_ImageInfo.imageLayout = vk::ImageLayout::eGeneral;
         
         m_ImageInfo.imageView = m_ImageView;
         m_ImageInfo.sampler = m_Sampler;
-    }
-
-    VulkanImage::~VulkanImage()
-    {
-        m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
-        m_RenderApi->m_Device->Logical().destroySampler(m_Sampler);
-        m_RenderApi->m_Device->Logical().destroyImageView(m_ImageView);
-        m_RenderApi->m_Device->Logical().destroyImage(m_Image);
     }
 
     void VulkanImage::OnResize(uint32_t width, uint32_t height)
@@ -154,6 +159,14 @@ namespace FusionEngine
 
         m_Width = width;
         m_Height = height;
+
+        m_RenderApi->WaitDeviceIdle();
+        m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
+        m_RenderApi->m_Device->Logical().destroySampler(m_Sampler);
+        m_RenderApi->m_Device->Logical().destroyImageView(m_ImageView);
+        m_RenderApi->m_Device->Logical().destroyImage(m_Image);
+
+        CreateVulkanObjects();
     }
 
     VkImageLayout VulkanImage::GetVulkanImageLayout() const

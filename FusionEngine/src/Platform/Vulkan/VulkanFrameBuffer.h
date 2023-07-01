@@ -21,8 +21,10 @@ namespace FusionEngine
         [[nodiscard]] vk::RenderPass GetRenderPass() const { return m_RenderPass; }
         [[nodiscard]] vk::Framebuffer GetFramebuffer() const { return m_Framebuffers[m_FrameIndex]; }
     private:
+        void CreateFrameBuffers();
+    private:
         Ref<VulkanRenderApi> m_RenderApi;
-        uint32_t m_Width, m_Height, m_FrameIndex = 0;
+        uint32_t m_Width = 0, m_Height = 0, m_FrameIndex = 0;
         std::vector<vk::Framebuffer> m_Framebuffers;
         vk::RenderPass m_RenderPass;
     };

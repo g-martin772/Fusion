@@ -8,6 +8,7 @@ namespace FusionEngine
     public:
         PerspectiveCameraController(float fov, float aspectRatio, float nearClip, float farClip);
         void OnUpdate(double deltaTime) override;
+        void OnResize(uint32_t width, uint32_t height) override;
         glm::mat4 GetViewMatrix() override;
         glm::mat4 GetProjectionMatrix() override;
     private:

@@ -18,9 +18,6 @@ using namespace FusionEngine;
 
 void EditorLayer::OnAttach()
 {
-    m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
-    m_Scene = MakeRef<Scene>();
-
     ImageSpecification imageSpecification;
     imageSpecification.Width = 100;
     imageSpecification.Height = 100;
@@ -36,25 +33,23 @@ void EditorLayer::OnAttach()
     m_ViewportFramebuffer = Framebuffer::Create(framebufferSpecification);
 
     m_ViewportTextureID = UI::ImGuiGetImageHandle(m_ViewportImage);
+
+    // Setup scene
+    m_Scene = MakeRef<Scene>();
+    m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
+    Entity e = m_Scene->CreateEntity("Box");
+    e.AddComponent<SpriteRenderComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
 }
 
 void EditorLayer::OnDetach()
 {
+    UI::ImGuiFreeImageHandle(m_ViewportTextureID);
 }
 
 void EditorLayer::OnUpdate(const Ref<Time> time)
 {
-    m_ViewportFramebuffer->Begin();
-
-    m_Camera->OnUpdate(time->GetDeltaTime());
-    m_Scene->RenderScene(m_Camera);
-
-    m_ViewportFramebuffer->End();
-
-    
     RenderCommand::BeginSwapchainRenderPass();
     
-
     // Setup Dockspace
 
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -83,9 +78,25 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     
     ImGui::Begin("Test Window");
-
-    ImGui::Image(m_ViewportTextureID, ImVec2(100, 100));
     
+    ImGui::End();
+
+    // ImGui Viewport
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+    ImGuiWindowFlags viewportFlags = ImGuiWindowFlags_NoTitleBar;
+    ImGui::Begin("Viewport", nullptr, viewportFlags);
+    ImGui::PopStyleVar();
+    const ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    const glm::uvec2 newViewportSize = { static_cast<uint32_t>(viewportPanelSize.x), static_cast<uint32_t>(viewportPanelSize.y) };
+    if(newViewportSize != m_ViewportSize)
+    {
+        m_Camera->OnResize(newViewportSize.x, newViewportSize.y);
+        m_ViewportFramebuffer->OnResize(newViewportSize.x, newViewportSize.y);
+        UI::ImGuiFreeImageHandle(m_ViewportTextureID);
+        m_ViewportTextureID = UI::ImGuiGetImageHandle(m_ViewportImage);
+    }
+    ImGui::Image(m_ViewportTextureID, viewportPanelSize);
+    bool viewportFocus = ImGui::IsWindowFocused();
     ImGui::End();
     
     // UI
@@ -96,4 +107,17 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
     ImGui::End();
 
     RenderCommand::EndSwapchainRenderPass();
+
+
+    
+    // Render viewport
+    
+    m_ViewportFramebuffer->Begin();
+    
+    if(viewportFocus)
+        m_Camera->OnUpdate(time->GetDeltaTime());
+
+    m_Scene->RenderScene(m_Camera);
+
+    m_ViewportFramebuffer->End();
 }

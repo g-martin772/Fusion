@@ -48,6 +48,7 @@ namespace FusionEngine { namespace UI {
         };
         
         vk::DescriptorPoolCreateInfo createInfo = {};
+        createInfo.flags = vk::DescriptorPoolCreateFlagBits::eFreeDescriptorSet;
         createInfo.maxSets = 1000 * std::size(poolSizes);
         createInfo.poolSizeCount = static_cast<uint32_t>(std::size(poolSizes));
         createInfo.pPoolSizes = poolSizes;
@@ -170,6 +171,19 @@ namespace FusionEngine { namespace UI {
                     vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, nullptr);
                 }
                 return descriptor_set;
+            }
+        }
+    }
+
+    void ImGuiFreeImageHandle(void* handle)
+    {
+        switch (RenderApi::GetApi()) {
+            case RenderApi::Api::Vulkan: {
+                ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+                ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+                vkDeviceWaitIdle(v->Device);
+                vkFreeDescriptorSets(v->Device, v->DescriptorPool, 1, reinterpret_cast<VkDescriptorSet*>(&handle));
+                break;
             }
         }
     }

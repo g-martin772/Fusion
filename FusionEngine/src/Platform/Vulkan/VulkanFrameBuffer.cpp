@@ -12,9 +12,10 @@ namespace FusionEngine
     {
         m_Spec = spec;
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
-    	m_Width = m_Spec.Width;
-    	m_Height = m_Spec.Height;
-
+    	FE_ASSERT(spec.Width > 0 && spec.Height > 0, "Framebuffer size must be greater than 0");
+    	m_Width = spec.Width;
+    	m_Height = spec.Height;
+    	
 		// CreateRenderPass
     	
     	std::vector<vk::AttachmentDescription> attachments;
@@ -60,6 +61,7 @@ namespace FusionEngine
 
     	std::vector<vk::SubpassDependency> dependencies;
 
+    	// What do I need this for?
     	// {
     	// 	VkSubpassDependency& depedency = dependencies.emplace_back();
     	// 	depedency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -99,21 +101,26 @@ namespace FusionEngine
     		FE_ASSERT(false, "Creating RenderPass failed");
     	}
 
-    	// Create Framebuffers
+    	CreateFrameBuffers();
+    }
 
-		if(spec.ExistingFramebuffer != nullptr)
-		{
-			m_Framebuffers = std::dynamic_pointer_cast<VulkanFrameBuffer>(spec.ExistingFramebuffer)->m_Framebuffers;
-			return;
-		}
-    	
+    VulkanFrameBuffer::~VulkanFrameBuffer()
+    {
+    	m_RenderApi->WaitDeviceIdle();
+    	m_RenderApi->m_Device->Logical().destroyRenderPass(m_RenderPass);
+    	for(const vk::Framebuffer framebuffer : m_Framebuffers)
+			m_RenderApi->m_Device->Logical().destroyFramebuffer(framebuffer);
+    }
+
+	void VulkanFrameBuffer::CreateFrameBuffers()
+    {
     	for (int i = 0; i < m_Spec.FramesInFlight; i++)
     	{
     		std::vector<vk::ImageView> attachments;
     		for (auto attachment : m_Spec.Attachments)
-			{
-				attachments.push_back(std::dynamic_pointer_cast<VulkanImage>(attachment.Image)->GetImageView());
-			}
+    		{
+    			attachments.push_back(std::dynamic_pointer_cast<VulkanImage>(attachment.Image)->GetImageView());
+    		}
 
     		vk::FramebufferCreateInfo framebufferInfo;
     		framebufferInfo.flags = vk::FramebufferCreateFlags();
@@ -135,14 +142,6 @@ namespace FusionEngine
     	}
     }
 
-    VulkanFrameBuffer::~VulkanFrameBuffer()
-    {
-    	m_RenderApi->WaitDeviceIdle();
-    	m_RenderApi->m_Device->Logical().destroyRenderPass(m_RenderPass);
-    	for(const vk::Framebuffer framebuffer : m_Framebuffers)
-			m_RenderApi->m_Device->Logical().destroyFramebuffer(framebuffer);
-    }
-
     void VulkanFrameBuffer::OnResize(uint32_t width, uint32_t height)
     {
         if(m_Width == width && m_Height == height)
@@ -150,6 +149,18 @@ namespace FusionEngine
 
     	m_Width = width;
     	m_Height = height;
+
+    	for(auto attachment : m_Spec.Attachments)
+			attachment.Image->OnResize(width, height);
+
+    	m_RenderApi->WaitDeviceIdle();
+    	for(const vk::Framebuffer framebuffer : m_Framebuffers)
+    	{
+    		m_RenderApi->m_Device->Logical().destroyFramebuffer(framebuffer);
+    	}
+    	m_Framebuffers.clear();
+
+    	CreateFrameBuffers();
     }
 
     void VulkanFrameBuffer::Begin()

@@ -26,6 +26,8 @@ namespace FusionEngine
         [[nodiscard]] vk::DescriptorImageInfo GetDescriptorImageInfo() const { return m_ImageInfo; }
         [[nodiscard]] vk::DeviceMemory GetMemory() const { return m_Memory; }
     private:
+        void CreateVulkanObjects();
+    private:
         Ref<VulkanRenderApi> m_RenderApi;
         vk::Image m_Image;
         vk::ImageView m_ImageView;

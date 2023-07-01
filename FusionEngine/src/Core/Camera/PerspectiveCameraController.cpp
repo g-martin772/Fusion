@@ -100,6 +100,17 @@ namespace FusionEngine
             m_InvalidView = true;
     }
 
+    void PerspectiveCameraController::OnResize(uint32_t width, uint32_t height)
+    {
+        const float newAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+        
+        if(m_AspectRatio == newAspectRatio)
+            return;
+
+        m_AspectRatio = newAspectRatio;
+        m_InvalidProj = true;
+    }
+
     glm::mat4 PerspectiveCameraController::GetViewMatrix()
     {
         if (m_InvalidView)
