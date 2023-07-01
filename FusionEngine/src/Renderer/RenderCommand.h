@@ -10,6 +10,8 @@ namespace FusionEngine
         static void ShutDown();
 
         static void BeginFrame();
+        static void BeginSwapchainRenderPass();
+        static void EndSwapchainRenderPass();
         static void Draw(uint32_t vertexCount);
         static void DrawIndexed(uint32_t indexCount);
         static void EndFrame();

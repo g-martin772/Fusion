@@ -212,7 +212,7 @@ namespace FusionEngine
 
             vk::FramebufferCreateInfo framebufferInfo;
             framebufferInfo.flags = vk::FramebufferCreateFlags();
-            framebufferInfo.renderPass = m_RenderApi->m_RenderPass;
+            framebufferInfo.renderPass = m_RenderApi->m_MainRenderPass;
             framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
             framebufferInfo.pAttachments = attachments.data();
             framebufferInfo.width = m_SwapchainExtent.width;

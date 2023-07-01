@@ -1,8 +1,10 @@
 ﻿#pragma once
+#include "imgui.h"
 #include "Core/Base.h"
 #include "Core/Layer.h"
 #include "Core/Camera/Camera.h"
 #include "IO/FileLoaders/ObjModel.h"
+#include "Renderer/Framebuffer.h"
 #include "Renderer/Pipeline.h"
 #include "Scene/Scene.h"
 
@@ -18,4 +20,9 @@ public:
 private:
     Ref<Scene> m_Scene;
     Ref<Camera> m_Camera;
+
+    Ref<Framebuffer> m_ViewportFramebuffer;
+    Ref<Image> m_ViewportImage;
+
+    ImTextureID m_ViewportTextureID;
 };

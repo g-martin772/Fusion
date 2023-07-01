@@ -12,6 +12,9 @@
 #include <imgui/backends/imgui_impl_glfw.cpp>
 
 #include "Core/Application.h"
+#include "Platform/Vulkan/VulkanImage.h"
+#include "Platform/Vulkan/VulkanRenderApi.h"
+#include "Renderer/RenderCommand.h"
 
 namespace FusionEngine { namespace UI {
 
@@ -133,5 +136,41 @@ namespace FusionEngine { namespace UI {
         device.waitIdle();
         
         ImGui_ImplVulkan_DestroyFontUploadObjects();
+    }
+
+    void* ImGuiGetImageHandle(const Ref<Image>& image)
+    {
+        switch (RenderApi::GetApi()) {
+            case RenderApi::Api::Vulkan: {
+                const Ref<VulkanImage> vulkanImage = std::dynamic_pointer_cast<VulkanImage>(image);
+                ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+                ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+
+                // Create Descriptor Set:
+                VkDescriptorSet descriptor_set;
+                {
+                    VkDescriptorSetAllocateInfo alloc_info = {};
+                    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+                    alloc_info.descriptorPool = v->DescriptorPool;
+                    alloc_info.descriptorSetCount = 1;
+                    alloc_info.pSetLayouts = &bd->DescriptorSetLayout;
+                    VkResult err = vkAllocateDescriptorSets(v->Device, &alloc_info, &descriptor_set);
+                    check_vk_result(err);
+                }
+
+                // Update the Descriptor Set:
+                {
+                    VkDescriptorImageInfo desc_image = vulkanImage->GetDescriptorImageInfo();
+                    VkWriteDescriptorSet write_desc[1] = {};
+                    write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    write_desc[0].dstSet = descriptor_set;
+                    write_desc[0].descriptorCount = 1;
+                    write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    write_desc[0].pImageInfo = &desc_image;
+                    vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, nullptr);
+                }
+                return descriptor_set;
+            }
+        }
     }
 }}

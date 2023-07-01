@@ -22,5 +22,4 @@ namespace FusionEngine
         vk::DeviceMemory m_Memory;
         uint32_t m_Size = 0;
     };
-    
 }

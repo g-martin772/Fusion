@@ -4,6 +4,7 @@
 // https://github.com/KhronosGroup/Vulkan-Hpp/blob/main/README.md
 #include <vulkan/vulkan.hpp>
 
+#include "VulkanDevice.h"
 #include "VulkanInstance.h"
 #include "VulkanResourceManager.h"
 #include "VulkanShader.h"
@@ -31,9 +32,15 @@ namespace FusionEngine
         void ShutDown() override;
 
         void BeginFrame() override;
+        void BeginSwapchainRenderPass() override;
+        void EndSwapchainRenderPass() override;
         void Draw(uint32_t vertexCount) override;
         void DrawIndexed(uint32_t indexCount) override;
         void EndFrame() override;
+
+        void WaitDeviceIdle() const { m_Device->Logical().waitIdle(); }
+    private:
+        Frame& GetCurrentFrame() { return m_Frames[m_CurrentFrame]; }
     private:
         VulkanInstance* m_Instance;
         VulkanDevice* m_Device;
@@ -51,8 +58,7 @@ namespace FusionEngine
 
         // RenderPass
         void CreateRenderPass();
-        vk::RenderPass m_RenderPass;
-        vk::RenderPass m_ImGuiRenderPass;
+        vk::RenderPass m_MainRenderPass;
 
         // Resources
         VulkanResourceManager* m_ResourceManager;
@@ -66,6 +72,8 @@ namespace FusionEngine
         friend class VulkanBuffer;
         friend class VulkanUniformBuffer;
         friend class VulkanResourceManager;
+        friend class VulkanFrameBuffer;
+        friend class VulkanImage;
     };
 
 }

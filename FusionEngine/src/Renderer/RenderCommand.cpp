@@ -21,7 +21,17 @@ namespace FusionEngine
     {
         s_RenderApi->BeginFrame();
     }
-    
+
+    void RenderCommand::BeginSwapchainRenderPass()
+    {
+        s_RenderApi->BeginSwapchainRenderPass();
+    }
+
+    void RenderCommand::EndSwapchainRenderPass()
+    {
+        s_RenderApi->EndSwapchainRenderPass();
+    }
+
     void RenderCommand::Draw(uint32_t vertexCount)
     {
         s_RenderApi->Draw(vertexCount);

@@ -2,6 +2,7 @@
 #include "VulkanPipeline.h"
 
 #include "VulkanDevice.h"
+#include "VulkanFrameBuffer.h"
 #include "VulkanRenderApi.h"
 #include "VulkanUtils.h"
 #include "Renderer/RenderCommand.h"
@@ -52,7 +53,6 @@ namespace FusionEngine
 		pipelineInfo.pInputAssemblyState = &inputAssemblyInfo;
 
 		//Vertex Shader
-		FE_INFO("Create vertex shader module");
 		vk::ShaderModule vertexShader = m_Shader->GetVertexShaderModule();
 		vk::PipelineShaderStageCreateInfo vertexShaderInfo = {};
 		vertexShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
@@ -90,7 +90,6 @@ namespace FusionEngine
 		pipelineInfo.pRasterizationState = &rasterizer;
 
 		//Fragment Shader
-		FE_INFO("Create fragment shader module");
 		vk::ShaderModule fragmentShader = m_Shader->GetFragmentShaderModule();
 		vk::PipelineShaderStageCreateInfo fragmentShaderInfo = {};
 		fragmentShaderInfo.flags = vk::PipelineShaderStageCreateFlags();
@@ -126,24 +125,20 @@ namespace FusionEngine
 		pipelineInfo.pColorBlendState = &colorBlending;
 
 		// DescriptorSet Layout
-		FE_INFO("Create DescriptorSet Layout");
 		m_DescriptorSetLayout = MakeDescriptorSetLayout();
 		
 		//Pipeline Layout
-		FE_INFO("Create Pipeline Layout");
 		m_PipelineLayout = MakePipelineLayout();
 		pipelineInfo.layout = m_PipelineLayout;
 
 		//Renderpass
-		FE_INFO("Create RenderPass");
-		pipelineInfo.renderPass = m_RenderApi->m_RenderPass;
+    	pipelineInfo.renderPass = m_RenderApi->m_MainRenderPass;
 		pipelineInfo.subpass = 0;
 
 		//Extra stuff
 		pipelineInfo.basePipelineHandle = nullptr;
 
 		//Make the Pipeline
-		FE_INFO("Create Graphics Pipeline");
 		try {
 			m_Pipeline = (m_RenderApi->m_Device->Logical().createGraphicsPipeline(nullptr, pipelineInfo)).value;
 		}

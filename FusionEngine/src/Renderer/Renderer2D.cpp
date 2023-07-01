@@ -83,7 +83,7 @@ namespace FusionEngine
         delete[] s_Data->QuadIndexBufferStart;
         delete s_Data;
     }
-
+    
     void Renderer2D::BeginScene(const Ref<Camera>& camera)
     {
         s_Data->Camera = camera;

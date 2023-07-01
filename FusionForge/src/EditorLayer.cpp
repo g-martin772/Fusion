@@ -7,10 +7,12 @@
 #include "Core/Camera/OrthographicCameraController.h"
 #include "Core/Camera/PerspectiveCameraController.h"
 #include "IO/FileLoaders/ObjModel.h"
+#include "Renderer/RenderCommand.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/Renderer2D.h"
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
+#include "UI/ImGui.h"
 
 using namespace FusionEngine;
 
@@ -18,6 +20,22 @@ void EditorLayer::OnAttach()
 {
     m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
     m_Scene = MakeRef<Scene>();
+
+    ImageSpecification imageSpecification;
+    imageSpecification.Width = 100;
+    imageSpecification.Height = 100;
+    m_ViewportImage = Image::Create(imageSpecification);
+
+    FramebufferSpecification framebufferSpecification;
+    FrameBufferAttachment colorAttachment;
+    colorAttachment.Image = m_ViewportImage;
+    framebufferSpecification.Attachments = { {colorAttachment} };
+    framebufferSpecification.Width = 100;
+    framebufferSpecification.Height = 100;
+    framebufferSpecification.ClearColor = {0.5f, 0.25f, 0.1f, 1.0f};
+    m_ViewportFramebuffer = Framebuffer::Create(framebufferSpecification);
+
+    m_ViewportTextureID = UI::ImGuiGetImageHandle(m_ViewportImage);
 }
 
 void EditorLayer::OnDetach()
@@ -26,9 +44,16 @@ void EditorLayer::OnDetach()
 
 void EditorLayer::OnUpdate(const Ref<Time> time)
 {
-    m_Camera->OnUpdate(time->GetDeltaTime());
+    m_ViewportFramebuffer->Begin();
 
+    m_Camera->OnUpdate(time->GetDeltaTime());
     m_Scene->RenderScene(m_Camera);
+
+    m_ViewportFramebuffer->End();
+
+    
+    RenderCommand::BeginSwapchainRenderPass();
+    
 
     // Setup Dockspace
 
@@ -58,6 +83,9 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
     ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
     
     ImGui::Begin("Test Window");
+
+    ImGui::Image(m_ViewportTextureID, ImVec2(100, 100));
+    
     ImGui::End();
     
     // UI
@@ -66,4 +94,6 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
 
     // End Dockspace
     ImGui::End();
+
+    RenderCommand::EndSwapchainRenderPass();
 }

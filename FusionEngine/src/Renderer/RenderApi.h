@@ -22,6 +22,8 @@ namespace FusionEngine
         virtual void ShutDown() = 0;
 
         virtual void BeginFrame() = 0;
+        virtual void BeginSwapchainRenderPass() = 0;
+        virtual void EndSwapchainRenderPass() = 0;
         virtual void Draw(uint32_t vertexCount) = 0;
         virtual void DrawIndexed(uint32_t indexCount) = 0;
         virtual void EndFrame() = 0;

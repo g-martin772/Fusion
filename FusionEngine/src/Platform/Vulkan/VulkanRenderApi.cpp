@@ -42,7 +42,7 @@ namespace FusionEngine
     	}
 
     	// ImGui
-    	UI::ImGuiInitVulkan(m_Instance->GetInstance(), m_Device->Logical(), m_Device->Physical(), m_ImGuiRenderPass,
+    	UI::ImGuiInitVulkan(m_Instance->GetInstance(), m_Device->Logical(), m_Device->Physical(), m_MainRenderPass,
     		m_Device->GraphicsFamily().value(), m_Device->GraphicsQueue(), m_SwapChain->GetImageCount());
     	UI::UploadImGuiFontsVulkan(m_CommandPool, m_MainCommandBuffer, m_Device->Logical(), m_Device->GraphicsQueue());
     }
@@ -63,8 +63,7 @@ namespace FusionEngine
 
     	m_Device->Logical().destroyCommandPool(m_CommandPool);
     	
-    	m_Device->Logical().destroyRenderPass(m_RenderPass);
-    	m_Device->Logical().destroyRenderPass(m_ImGuiRenderPass);
+    	m_Device->Logical().destroyRenderPass(m_MainRenderPass);
     	
 		delete m_Device;
     	
@@ -108,9 +107,14 @@ namespace FusionEngine
     		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
     		FE_ASSERT(false, "Beginning Command Buffer failed");
     	}
+    }
 
+	void VulkanRenderApi::BeginSwapchainRenderPass()
+    {
+    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+    	
     	vk::RenderPassBeginInfo renderPassInfo = {};
-    	renderPassInfo.renderPass = m_RenderPass;
+    	renderPassInfo.renderPass = m_MainRenderPass;
     	renderPassInfo.framebuffer = m_Frames[m_CurrentFrame].FrameBuffer;
     	renderPassInfo.renderArea.offset.x = 0;
     	renderPassInfo.renderArea.offset.y = 0;
@@ -137,7 +141,18 @@ namespace FusionEngine
     	commandBuffer.setScissor(0, 1, &scissor);
     }
 
-    void VulkanRenderApi::Draw(uint32_t vertexCount)
+	void VulkanRenderApi::EndSwapchainRenderPass()
+	{
+    	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
+
+    	// Render ImGui
+    	UI::ImGuiRenderVulkan(commandBuffer);
+
+    	// End
+    	commandBuffer.endRenderPass();
+	}
+
+	void VulkanRenderApi::Draw(uint32_t vertexCount)
     {
     	m_Frames[m_CurrentFrame].CommandBuffer.draw(vertexCount, 1, 0, 0);
     }
@@ -150,29 +165,6 @@ namespace FusionEngine
     void VulkanRenderApi::EndFrame()
     {
     	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
-
-    	commandBuffer.endRenderPass();
-
-		// Render ImGui
-
-    	vk::RenderPassBeginInfo renderPassInfo = {};
-    	renderPassInfo.renderPass = m_ImGuiRenderPass;
-    	renderPassInfo.framebuffer = m_Frames[m_CurrentFrame].FrameBuffer;
-    	renderPassInfo.renderArea.offset.x = 0;
-    	renderPassInfo.renderArea.offset.y = 0;
-    	renderPassInfo.renderArea.extent = m_SwapChain->GetSwapChainExtent();
-
-    	const vk::ClearValue clearColor = { std::array<float, 4>{1.0f, 0.5f, 0.25f, 1.0f} };
-    	renderPassInfo.clearValueCount = 1;
-    	renderPassInfo.pClearValues = &clearColor;
-
-    	commandBuffer.beginRenderPass(&renderPassInfo, vk::SubpassContents::eInline);
-
-		UI::ImGuiRenderVulkan(commandBuffer);
-    	
-    	commandBuffer.endRenderPass();
-
-		// End
     	 
     	try {
     		commandBuffer.end();
@@ -265,7 +257,7 @@ namespace FusionEngine
     	colorAttachment.format = m_SwapChain->GetSurfaceFormat().format;
     	colorAttachment.samples = vk::SampleCountFlagBits::e1;
     	colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
-    	colorAttachment.storeOp = vk::AttachmentStoreOp::eStore;
+    	colorAttachment.storeOp = vk::AttachmentStoreOp::eStore; 
     	colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
     	colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
     	colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
@@ -291,8 +283,7 @@ namespace FusionEngine
     	renderpassInfo.subpassCount = 1;
     	renderpassInfo.pSubpasses = &subpass;
     	try {
-    		m_RenderPass = m_Device->Logical().createRenderPass(renderpassInfo);
-    		m_ImGuiRenderPass = m_Device->Logical().createRenderPass(renderpassInfo);
+    		m_MainRenderPass = m_Device->Logical().createRenderPass(renderpassInfo);
     	}
     	catch (vk::SystemError& err)
     	{

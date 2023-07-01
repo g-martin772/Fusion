@@ -3,6 +3,7 @@
 #include <memory>
 #include <glm/glm.hpp>
 
+#include "Framebuffer.h"
 #include "Core/Camera/Camera.h"
 
 namespace FusionEngine

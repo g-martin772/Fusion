@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Framebuffer.h"
 #include "RenderApi.h"
 #include "Shader.h"
 #include "VertexBuffer.h"
@@ -27,6 +28,7 @@ namespace FusionEngine
         {
             DrawMode DrawMode = DrawMode::Triangles;
             Ref<Shader> Shader;
+            Ref<Framebuffer> FrameBuffer;
             bool WireFrame = false;
 
             std::vector<std::vector<VertexBuffer::Attribute>> VertexBufferLayouts;

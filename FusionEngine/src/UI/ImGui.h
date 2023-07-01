@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Renderer/Image.h"
 
 namespace vk
 {
@@ -18,5 +19,7 @@ namespace FusionEngine { namespace UI {
     void ImGuiNewFrame();
     void ImGuiRenderVulkan(vk::CommandBuffer commandBuffer);
     void UploadImGuiFontsVulkan(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer, vk::Device device, vk::Queue queue);
-    
+
+    void* ImGuiGetImageHandle(const Ref<Image>& image);
+    void ImGuiFreeImageHandle(void* handle);
 }}
