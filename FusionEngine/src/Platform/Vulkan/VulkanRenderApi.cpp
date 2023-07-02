@@ -1,6 +1,7 @@
 ﻿#include "fepch.h"
 #include "VulkanRenderApi.h"
 
+#include <entt/entt.hpp>
 #include <GLFW/glfw3.h>
 
 #include "VulkanDevice.h"
@@ -99,7 +100,7 @@ namespace FusionEngine
 
     	try
     	{
-    		const vk::CommandBufferBeginInfo beginInfo;
+    		constexpr vk::CommandBufferBeginInfo beginInfo;
     		commandBuffer.begin(beginInfo);
     	}
     	catch (vk::SystemError& err)
@@ -227,7 +228,40 @@ namespace FusionEngine
     	m_CurrentFrame = (m_CurrentFrame + 1) % m_Frames.size();
     }
 
-    
+    vk::CommandBuffer VulkanRenderApi::BeginOneTimeCommandBuffer()
+    {
+	    const vk::CommandBuffer commandBuffer = CreateCommandBuffer();
+
+	    constexpr vk::CommandBufferBeginInfo beginInfo = {};
+
+    	commandBuffer.begin(beginInfo);
+
+    	return commandBuffer;
+    }
+
+    void VulkanRenderApi::EndOneTimeCommandBuffer(vk::CommandBuffer commandBuffer)
+    {
+    	commandBuffer.end();
+    	
+    	vk::SubmitInfo submitInfo = {};
+    	submitInfo.commandBufferCount = 1;
+    	submitInfo.pCommandBuffers = &commandBuffer;
+    	
+    	try
+    	{
+    		m_Device->GraphicsQueue().submit(1, &submitInfo, nullptr);
+    	}
+    	catch (vk::SystemError& err)
+    	{
+    		FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
+    		FE_ASSERT(false, "Submitting OneTime Commandbuffer failed");
+    	}
+    	
+    	m_Device->GraphicsQueue().waitIdle();
+
+    	m_Device->Logical().freeCommandBuffers(m_CommandPool, 1, &commandBuffer);
+    }
+
 
     vk::CommandBuffer VulkanRenderApi::CreateCommandBuffer()
     {
@@ -237,7 +271,6 @@ namespace FusionEngine
     	allocInfo.commandBufferCount = 1;
     	
     	try {
-    		FE_INFO("Allocating command buffer");
     		return m_Device->Logical().allocateCommandBuffers(allocInfo)[0];
     	}
     	catch (vk::SystemError& err)
@@ -268,6 +301,30 @@ namespace FusionEngine
     	colorAttachmentRef.attachment = 0;
     	colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
 
+    	// Dependencies
+    	std::vector<vk::SubpassDependency> dependencies;
+
+	    {
+    		VkSubpassDependency& depedency = dependencies.emplace_back();
+    		depedency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    		depedency.dstSubpass = 0;
+    		depedency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    		depedency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    		depedency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    		depedency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    		depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	    }
+	    {
+    		VkSubpassDependency& depedency = dependencies.emplace_back();
+    		depedency.srcSubpass = 0;
+    		depedency.dstSubpass = VK_SUBPASS_EXTERNAL;
+    		depedency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    		depedency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    		depedency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    		depedency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    		depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+	    }
+
     	//Renderpasses are broken down into subpasses, there's always at least one.
     	vk::SubpassDescription subpass = {};
     	subpass.flags = vk::SubpassDescriptionFlags();
@@ -282,6 +339,9 @@ namespace FusionEngine
     	renderpassInfo.pAttachments = &colorAttachment;
     	renderpassInfo.subpassCount = 1;
     	renderpassInfo.pSubpasses = &subpass;
+    	renderpassInfo.dependencyCount = dependencies.size();
+    	renderpassInfo.pDependencies = dependencies.data();
+    	
     	try {
     		m_MainRenderPass = m_Device->Logical().createRenderPass(renderpassInfo);
     	}

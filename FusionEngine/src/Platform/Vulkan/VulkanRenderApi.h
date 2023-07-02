@@ -39,6 +39,9 @@ namespace FusionEngine
         void EndFrame() override;
 
         void WaitDeviceIdle() const { m_Device->Logical().waitIdle(); }
+        vk::CommandBuffer GetMainCommandBuffer() const { return m_MainCommandBuffer; }
+        vk::CommandBuffer BeginOneTimeCommandBuffer();
+        void EndOneTimeCommandBuffer(vk::CommandBuffer commandBuffer);
     private:
         Frame& GetCurrentFrame() { return m_Frames[m_CurrentFrame]; }
     private:

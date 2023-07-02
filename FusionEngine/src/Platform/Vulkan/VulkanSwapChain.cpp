@@ -94,7 +94,7 @@ namespace FusionEngine
             m_Capabilities.minImageCount + 1
         );
 
-        FE_INFO("Creating Swapchain...");
+        FE_INFO("Creating Swapchain with {0} images", imageCount);
         vk::SwapchainCreateInfoKHR createInfo(
             vk::SwapchainCreateFlagsKHR(),
             m_Surface,
@@ -170,7 +170,6 @@ namespace FusionEngine
         m_Capabilities = m_RenderApi->m_Device->Physical().getSurfaceCapabilitiesKHR(m_Surface);
         m_SwapchainExtent = m_Capabilities.currentExtent;
     	
-        FE_INFO("Recreating Swapchain");
         CleanUpSwapChain();
         CreateSwapChain();
         CreateFrameBuffers();
@@ -205,7 +204,6 @@ namespace FusionEngine
     {
         for (auto& frame : m_RenderApi->m_Frames)
         {
-            FE_INFO("Creating FrameBuffer");
             std::vector<vk::ImageView> attachments = {
                 frame.ImageView
             };

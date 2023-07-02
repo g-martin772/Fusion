@@ -127,7 +127,6 @@ namespace FusionEngine
         if (m_InvalidProj)
         {
             m_InvalidProj = false;
-            FE_INFO("FOEV: {0}", m_FOV);
             m_Proj = glm::perspective(glm::radians(m_FOV), m_AspectRatio, m_Near, m_Far);
         }
 

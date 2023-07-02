@@ -61,27 +61,26 @@ namespace FusionEngine
 
     	std::vector<vk::SubpassDependency> dependencies;
 
-    	// What do I need this for?
-    	// {
-    	// 	VkSubpassDependency& depedency = dependencies.emplace_back();
-    	// 	depedency.srcSubpass = VK_SUBPASS_EXTERNAL;
-    	// 	depedency.dstSubpass = 0;
-    	// 	depedency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    	// 	depedency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    	// 	depedency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    	// 	depedency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    	// 	depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-    	// }
-    	// {
-    	// 	VkSubpassDependency& depedency = dependencies.emplace_back();
-    	// 	depedency.srcSubpass = 0;
-    	// 	depedency.dstSubpass = VK_SUBPASS_EXTERNAL;
-    	// 	depedency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    	// 	depedency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-    	// 	depedency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
-    	// 	depedency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
-    	// 	depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
-    	// }
+    	{
+    		VkSubpassDependency& depedency = dependencies.emplace_back();
+    		depedency.srcSubpass = VK_SUBPASS_EXTERNAL;
+    		depedency.dstSubpass = 0;
+    		depedency.srcStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    		depedency.srcAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    		depedency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    		depedency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    		depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+    	}
+    	{
+    		VkSubpassDependency& depedency = dependencies.emplace_back();
+    		depedency.srcSubpass = 0;
+    		depedency.dstSubpass = VK_SUBPASS_EXTERNAL;
+    		depedency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    		depedency.srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    		depedency.dstStageMask = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+    		depedency.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+    		depedency.dependencyFlags = VK_DEPENDENCY_BY_REGION_BIT;
+    	}
 
     	vk::RenderPassCreateInfo renderpassInfo = {};
     	renderpassInfo.flags = vk::RenderPassCreateFlags();

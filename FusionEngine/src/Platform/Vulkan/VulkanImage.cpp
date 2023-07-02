@@ -93,17 +93,22 @@ namespace FusionEngine
             FE_ASSERT(false, "Binding image memory failed");
         }
 
+        // SubResourceRange
+
+        vk::ImageSubresourceRange subResourceRange = {};
+        subResourceRange.aspectMask = aspectFlags;
+        subResourceRange.baseMipLevel = 0;
+        subResourceRange.levelCount = m_Spec.Mips;
+        subResourceRange.baseArrayLayer = 0;
+        subResourceRange.layerCount = m_Spec.Layers;
+        
          // ImageView
 
         vk::ImageViewCreateInfo imageViewCreateInfo = {};
         imageViewCreateInfo.image = m_Image;
         imageViewCreateInfo.viewType = m_Spec.Layers > 1 ? vk::ImageViewType::e2DArray : vk::ImageViewType::e2D;
         imageViewCreateInfo.format = GetVulkanFormat();
-        imageViewCreateInfo.subresourceRange.aspectMask = aspectFlags;
-        imageViewCreateInfo.subresourceRange.baseMipLevel = 0;
-        imageViewCreateInfo.subresourceRange.levelCount = m_Spec.Mips;
-        imageViewCreateInfo.subresourceRange.baseArrayLayer = 0;
-        imageViewCreateInfo.subresourceRange.layerCount = m_Spec.Layers;
+        imageViewCreateInfo.subresourceRange = subResourceRange;
 
         try {
             m_ImageView = m_RenderApi->m_Device->Logical().createImageView(imageViewCreateInfo);
@@ -151,6 +156,25 @@ namespace FusionEngine
         
         m_ImageInfo.imageView = m_ImageView;
         m_ImageInfo.sampler = m_Sampler;
+
+        // Image Transition
+
+        vk::CommandBuffer commandBuffer = m_RenderApi->BeginOneTimeCommandBuffer();
+
+        vk::ImageMemoryBarrier barrier = {};
+        barrier.oldLayout = vk::ImageLayout::eUndefined;
+        barrier.newLayout = m_ImageInfo.imageLayout;
+        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.image = m_Image;
+        barrier.subresourceRange = subResourceRange;
+        barrier.srcAccessMask = vk::AccessFlagBits();
+        barrier.dstAccessMask = vk::AccessFlagBits();
+
+        commandBuffer.pipelineBarrier(vk::PipelineStageFlagBits::eTopOfPipe, vk::PipelineStageFlagBits::eFragmentShader,
+            vk::DependencyFlagBits(), 0, nullptr, 0, nullptr, 1, &barrier);
+        
+        m_RenderApi->EndOneTimeCommandBuffer(commandBuffer);
     }
 
     void VulkanImage::OnResize(uint32_t width, uint32_t height)
