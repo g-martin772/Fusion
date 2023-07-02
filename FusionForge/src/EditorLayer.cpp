@@ -34,6 +34,9 @@ void EditorLayer::OnAttach()
     m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
     Entity e = m_Scene->CreateEntity("Box");
     e.AddComponent<SpriteRenderComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    m_Scene->CreateEntity("Test1");
+    m_Scene->CreateEntity("Test2");
+    m_Scene->CreateEntity("Test3");
 }
 
 void EditorLayer::OnDetach()
@@ -43,7 +46,24 @@ void EditorLayer::OnDetach()
 void EditorLayer::OnUpdate(const Ref<Time> time)
 {
     RenderCommand::BeginSwapchainRenderPass();
+    RenderImGui();
+    RenderCommand::EndSwapchainRenderPass();
     
+    // Render viewport
+    
+    m_ViewportFramebuffer->Begin();
+    
+    if(m_IsViewportFocused)
+        m_Camera->OnUpdate(time->GetDeltaTime());
+
+    m_Scene->RenderScene(m_Camera);
+
+    m_ViewportFramebuffer->End();
+}
+
+
+void EditorLayer::RenderImGui()
+{
     // Setup Dockspace
 
     static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
@@ -88,28 +108,19 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
         m_ViewportFramebuffer->OnResize(newViewportSize.x, newViewportSize.y);
     }
     ImGui::Image(m_ViewportFramebuffer->GetCurrentImage()->GetImGuiHandle(), viewportPanelSize);
-    bool viewportFocus = ImGui::IsWindowFocused();
+    m_IsViewportFocused = ImGui::IsWindowFocused();
+    m_IsViewportHovered = ImGui::IsWindowHovered();
     ImGui::End();
     
     // UI
     ImGui::ShowDemoWindow();
     ImGui::ShowMetricsWindow();
 
+    DrawSceneHierarchyPanel();
+
+    if(m_SelectedEntity)
+        FE_INFO("{0}", m_SelectedEntity.GetComponent<std::string_view>());
+
     // End Dockspace
     ImGui::End();
-
-    RenderCommand::EndSwapchainRenderPass();
-
-
-    
-    // Render viewport
-    
-    m_ViewportFramebuffer->Begin();
-    
-    if(viewportFocus)
-        m_Camera->OnUpdate(time->GetDeltaTime());
-
-    m_Scene->RenderScene(m_Camera);
-
-    m_ViewportFramebuffer->End();
 }

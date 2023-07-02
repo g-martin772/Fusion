@@ -27,5 +27,5 @@ namespace FusionEngine
     template<typename...>
     struct ComponentGroup {};
 
-    using AllComponents = ComponentGroup<TransformComponent>;
+    using AllComponents = ComponentGroup<UUID, std::string_view, TransformComponent, SpriteRenderComponent>;
 }

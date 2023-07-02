@@ -16,6 +16,9 @@ namespace FusionEngine
         Entity GetEntityByUUID(const UUID uuid);
         Entity GetEntityByName(const std::string_view name);
 
+        template<typename... Components>
+        auto View() { return m_Registry.view<Components...>(); }
+
         void StartRuntime();
         void StopRuntime();
 

@@ -6,7 +6,7 @@
 
 #include "VulkanDevice.h"
 #include "VulkanUtils.h"
-#include "UI/ImGui.h"
+#include "..\..\UI\ImGuiBackend.h"
 
 #undef CreateSemaphore
 
@@ -43,9 +43,9 @@ namespace FusionEngine
     	}
 
     	// ImGui
-    	UI::ImGuiInitVulkan(m_Instance->GetInstance(), m_Device->Logical(), m_Device->Physical(), m_MainRenderPass,
+    	ImGuiBackend::ImGuiInitVulkan(m_Instance->GetInstance(), m_Device->Logical(), m_Device->Physical(), m_MainRenderPass,
     		m_Device->GraphicsFamily().value(), m_Device->GraphicsQueue(), m_SwapChain->GetImageCount());
-    	UI::UploadImGuiFontsVulkan(m_CommandPool, m_MainCommandBuffer, m_Device->Logical(), m_Device->GraphicsQueue());
+    	ImGuiBackend::UploadImGuiFontsVulkan(m_CommandPool, m_MainCommandBuffer, m_Device->Logical(), m_Device->GraphicsQueue());
     }
 	
     void VulkanRenderApi::OnWindowResize(uint32_t width, uint32_t height)
@@ -57,7 +57,7 @@ namespace FusionEngine
     {
 		m_Device->Logical().waitIdle();
 
-		UI::ImGuiShutdownVulkan(m_Device->Logical());
+		ImGuiBackend::ImGuiShutdownVulkan(m_Device->Logical());
     	
     	delete m_ResourceManager;
     	delete m_SwapChain;
@@ -73,7 +73,7 @@ namespace FusionEngine
 
     void VulkanRenderApi::BeginFrame()
     {
-		UI::ImGuiNewFrame();
+		ImGuiBackend::ImGuiNewFrame();
     	
     	auto result1 = m_Device->Logical().waitForFences(1, &m_Frames[m_CurrentFrame].InFlightFence, VK_TRUE, UINT64_MAX);
 
@@ -147,7 +147,7 @@ namespace FusionEngine
     	const vk::CommandBuffer commandBuffer = m_Frames[m_CurrentFrame].CommandBuffer;
 
     	// Render ImGui
-    	UI::ImGuiRenderVulkan(commandBuffer);
+    	ImGuiBackend::ImGuiRenderVulkan(commandBuffer);
 
     	// End
     	commandBuffer.endRenderPass();

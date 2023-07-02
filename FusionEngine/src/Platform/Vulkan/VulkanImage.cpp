@@ -4,7 +4,7 @@
 #include "VulkanRenderApi.h"
 #include "VulkanDevice.h"
 #include "Renderer/RenderCommand.h"
-#include "UI/ImGui.h"
+#include "..\..\UI\ImGuiBackend.h"
 
 namespace FusionEngine
 {
@@ -188,7 +188,7 @@ namespace FusionEngine
         m_RenderApi->WaitDeviceIdle();
         if(m_ImGuiHandle != nullptr)
         {
-            UI::ImGuiFreeImageHandle(m_ImGuiHandle);
+            ImGuiBackend::ImGuiFreeImageHandle(m_ImGuiHandle);
             m_ImGuiHandle = nullptr;
         }
         m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
@@ -203,7 +203,7 @@ namespace FusionEngine
     {
         if(m_ImGuiHandle == nullptr)
         {
-            m_ImGuiHandle = UI::ImGuiCreateImageHandle(m_ImageInfo);
+            m_ImGuiHandle = ImGuiBackend::ImGuiCreateImageHandle(m_ImageInfo);
         }
 
         return m_ImGuiHandle;

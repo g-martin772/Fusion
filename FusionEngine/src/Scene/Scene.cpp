@@ -24,7 +24,7 @@ namespace FusionEngine
             }
         }
         FE_WARN("Entity with ID {0} not found!", uuid.ToString());
-        return CreateEntity();
+        return Entity();
     }
 
     Entity Scene::GetEntityByName(const std::string_view name)
@@ -37,7 +37,7 @@ namespace FusionEngine
             }
         }
         FE_WARN("Entity with name \"{0}\" not found!", name);
-        return CreateEntity();
+        return Entity();
     }
 
     void Scene::StartRuntime()

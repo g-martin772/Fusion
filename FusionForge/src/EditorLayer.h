@@ -7,6 +7,7 @@
 #include "Renderer/Framebuffer.h"
 #include "Renderer/Pipeline.h"
 #include "Scene/Scene.h"
+#include "Scene/Entity.h"
 
 using namespace FusionEngine;
 
@@ -18,10 +19,17 @@ public:
     void OnDetach() override;
 
 private:
+    void RenderImGui();
+    void DrawSceneHierarchyPanel();
+private:
     Ref<Scene> m_Scene;
     Ref<Camera> m_Camera;
 
     Ref<Framebuffer> m_ViewportFramebuffer;
     Ref<Image> m_ViewportImage;
     glm::uvec2 m_ViewportSize;
+    bool m_IsViewportFocused = false, m_IsViewportHovered = false;
+
+    // SceneHierarchyPanel
+    Entity m_SelectedEntity;
 };

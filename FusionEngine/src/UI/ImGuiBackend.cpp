@@ -1,5 +1,5 @@
 ﻿#include "fepch.h"
-#include "ImGui.h"
+#include "ImGuiBackend.h"
 
 
 #include <GLFW/glfw3.h>
@@ -16,7 +16,7 @@
 #include "Platform/Vulkan/VulkanRenderApi.h"
 #include "Renderer/RenderCommand.h"
 
-namespace FusionEngine { namespace UI {
+namespace FusionEngine { namespace ImGuiBackend {
 
     static vk::DescriptorPool descriptorPool;
 

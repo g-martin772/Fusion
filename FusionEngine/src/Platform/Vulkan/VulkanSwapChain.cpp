@@ -154,7 +154,6 @@ namespace FusionEngine
             FE_ERROR("VulkanException {0}: {1}", err.code(), err.what());
             FE_ASSERT(false, "Creating swapchain failed");
         }
-        FE_INFO("Success");
     }
 
     void VulkanSwapChain::RecreateSwapChain()

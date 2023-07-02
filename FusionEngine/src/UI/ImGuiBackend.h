@@ -13,7 +13,7 @@ namespace vk
     class CommandPool;
 }
 
-namespace FusionEngine { namespace UI {
+namespace FusionEngine { namespace ImGuiBackend {
 
     void ImGuiInitVulkan(vk::Instance instance, vk::Device device, vk::PhysicalDevice physicalDevice, vk::RenderPass renderPass, uint32_t queueFamilyIndex, vk::Queue queue, uint32_t imageCount);
     void ImGuiShutdownVulkan(vk::Device device);
