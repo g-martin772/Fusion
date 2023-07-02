@@ -3,16 +3,13 @@
 #include "imgui.h"
 #include "Core/Input.h"
 #include "Core/Log.h"
-#include "Core/UUID.h"
 #include "Core/Camera/OrthographicCameraController.h"
 #include "Core/Camera/PerspectiveCameraController.h"
 #include "IO/FileLoaders/ObjModel.h"
 #include "Renderer/RenderCommand.h"
-#include "Renderer/Renderer.h"
 #include "Renderer/Renderer2D.h"
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
-#include "UI/ImGui.h"
 
 using namespace FusionEngine;
 
@@ -32,8 +29,6 @@ void EditorLayer::OnAttach()
     framebufferSpecification.ClearColor = {0.5f, 0.25f, 0.1f, 1.0f};
     m_ViewportFramebuffer = Framebuffer::Create(framebufferSpecification);
 
-    m_ViewportTextureID = UI::ImGuiGetImageHandle(m_ViewportImage);
-
     // Setup scene
     m_Scene = MakeRef<Scene>();
     m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
@@ -43,7 +38,6 @@ void EditorLayer::OnAttach()
 
 void EditorLayer::OnDetach()
 {
-    UI::ImGuiFreeImageHandle(m_ViewportTextureID);
 }
 
 void EditorLayer::OnUpdate(const Ref<Time> time)
@@ -92,10 +86,8 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
     {
         m_Camera->OnResize(newViewportSize.x, newViewportSize.y);
         m_ViewportFramebuffer->OnResize(newViewportSize.x, newViewportSize.y);
-        UI::ImGuiFreeImageHandle(m_ViewportTextureID);
-        m_ViewportTextureID = UI::ImGuiGetImageHandle(m_ViewportImage);
     }
-    ImGui::Image(m_ViewportTextureID, viewportPanelSize);
+    ImGui::Image(m_ViewportFramebuffer->GetCurrentImage()->GetImGuiHandle(), viewportPanelSize);
     bool viewportFocus = ImGui::IsWindowFocused();
     ImGui::End();
     

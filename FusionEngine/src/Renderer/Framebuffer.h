@@ -50,6 +50,7 @@ namespace FusionEngine
         virtual void OnResize(uint32_t with, uint32_t height) = 0;
         virtual void Begin() = 0;
         virtual void End() = 0;
+        [[nodiscard]] virtual Ref<Image> GetCurrentImage() const = 0;
 
         [[nodiscard]] Ref<Image> GetImage(const uint32_t index = 0) const { return m_Spec.Attachments[index].Image; }
         [[nodiscard]] FramebufferSpecification GetSpecification() const { return  m_Spec; }

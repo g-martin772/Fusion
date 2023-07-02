@@ -139,40 +139,41 @@ namespace FusionEngine { namespace UI {
         ImGui_ImplVulkan_DestroyFontUploadObjects();
     }
 
-    void* ImGuiGetImageHandle(const Ref<Image>& image)
+    void* ImGuiCreateImageHandle(vk::DescriptorImageInfo imageInfo)
     {
         switch (RenderApi::GetApi()) {
             case RenderApi::Api::Vulkan: {
-                const Ref<VulkanImage> vulkanImage = std::dynamic_pointer_cast<VulkanImage>(image);
-                ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
-                ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
+                const ImGui_ImplVulkan_Data* bd = ImGui_ImplVulkan_GetBackendData();
+                const ImGui_ImplVulkan_InitInfo* v = &bd->VulkanInitInfo;
 
                 // Create Descriptor Set:
-                VkDescriptorSet descriptor_set;
+                VkDescriptorSet descriptorSet;
                 {
-                    VkDescriptorSetAllocateInfo alloc_info = {};
-                    alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-                    alloc_info.descriptorPool = v->DescriptorPool;
-                    alloc_info.descriptorSetCount = 1;
-                    alloc_info.pSetLayouts = &bd->DescriptorSetLayout;
-                    VkResult err = vkAllocateDescriptorSets(v->Device, &alloc_info, &descriptor_set);
+                    VkDescriptorSetAllocateInfo allocInfo = {};
+                    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+                    allocInfo.descriptorPool = v->DescriptorPool;
+                    allocInfo.descriptorSetCount = 1;
+                    allocInfo.pSetLayouts = &bd->DescriptorSetLayout;
+                    const VkResult err = vkAllocateDescriptorSets(v->Device, &allocInfo, &descriptorSet);
                     check_vk_result(err);
                 }
 
                 // Update the Descriptor Set:
                 {
-                    VkDescriptorImageInfo desc_image = vulkanImage->GetDescriptorImageInfo();
-                    VkWriteDescriptorSet write_desc[1] = {};
-                    write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-                    write_desc[0].dstSet = descriptor_set;
-                    write_desc[0].descriptorCount = 1;
-                    write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-                    write_desc[0].pImageInfo = &desc_image;
-                    vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, nullptr);
+                    const VkDescriptorImageInfo descImage = imageInfo;
+                    VkWriteDescriptorSet writeDesc = {};
+                    writeDesc.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+                    writeDesc.dstSet = descriptorSet;
+                    writeDesc.descriptorCount = 1;
+                    writeDesc.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+                    writeDesc.pImageInfo = &descImage;
+                    vkUpdateDescriptorSets(v->Device, 1, &writeDesc, 0, nullptr);
                 }
-                return descriptor_set;
+                return descriptorSet;
             }
         }
+
+        return nullptr;
     }
 
     void ImGuiFreeImageHandle(void* handle)

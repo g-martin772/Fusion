@@ -42,6 +42,7 @@ namespace FusionEngine
         virtual ~Image() = default;
 
         virtual void OnResize(uint32_t width, uint32_t height) = 0;
+        [[nodiscard]] virtual void* GetImGuiHandle() = 0;
 
         [[nodiscard]] ImageFormat GetFormat() const { return m_Spec.Format; }
         [[nodiscard]] ImageTextureFilter GetImageTextureFilter() const { return m_Spec.Filter; }

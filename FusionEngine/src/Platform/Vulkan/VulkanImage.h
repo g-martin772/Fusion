@@ -17,6 +17,8 @@ namespace FusionEngine
 
         void OnResize(uint32_t width, uint32_t height) override;
 
+        [[nodiscard]] void* GetImGuiHandle() override;
+        
         [[nodiscard]] VkImageLayout GetVulkanImageLayout() const;
         [[nodiscard]] vk::Format GetVulkanFormat() const;
         
@@ -35,5 +37,6 @@ namespace FusionEngine
         uint32_t m_Width, m_Height;
         vk::DescriptorImageInfo m_ImageInfo;
         vk::DeviceMemory m_Memory;
+        void* m_ImGuiHandle = nullptr;
     };
 }

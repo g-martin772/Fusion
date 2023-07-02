@@ -3,6 +3,7 @@
 
 namespace vk
 {
+    struct DescriptorImageInfo;
     class Instance;
     class PhysicalDevice;
     class RenderPass;
@@ -20,6 +21,6 @@ namespace FusionEngine { namespace UI {
     void ImGuiRenderVulkan(vk::CommandBuffer commandBuffer);
     void UploadImGuiFontsVulkan(vk::CommandPool commandPool, vk::CommandBuffer commandBuffer, vk::Device device, vk::Queue queue);
 
-    void* ImGuiGetImageHandle(const Ref<Image>& image);
+    void* ImGuiCreateImageHandle(vk::DescriptorImageInfo imageInfo);
     void ImGuiFreeImageHandle(void* handle);
 }}

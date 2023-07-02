@@ -4,6 +4,7 @@
 #include "VulkanRenderApi.h"
 #include "VulkanDevice.h"
 #include "Renderer/RenderCommand.h"
+#include "UI/ImGui.h"
 
 namespace FusionEngine
 {
@@ -161,12 +162,27 @@ namespace FusionEngine
         m_Height = height;
 
         m_RenderApi->WaitDeviceIdle();
+        if(m_ImGuiHandle != nullptr)
+        {
+            UI::ImGuiFreeImageHandle(m_ImGuiHandle);
+            m_ImGuiHandle = nullptr;
+        }
         m_RenderApi->m_Device->Logical().freeMemory(m_Memory);
         m_RenderApi->m_Device->Logical().destroySampler(m_Sampler);
         m_RenderApi->m_Device->Logical().destroyImageView(m_ImageView);
         m_RenderApi->m_Device->Logical().destroyImage(m_Image);
 
         CreateVulkanObjects();
+    }
+
+    void* VulkanImage::GetImGuiHandle()
+    {
+        if(m_ImGuiHandle == nullptr)
+        {
+            m_ImGuiHandle = UI::ImGuiCreateImageHandle(m_ImageInfo);
+        }
+
+        return m_ImGuiHandle;
     }
 
     VkImageLayout VulkanImage::GetVulkanImageLayout() const

@@ -17,6 +17,8 @@ namespace FusionEngine
         void OnResize(uint32_t width, uint32_t height) override;
         void Begin() override;
         void End() override;
+        
+        [[nodiscard]] Ref<Image> GetCurrentImage() const override;
 
         [[nodiscard]] vk::RenderPass GetRenderPass() const { return m_RenderPass; }
         [[nodiscard]] vk::Framebuffer GetFramebuffer() const { return m_Framebuffers[m_FrameIndex]; }
