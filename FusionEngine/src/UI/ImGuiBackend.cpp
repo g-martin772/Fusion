@@ -24,7 +24,7 @@ namespace FusionEngine { namespace ImGuiBackend {
     {
         if (result != VK_SUCCESS)
         {
-            FE_ASSERT(false, "Vulkan API call failed with error code: {0}", result);
+            FE_ASSERT(false, "Vulkan API call failed");
         }
     }
     
@@ -61,7 +61,8 @@ namespace FusionEngine { namespace ImGuiBackend {
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;  
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_NoMouseCursorChange;  
         
         ImGui_ImplGlfw_InitForVulkan(static_cast<GLFWwindow*>(Application::Get()->GetWindow()->GetNativeWindow()), true);
         

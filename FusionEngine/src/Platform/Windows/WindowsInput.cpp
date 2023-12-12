@@ -52,12 +52,13 @@ namespace FusionEngine
     {
         if (capture)
         {
-            glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+            glfwSetInputMode(m_WindowHandle, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
         }
         else
         {
             glfwSetInputMode(m_WindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            glfwSetInputMode(m_WindowHandle, GLFW_RAW_MOUSE_MOTION, GLFW_FALSE);
         }
     }
 }

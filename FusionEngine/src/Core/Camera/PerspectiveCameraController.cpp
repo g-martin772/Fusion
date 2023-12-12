@@ -8,9 +8,9 @@
 namespace FusionEngine
 {
     PerspectiveCameraController::PerspectiveCameraController(float fov, float aspectRatio, float nearClip, float farClip)
-        : m_FOV(fov), m_AspectRatio(aspectRatio), m_Near(nearClip), m_Far(farClip), m_CameraPosition(glm::vec3(0.0f, 0.0f, 1.0f)),
-          m_CameraFront(glm::vec3(0.0f, 0.0f, -1.0f)), m_CameraUp(glm::vec3(0.0f, 1.0f, 0.0f)), m_CameraSpeed(1.0f), m_ZoomSpeed(30.0f),
-          m_MouseSensitivity(0.1f), m_Yaw(-90.0f), m_Pitch(0.0f)
+        : m_CameraPosition(glm::vec3(0.0f, 0.0f, 1.0f)), m_CameraFront(glm::vec3(0.0f, 0.0f, -1.0f)), m_CameraUp(glm::vec3(0.0f, 1.0f, 0.0f)),
+          m_CameraSpeed(1.0f), m_FOV(fov), m_Yaw(-90.0f), m_Pitch(0.0f), m_ZoomSpeed(30.0f), m_MouseSensitivity(0.1f),
+          m_AspectRatio(aspectRatio), m_Near(nearClip), m_Far(farClip)
     {
     }
 
@@ -62,10 +62,7 @@ namespace FusionEngine
             m_InvalidProj = true;
         }
 
-        if (m_FOV > 179.0f)
-            m_FOV = 179.0f;
-        if (m_FOV < 1.0f)
-            m_FOV = 1.0f;
+        m_FOV = std::clamp(m_FOV, 1.0f, 179.0f);
 
         // Camera orientation control with mouse input
         if (Input::IsMouseButtonPressed(MouseCode::Right))
@@ -77,11 +74,8 @@ namespace FusionEngine
             m_Pitch += yOffset;
 
             // Clamp pitch to avoid flipping the camera
-            if (m_Pitch > 89.0f)
-                m_Pitch = 89.0f;
-            if (m_Pitch < -89.0f)
-                m_Pitch = -89.0f;
-
+            m_Pitch = std::clamp(m_Pitch, -89.0f, 89.0f);
+            
             glm::vec3 front;
             front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
             front.y = sin(glm::radians(m_Pitch));

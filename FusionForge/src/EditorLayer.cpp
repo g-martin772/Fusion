@@ -15,6 +15,7 @@ using namespace FusionEngine;
 
 void EditorLayer::OnAttach()
 {
+    // Setup Viewport
     ImageSpecification imageSpecification;
     imageSpecification.Width = 100;
     imageSpecification.Height = 100;
@@ -31,7 +32,7 @@ void EditorLayer::OnAttach()
 
     // Setup scene
     m_Scene = MakeRef<Scene>();
-    m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
+    m_Camera = MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
     Entity e = m_Scene->CreateEntity("Box");
     e.AddComponent<SpriteRenderComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
     m_Scene->CreateEntity("Test1");
@@ -116,6 +117,7 @@ void EditorLayer::RenderImGui()
     ImGui::ShowDemoWindow();
     ImGui::ShowMetricsWindow();
 
+    // Panels
     DrawSceneHierarchyPanel();
 
     if(m_SelectedEntity)
