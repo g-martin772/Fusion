@@ -20,7 +20,7 @@ namespace FusionEngine
     }
 #pragma endregion Callbacks
     
-    void WindowsWindow::Init()
+    void WindowsWindow::InitPlatform()
     {
         if (!glfwInit())
             FE_ASSERT(false, "Failed to initialize glfw!");
@@ -39,7 +39,7 @@ namespace FusionEngine
         glfwMakeContextCurrent(m_Window);
     }
 
-    void WindowsWindow::OnUpdate()
+    void WindowsWindow::OnUpdatePlatform()
     {
         if(glfwWindowShouldClose(m_Window))
             Application::Get()->Close();
@@ -48,7 +48,7 @@ namespace FusionEngine
         glfwSwapBuffers(m_Window);
     }
 
-    void WindowsWindow::ShutDown()
+    void WindowsWindow::ShutDownPlatform()
     {
         glfwDestroyWindow(m_Window);
         glfwTerminate();
