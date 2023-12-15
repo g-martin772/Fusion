@@ -8,7 +8,7 @@ namespace FusionEngine
     class UniformBuffer
     {
     public:
-        static Ref<UniformBuffer> Create(const std::string& name, uint32_t size, uint32_t binding, ShaderType shaderType);
+        static Shared<UniformBuffer> Create(const std::string& name, uint32_t size, uint32_t binding, ShaderType shaderType);
         virtual ~UniformBuffer() = default;
 
         virtual void Bind() = 0;

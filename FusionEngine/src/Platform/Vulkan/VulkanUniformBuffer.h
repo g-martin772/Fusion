@@ -18,7 +18,7 @@ namespace FusionEngine
 
         VulkanBuffer* Buffer;
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         uint32_t m_Binding;
 
         vk::DescriptorSetLayoutBinding m_LayoutBinding;

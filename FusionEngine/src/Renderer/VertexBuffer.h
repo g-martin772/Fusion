@@ -15,7 +15,7 @@ namespace FusionEngine
             Vec2, Vec3, Vec4
         };
     public:
-        static Ref<VertexBuffer> Create(const std::vector<Attribute>& attributes, uint32_t size);
+        static Shared<VertexBuffer> Create(const std::vector<Attribute>& attributes, uint32_t size);
         virtual ~VertexBuffer() = default;
 
         virtual void Bind() = 0;

@@ -64,7 +64,7 @@ namespace FusionEngine
     {
     }
 
-    void Scene::RenderScene(const Ref<Camera>& camera)
+    void Scene::RenderScene(const Shared<Camera>& camera)
     {
         Renderer2D::BeginScene(camera);
         for(auto [entity, tc, src] : m_Registry.view<TransformComponent, SpriteRenderComponent>().each())

@@ -21,20 +21,20 @@ namespace FusionEngine
     
     struct RenderData2D
     {
-        Ref<Shader> QuadShader;
-        Ref<Pipeline> QuadPipeline;
-        Ref<UniformBuffer> CameraUniformBuffer;
+        Shared<Shader> QuadShader;
+        Shared<Pipeline> QuadPipeline;
+        Shared<UniformBuffer> CameraUniformBuffer;
         CameraData* CameraData;
-        Ref<Camera> Camera;
+        Shared<Camera> Camera;
 
         uint32_t QuadVertexSize = 4 * (sizeof(glm::vec3) + sizeof(glm::vec4));
         std::vector<VertexBuffer::Attribute> QuadVertexBufferLayout;
-        Ref<VertexBuffer> QuadVertexBuffer;
+        Shared<VertexBuffer> QuadVertexBuffer;
         char* QuadBufferStart;
         char* QuadBufferCurrent;
 
         uint32_t QuadIndexSize = 6 * sizeof(uint32_t);
-        Ref<IndexBuffer> QuadIndexBuffer;
+        Shared<IndexBuffer> QuadIndexBuffer;
         uint32_t* QuadIndexBufferStart;
         uint32_t* QuadIndexBufferCurrent;
 
@@ -84,7 +84,7 @@ namespace FusionEngine
         delete s_Data;
     }
     
-    void Renderer2D::BeginScene(const Ref<Camera>& camera)
+    void Renderer2D::BeginScene(const Shared<Camera>& camera)
     {
         s_Data->Camera = camera;
         s_Data->CameraData->ViewProjection = s_Data->Camera->GetViewProjectionMatrix();

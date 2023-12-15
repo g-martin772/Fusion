@@ -31,8 +31,8 @@ void EditorLayer::OnAttach()
     m_ViewportFramebuffer = Framebuffer::Create(framebufferSpecification);
 
     // Setup scene
-    m_Scene = MakeRef<Scene>();
-    m_Camera = MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
+    m_Scene = MakeShared<Scene>();
+    m_Camera = MakeShared<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
     Entity e = m_Scene->CreateEntity("Box");
     e.AddComponent<SpriteRenderComponent>(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
     m_Scene->CreateEntity("Test1");
@@ -44,7 +44,7 @@ void EditorLayer::OnDetach()
 {
 }
 
-void EditorLayer::OnUpdate(const Ref<Time> time)
+void EditorLayer::OnUpdate(const Time& time)
 {
     RenderCommand::BeginSwapchainRenderPass();
     RenderImGui();
@@ -55,7 +55,7 @@ void EditorLayer::OnUpdate(const Ref<Time> time)
     m_ViewportFramebuffer->Begin();
     
     if(m_IsViewportFocused)
-        m_Camera->OnUpdate(time->GetDeltaTime());
+        m_Camera->OnUpdate(time.GetDeltaTime());
 
     m_Scene->RenderScene(m_Camera);
 

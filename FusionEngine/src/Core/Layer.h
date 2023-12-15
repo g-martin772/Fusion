@@ -14,7 +14,7 @@ namespace FusionEngine
 
         virtual void OnAttach() {}
         virtual void OnDetach() {}
-        virtual void OnUpdate(Ref<Time> time) {}
+        virtual void OnUpdate(const Time& time) {}
 
         [[nodiscard]] const std::string& GetName() const { return m_DebugName; }
     protected:

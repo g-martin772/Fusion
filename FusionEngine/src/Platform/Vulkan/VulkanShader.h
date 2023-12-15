@@ -20,7 +20,7 @@ namespace FusionEngine
     private:
         vk::ShaderModule CreateShaderModule(const std::vector<char>& spirv) const;
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         
         std::vector<char> m_VertexShader, m_FragmentShader;
         vk::ShaderModule  m_VertexShaderModule, m_FragmentShaderModule;

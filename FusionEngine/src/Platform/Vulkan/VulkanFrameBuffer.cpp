@@ -204,7 +204,7 @@ namespace FusionEngine
     	m_RenderApi->GetCurrentFrame().CommandBuffer.endRenderPass();
     }
 
-    Ref<Image> VulkanFrameBuffer::GetCurrentImage() const
+    Shared<Image> VulkanFrameBuffer::GetCurrentImage() const
     {
     	return  m_Spec.Attachments[m_FrameIndex].Image;
     }

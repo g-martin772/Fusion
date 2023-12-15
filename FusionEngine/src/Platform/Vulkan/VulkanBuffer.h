@@ -16,7 +16,7 @@ namespace FusionEngine
         [[nodiscard]] vk::DeviceMemory GetMemory() const { return m_Memory; }
         [[nodiscard]] uint32_t GetSize() const { return m_Size; }
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         
         vk::Buffer m_Buffer;
         vk::DeviceMemory m_Memory;

@@ -13,8 +13,8 @@ namespace FusionEngine
         ObjModel(const std::string& path);
         ~ObjModel();
 
-        Ref<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
-        Ref<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
+        Shared<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
+        Shared<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
         uint32_t GetIndexCount() const { return m_IndexCount; }
     private:
         uint32_t ReadCorner(const std::string& corner);
@@ -22,8 +22,8 @@ namespace FusionEngine
         std::vector<glm::vec3> m_VertexPositions;
         std::vector<uint32_t> m_Indices;
         
-        Ref<VertexBuffer> m_VertexBuffer;
-        Ref<IndexBuffer> m_IndexBuffer;
+        Shared<VertexBuffer> m_VertexBuffer;
+        Shared<IndexBuffer> m_IndexBuffer;
         uint32_t m_IndexCount = 0;
     };
     

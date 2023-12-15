@@ -17,16 +17,16 @@ using namespace FusionEngine;
 
 void EditorLayer::OnAttach()
 {
-    m_Camera = FusionEngine::MakeRef<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
-    m_Model = MakeRef<ObjModel>("assets/models/basic/textcube.obj");
-    m_Scene = MakeRef<Scene>();
+    m_Camera = FusionEngine::MakeShared<PerspectiveCameraController>(90, 16.0f / 9.0f, 0.001f, 100.0f);
+    m_Model = MakeShared<ObjModel>("assets/models/basic/textcube.obj");
+    m_Scene = MakeShared<Scene>();
 
     // Test ECS
     Entity e = m_Scene->CreateEntity();
     e.AddComponent<SpriteRenderComponent>(SpriteRenderComponent{glm::vec4{1.0f, 1.0f, 0.0f, 1.0f}});
 }
 
-void EditorLayer::OnUpdate(const Ref<Time> time)
+void EditorLayer::OnUpdate(const Shared<Time> time)
 {
     m_Camera->OnUpdate(time->GetDeltaTime());
 

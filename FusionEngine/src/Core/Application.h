@@ -21,15 +21,13 @@ namespace FusionEngine
 
         void Close();
 
-        void PushLayer(Layer* layer);
-        void PushOverlay(Layer* layer);
-
-        Ref<Window> GetWindow() { return m_Window; }
+        Shared<Window> GetWindow() { return m_MainWindow; }
+        Shared<Window> GetTestWindow() { return m_TestWindow; }
     private:
         bool m_Running = true;
 
-        Ref<Time> m_Time;
-        Ref<Window> m_Window;
-        LayerStack m_LayerStack;
+        Shared<Time> m_Time;
+        Shared<Window> m_MainWindow;
+        Shared<Window> m_TestWindow;
     };
 }

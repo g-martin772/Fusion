@@ -31,7 +31,7 @@ namespace FusionEngine
         void RecreateResources();
         void RecreateFrameResources();
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         uint32_t m_FrameCount;
         
         std::vector<vk::DescriptorSetLayoutBinding> m_LayoutBindings;

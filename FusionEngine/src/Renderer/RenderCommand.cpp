@@ -5,7 +5,7 @@
 
 namespace FusionEngine
 {
-    Ref<RenderApi> RenderCommand::s_RenderApi = RenderApi::Create();
+    Shared<RenderApi> RenderCommand::s_RenderApi = RenderApi::Create();
     
     void RenderCommand::Init()
     {
@@ -52,7 +52,7 @@ namespace FusionEngine
         s_RenderApi->OnWindowResize(width, height);
     }
 
-    const Ref<RenderApi>& RenderCommand::GetRenderApi()
+    const Shared<RenderApi>& RenderCommand::GetRenderApi()
     {
         return s_RenderApi;
     }

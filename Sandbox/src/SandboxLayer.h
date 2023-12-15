@@ -10,12 +10,12 @@ class EditorLayer : public FusionEngine::Layer
 {
 public:
     void OnAttach() override;
-    void OnUpdate(FusionEngine::Ref<FusionEngine::Time> time) override;
+    void OnUpdate(FusionEngine::Shared<FusionEngine::Time> time) override;
     void OnDetach() override;
 private:
-    FusionEngine::Ref<FusionEngine::Scene> m_Scene;
+    FusionEngine::Shared<FusionEngine::Scene> m_Scene;
     
-    FusionEngine::Ref<FusionEngine::Camera> m_Camera;
-    FusionEngine::Ref<FusionEngine::ObjModel> m_Model;
-    FusionEngine::Ref<FusionEngine::ObjModel> m_Dice;
+    FusionEngine::Shared<FusionEngine::Camera> m_Camera;
+    FusionEngine::Shared<FusionEngine::ObjModel> m_Model;
+    FusionEngine::Shared<FusionEngine::ObjModel> m_Dice;
 };

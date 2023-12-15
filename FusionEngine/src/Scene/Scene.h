@@ -28,7 +28,7 @@ namespace FusionEngine
         void OnUpdateRuntime();
         void OnUpdateSimulation();
 
-        void RenderScene(const Ref<Camera>& camera);
+        void RenderScene(const Shared<Camera>& camera);
     private:
         entt::registry m_Registry;
 

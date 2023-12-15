@@ -11,7 +11,7 @@
 namespace FusionEngine
 {
     template<typename T>
-    using Ref = std::shared_ptr<T>;
+    using Shared = std::shared_ptr<T>;
     
     template<typename T>
     using Unique = std::unique_ptr<T>;
@@ -20,7 +20,7 @@ namespace FusionEngine
     using Weak = std::weak_ptr<T>;
 
     template<typename T, typename ... Args>
-    constexpr Ref<T> MakeRef(Args&& ... args)
+    constexpr Shared<T> MakeShared(Args&& ... args)
     {
         return std::make_shared<T>(std::forward<Args>(args)...);
     }

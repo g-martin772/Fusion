@@ -22,14 +22,14 @@ namespace FusionEngine
         [[nodiscard]] vk::PipelineLayout MakePipelineLayout() const;
         [[nodiscard]] vk::DescriptorSetLayout MakeDescriptorSetLayout() const;
     private:
-        Ref<VulkanShader> m_Shader;
+        Shared<VulkanShader> m_Shader;
 
         vk::PipelineLayout m_PipelineLayout;
         vk::Pipeline m_Pipeline;
 
         vk::DescriptorSetLayout m_DescriptorSetLayout;
         
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         PipelineSpecification m_Spec;
     };
     

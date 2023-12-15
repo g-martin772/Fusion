@@ -38,7 +38,7 @@ namespace FusionEngine
     class Image
     {
     public:
-        static Ref<Image> Create(const ImageSpecification& spec);
+        static Shared<Image> Create(const ImageSpecification& spec);
         virtual ~Image() = default;
 
         virtual void OnResize(uint32_t width, uint32_t height) = 0;

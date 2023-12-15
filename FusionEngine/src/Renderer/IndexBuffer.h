@@ -5,7 +5,7 @@ namespace FusionEngine
     class IndexBuffer
     {
     public:
-        static Ref<IndexBuffer> Create(uint32_t size);
+        static Shared<IndexBuffer> Create(uint32_t size);
         virtual ~IndexBuffer() = default;
 
         virtual void Bind() = 0;

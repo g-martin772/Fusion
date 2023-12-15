@@ -24,7 +24,7 @@ namespace FusionEngine
         VulkanBuffer* Buffer;
     private:
         void* m_MappedMemory = nullptr;
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
     };
     
 }

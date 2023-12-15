@@ -6,10 +6,10 @@
 
 namespace FusionEngine
 {
-    Ref<Image> Image::Create(const ImageSpecification& spec)
+    Shared<Image> Image::Create(const ImageSpecification& spec)
     {
         switch (RenderApi::GetApi()) {
-            case RenderApi::Api::Vulkan: return MakeRef<VulkanImage>(spec);
+            case RenderApi::Api::Vulkan: return MakeShared<VulkanImage>(spec);
         }
         FE_ASSERT(false, "Invalid Render API");
         return nullptr;

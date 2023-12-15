@@ -6,10 +6,10 @@
 
 namespace FusionEngine
 {
-    Ref<Shader> Shader::Create(const std::string& name)
+    Shared<Shader> Shader::Create(const std::string& name)
     {
         switch (RenderApi::GetApi()) {
-            case RenderApi::Api::Vulkan: return MakeRef<VulkanShader>(name);
+            case RenderApi::Api::Vulkan: return MakeShared<VulkanShader>(name);
         }
 
         FE_ASSERT(false, "No Graphics API selected");

@@ -33,7 +33,7 @@ namespace FusionEngine
         delete s_Data;
     }
 
-    void Renderer::BeginScene(const Ref<Camera>& camera)
+    void Renderer::BeginScene(const Shared<Camera>& camera)
     {
         
     }
@@ -42,7 +42,7 @@ namespace FusionEngine
     {
     }
 
-    void Renderer::DrawObjModel(Ref<ObjModel> model)
+    void Renderer::DrawObjModel(Shared<ObjModel> model)
     {
         model->GetVertexBuffer()->Bind();
         model->GetIndexBuffer()->Bind();

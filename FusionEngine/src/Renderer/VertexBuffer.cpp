@@ -7,10 +7,10 @@
 
 namespace FusionEngine
 {
-    Ref<VertexBuffer> VertexBuffer::Create(const std::vector<Attribute>& attributes, uint32_t size)
+    Shared<VertexBuffer> VertexBuffer::Create(const std::vector<Attribute>& attributes, uint32_t size)
     {
         switch (RenderApi::GetApi()) {
-            case RenderApi::Api::Vulkan: return MakeRef<VulkanVertexBuffer>(attributes, size);
+            case RenderApi::Api::Vulkan: return MakeShared<VulkanVertexBuffer>(attributes, size);
         }
         FE_ASSERT(false, "Invalid Render API");
         return nullptr;

@@ -30,13 +30,12 @@ namespace FusionEngine
         
         m_Window = glfwCreateWindow(1200, 700, "Fusion Engine", nullptr, nullptr);
 
-        if(!m_Window)
-            FE_ASSERT(false, "Failed to create glfw window!");
+        FE_ASSERT(m_Window, "Failed to create glfw window!");
 
         glfwSetFramebufferSizeCallback(m_Window, framebuffer_size_callback);
         glfwSetWindowSizeCallback(m_Window, window_size_callback);
 
-        glfwMakeContextCurrent(m_Window);
+        //glfwMakeContextCurrent(m_Window);
     }
 
     void WindowsWindow::OnUpdatePlatform()
@@ -45,7 +44,7 @@ namespace FusionEngine
             Application::Get()->Close();
 
         glfwPollEvents();
-        glfwSwapBuffers(m_Window);
+        //glfwSwapBuffers(m_Window);
     }
 
     void WindowsWindow::ShutDownPlatform()

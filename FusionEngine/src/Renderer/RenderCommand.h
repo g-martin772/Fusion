@@ -18,8 +18,8 @@ namespace FusionEngine
 
         static void ResizeWindow(uint32_t width, uint32_t height);
 
-        static const Ref<RenderApi>& GetRenderApi();
+        static const Shared<RenderApi>& GetRenderApi();
     private:
-        static Ref<RenderApi> s_RenderApi;
+        static Shared<RenderApi> s_RenderApi;
     };
 }

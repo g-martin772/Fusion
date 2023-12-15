@@ -13,18 +13,18 @@ namespace FusionEngine
     public:
         static void Init();
 
-        static Ref<spdlog::logger> GetFusionLogger() {
-            static Ref<spdlog::logger> s_FusionLogger = spdlog::stdout_color_mt("FUSION");
+        static Shared<spdlog::logger> GetFusionLogger() {
+            static Shared<spdlog::logger> s_FusionLogger = spdlog::stdout_color_mt("FUSION");
             return s_FusionLogger;
         }
 
-        static Ref<spdlog::logger> GetForgeLogger() {
-            static Ref<spdlog::logger> s_ForgeLogger = spdlog::stdout_color_mt("FORGE");
+        static Shared<spdlog::logger> GetForgeLogger() {
+            static Shared<spdlog::logger> s_ForgeLogger = spdlog::stdout_color_mt("FORGE");
             return s_ForgeLogger;
         }
 
-        static Ref<spdlog::logger> GetGameLogger() {
-            static Ref<spdlog::logger> s_GameLogger = spdlog::stdout_color_mt("GAME");
+        static Shared<spdlog::logger> GetGameLogger() {
+            static Shared<spdlog::logger> s_GameLogger = spdlog::stdout_color_mt("GAME");
             return s_GameLogger;
         }
     }; 

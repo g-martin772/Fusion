@@ -28,7 +28,7 @@ namespace FusionEngine
         void CleanUpSwapChain();
         void CreateFrameBuffers();
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
 
         vk::SurfaceKHR m_Surface;
 

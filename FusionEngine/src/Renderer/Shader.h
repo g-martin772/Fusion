@@ -14,7 +14,7 @@ namespace FusionEngine
     class Shader
     {
     public:
-        static Ref<Shader> Create(const std::string& name);
+        static Shared<Shader> Create(const std::string& name);
 
         Shader(const std::string& name);
         virtual ~Shader() = default;

@@ -18,14 +18,18 @@ namespace FusionEngine
     Application::Application()
     {
         s_Application = this;
+        FE_INFO("Startin Fusion Engine");
         
         Log::Init();
-        FE_INFO("Startin Fusion Engine");
 
-        m_Time = MakeRef<Time>();
+        m_Time = MakeShared<Time>();
 
-        m_Window = Window::Create();
-        m_Window->Init();
+        m_MainWindow = Window::Create();
+        m_MainWindow->Init();
+
+        m_TestWindow = Window::Create();
+        m_TestWindow->Init();
+        
         Input::Init();
 
         RenderCommand::Init();
@@ -37,15 +41,8 @@ namespace FusionEngine
         while(m_Running)
         {
             m_Time->Update();
-            Input::OnUpdate();
-
-            RenderCommand::BeginFrame();
-            
-            for (Layer* layer : m_LayerStack)
-                layer->OnUpdate(m_Time);
-
-            RenderCommand::EndFrame();
-            m_Window->OnUpdate();
+            m_MainWindow->OnUpdate();
+            m_TestWindow->OnUpdate();
         }
     }
 
@@ -53,33 +50,16 @@ namespace FusionEngine
     {
         FE_INFO("Fusion Engine Shutdown");
 
-        for (Layer* layer : m_LayerStack)
-        {
-            layer->OnDetach();
-            delete layer;
-        }
-
         Renderer2D::ShutDown();
         RenderCommand::ShutDown();
         Input::Shutdown();
-        m_Window->ShutDown();
+        m_MainWindow->ShutDown();
+        m_TestWindow->ShutDown();
     }
 
     void Application::Close()
     {
         m_Running = false;
-    }
-
-    void Application::PushLayer(Layer* layer)
-    {
-        m_LayerStack.PushLayer(layer);
-        layer->OnAttach();
-    }
-
-    void Application::PushOverlay(Layer* layer)
-    {
-        m_LayerStack.PushOverlay(layer);
-        layer->OnAttach();
     }
 }
 

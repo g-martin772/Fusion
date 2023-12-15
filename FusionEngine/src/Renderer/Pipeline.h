@@ -27,8 +27,8 @@ namespace FusionEngine
         struct PipelineSpecification
         {
             DrawMode DrawMode = DrawMode::Triangles;
-            Ref<Shader> Shader;
-            Ref<Framebuffer> FrameBuffer;
+            Shared<Shader> Shader;
+            Shared<Framebuffer> FrameBuffer;
             bool WireFrame = false;
 
             std::vector<std::vector<VertexBuffer::Attribute>> VertexBufferLayouts;
@@ -36,7 +36,7 @@ namespace FusionEngine
             std::vector<DescriptorSetLayout> DescriptorSetLayouts;
         };
     public:
-        static Ref<Pipeline> Create(const PipelineSpecification& specification);
+        static Shared<Pipeline> Create(const PipelineSpecification& specification);
         virtual ~Pipeline() = default;
 
         virtual void Bind() = 0;

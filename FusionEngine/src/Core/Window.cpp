@@ -1,9 +1,11 @@
 ﻿#include "fepch.h"
 #include "Window.h"
 
+#include "Input.h"
 #include "Layer.h"
 #include "LayerStack.h"
 #include "Platform/Windows/WindowsWindow.h"
+#include "Renderer/RenderCommand.h"
 
 namespace FusionEngine
 {
@@ -21,12 +23,27 @@ namespace FusionEngine
 
     void Window::OnUpdate()
     {
+        Input::OnUpdate();
+        
+        RenderCommand::BeginFrame();
+            
+        for (Layer* layer : m_LayerStack)
+            layer->OnUpdate(m_Time);
+
+        RenderCommand::EndFrame();
+        
         OnUpdatePlatform();
         m_Time.Update();
     }
 
     void Window::ShutDown()
     {
+        for (Layer* layer : m_LayerStack)
+        {
+            layer->OnDetach();
+            delete layer;
+        }
+        
         ShutDownPlatform();
     }
 

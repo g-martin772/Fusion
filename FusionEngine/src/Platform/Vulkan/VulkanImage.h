@@ -30,7 +30,7 @@ namespace FusionEngine
     private:
         void CreateVulkanObjects();
     private:
-        Ref<VulkanRenderApi> m_RenderApi;
+        Shared<VulkanRenderApi> m_RenderApi;
         vk::Image m_Image;
         vk::ImageView m_ImageView;
         vk::Sampler m_Sampler;
