@@ -7,6 +7,5 @@ using namespace FusionEngine;
 Application* CreateApplication()
 {
     auto* app = new Application();
-    app->PushLayer(new EditorLayer);
     return app;
 }

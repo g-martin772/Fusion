@@ -18,43 +18,21 @@ namespace FusionEngine
     Application::Application()
     {
         s_Application = this;
-        FE_INFO("Startin Fusion Engine");
         
         Log::Init();
-
-        m_Time = MakeShared<Time>();
-
-        m_MainWindow = Window::Create();
-        m_MainWindow->Init();
-
-        m_TestWindow = Window::Create();
-        m_TestWindow->Init();
-        
-        Input::Init();
-
-        RenderCommand::Init();
-        Renderer2D::Init();
+        FE_INFO("Startin Fusion Engine");
     }
 
     void Application::Run()
     {
         while(m_Running)
         {
-            m_Time->Update();
-            m_MainWindow->OnUpdate();
-            m_TestWindow->OnUpdate();
         }
     }
 
     void Application::Shutdown()
     {
         FE_INFO("Fusion Engine Shutdown");
-
-        Renderer2D::ShutDown();
-        RenderCommand::ShutDown();
-        Input::Shutdown();
-        m_MainWindow->ShutDown();
-        m_TestWindow->ShutDown();
     }
 
     void Application::Close()

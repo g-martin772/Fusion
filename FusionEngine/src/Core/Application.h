@@ -21,13 +21,9 @@ namespace FusionEngine
 
         void Close();
 
-        Shared<Window> GetWindow() { return m_MainWindow; }
-        Shared<Window> GetTestWindow() { return m_TestWindow; }
+        Shared<Window> GetWindow() { return nullptr; }
+        Shared<Window> GetTestWindow() { return nullptr; }
     private:
         bool m_Running = true;
-
-        Shared<Time> m_Time;
-        Shared<Window> m_MainWindow;
-        Shared<Window> m_TestWindow;
     };
 }

@@ -10,7 +10,7 @@ class EditorLayer : public FusionEngine::Layer
 {
 public:
     void OnAttach() override;
-    void OnUpdate(FusionEngine::Shared<FusionEngine::Time> time) override;
+    void OnUpdate(FusionEngine::Shared<FusionEngine::Time> time);
     void OnDetach() override;
 private:
     FusionEngine::Shared<FusionEngine::Scene> m_Scene;

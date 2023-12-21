@@ -2,12 +2,19 @@ import os
 import subprocess
 import platform
 
-from ValidateModules import Validate
-Validate()
+VULKAN_SDK = os.environ.get('VULKAN_SDK')
+VULKAN_VERSION = "1.3.231.1"
 
-from Vulkan import CheckVulkan
-if not CheckVulkan():
-    exit(1)
+print(f"Checking for vulkan version {VULKAN_VERSION}")
+
+if (VULKAN_SDK is None):
+   print("You don't have the Vulkan SDK installed!")
+   exit(1)
+elif (VULKAN_VERSION not in VULKAN_SDK):
+    print(f"Located Vulkan SDK at {VULKAN_SDK}")
+    print(f"You don't have the correct Vulkan SDK version! (Fusion requires {VULKAN_VERSION})")
+    
+print(f"Correct Vulkan SDK located at {VULKAN_SDK}")
 
 os.chdir('./../')
 
@@ -21,11 +28,9 @@ print("\nRunning premake...")
 if platform.system() == 'Windows':
      subprocess.call([os.path.abspath("./scripts/GenerateVS22.bat"), "nopause"])
 elif platform.system() == 'Linux':
-    print("missing support, contact dev")
-elif platform.system() == 'Darwin':
-    print("missing support, contact dev")
+    subprocess.call([os.path.abspath("./scripts/GenerateMakefile.sh"), "nopause"])
 else:
-    print('Unsupported operating system.')
+    print('What os are you even on at this point xD? Macos or what xD')
     exit(1)
     
 
