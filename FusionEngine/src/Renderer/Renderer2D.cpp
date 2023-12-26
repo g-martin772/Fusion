@@ -24,8 +24,8 @@ namespace FusionEngine
         Shared<Shader> QuadShader;
         Shared<Pipeline> QuadPipeline;
         Shared<UniformBuffer> CameraUniformBuffer;
-        CameraData* CameraData;
-        Shared<Camera> Camera;
+        CameraData* CamData;
+        Shared<Camera> Cam;
 
         uint32_t QuadVertexSize = 4 * (sizeof(glm::vec3) + sizeof(glm::vec4));
         std::vector<VertexBuffer::Attribute> QuadVertexBufferLayout;
@@ -56,15 +56,15 @@ namespace FusionEngine
         };
 
         s_Data->CameraUniformBuffer = UniformBuffer::Create("Camera", sizeof(CameraData), 0, ShaderType::Vertex);
-        s_Data->CameraData = new CameraData;
+        s_Data->CamData = new CameraData;
         
         s_Data->CameraUniformBuffer->Bind();
         
         Pipeline::PipelineSpecification quadPipeSpec;
-        quadPipeSpec.Shader = s_Data->QuadShader;
+        quadPipeSpec.MainShader = s_Data->QuadShader;
         quadPipeSpec.WireFrame = false;
         quadPipeSpec.VertexBufferLayouts = { s_Data->QuadVertexBufferLayout };
-        quadPipeSpec.DescriptorSetLayouts = {{0, 1, ShaderType::Vertex, Pipeline::DescriptorType::UniformBuffer}};
+        quadPipeSpec.DescriptorSetLayouts = {{0, 1, ShaderType::Vertex, Pipeline::EDescriptorType::UniformBuffer}};
         s_Data->QuadPipeline = Pipeline::Create(quadPipeSpec);
 
         s_Data->QuadVertexBuffer = VertexBuffer::Create(s_Data->QuadVertexBufferLayout, 4 * s_Data->MaxQuads * s_Data->QuadVertexSize);
@@ -78,7 +78,7 @@ namespace FusionEngine
 
     void Renderer2D::ShutDown()
     {
-        delete s_Data->CameraData;
+        delete s_Data->CamData;
         delete[] s_Data->QuadBufferStart;
         delete[] s_Data->QuadIndexBufferStart;
         delete s_Data;
@@ -86,9 +86,9 @@ namespace FusionEngine
     
     void Renderer2D::BeginScene(const Shared<Camera>& camera)
     {
-        s_Data->Camera = camera;
-        s_Data->CameraData->ViewProjection = s_Data->Camera->GetViewProjectionMatrix();
-        s_Data->CameraUniformBuffer->SetData(s_Data->CameraData);
+        s_Data->Cam = camera;
+        s_Data->CamData->ViewProjection = s_Data->Cam->GetViewProjectionMatrix();
+        s_Data->CameraUniformBuffer->SetData(s_Data->CamData);
     }
 
     void Renderer2D::EndScene()

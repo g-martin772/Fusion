@@ -25,7 +25,7 @@ namespace FusionEngine
 		{
 			vk::AttachmentDescription attachment = {};
 			attachment.flags = vk::AttachmentDescriptionFlags();
-			attachment.format = std::dynamic_pointer_cast<VulkanImage>(m_Spec.Attachments[i].Image)->GetVulkanFormat();
+			attachment.format = std::dynamic_pointer_cast<VulkanImage>(m_Spec.Attachments[i].AttachedImage)->GetVulkanFormat();
 			
 			attachment.samples = static_cast<vk::SampleCountFlagBits>(m_Spec.Samples);
 
@@ -118,7 +118,7 @@ namespace FusionEngine
     		std::vector<vk::ImageView> attachments;
     		for (auto attachment : m_Spec.Attachments)
     		{
-    			attachments.push_back(std::dynamic_pointer_cast<VulkanImage>(attachment.Image)->GetImageView());
+    			attachments.push_back(std::dynamic_pointer_cast<VulkanImage>(attachment.AttachedImage)->GetImageView());
     		}
 
     		vk::FramebufferCreateInfo framebufferInfo;
@@ -150,7 +150,7 @@ namespace FusionEngine
     	m_Height = height;
 
     	for(auto attachment : m_Spec.Attachments)
-			attachment.Image->OnResize(width, height);
+			attachment.AttachedImage->OnResize(width, height);
 
     	m_RenderApi->WaitDeviceIdle();
     	for(const vk::Framebuffer framebuffer : m_Framebuffers)
@@ -206,6 +206,6 @@ namespace FusionEngine
 
     Shared<Image> VulkanFrameBuffer::GetCurrentImage() const
     {
-    	return  m_Spec.Attachments[m_FrameIndex].Image;
+    	return  m_Spec.Attachments[m_FrameIndex].AttachedImage;
     }
 }

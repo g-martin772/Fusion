@@ -40,6 +40,7 @@ namespace FusionEngine
     void VulkanVertexBuffer::Bind()
     {
         static vk::DeviceSize currentVertexBufferOffsets[1] = {0};
-        m_RenderApi->m_Frames[m_RenderApi->m_CurrentFrame].CommandBuffer.bindVertexBuffers(0, 1, &Buffer->GetBuffer(), currentVertexBufferOffsets);
+        vk::Buffer buffer = Buffer->GetBuffer();
+        m_RenderApi->m_Frames[m_RenderApi->m_CurrentFrame].CommandBuffer.bindVertexBuffers(0, 1, &buffer, currentVertexBufferOffsets);
     }
 }

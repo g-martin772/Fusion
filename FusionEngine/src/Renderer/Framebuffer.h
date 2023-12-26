@@ -26,7 +26,7 @@ namespace FusionEngine
     {
         FrameBufferLoadOp LoadOp = FrameBufferLoadOp::Clear;
         FramebufferStoreOp StoreOp = FramebufferStoreOp::Store;
-        Shared<Image> Image;
+        Shared<Image> AttachedImage;
     };
     
     struct FramebufferSpecification
@@ -52,7 +52,7 @@ namespace FusionEngine
         virtual void End() = 0;
         [[nodiscard]] virtual Shared<Image> GetCurrentImage() const = 0;
 
-        [[nodiscard]] Shared<Image> GetImage(const uint32_t index = 0) const { return m_Spec.Attachments[index].Image; }
+        [[nodiscard]] Shared<Image> GetImage(const uint32_t index = 0) const { return m_Spec.Attachments[index].AttachedImage; }
         [[nodiscard]] FramebufferSpecification GetSpecification() const { return  m_Spec; }
         [[nodiscard]] uint32_t GetWidth() const { return m_Spec.Width; }
         [[nodiscard]] uint32_t GetHeight() const { return m_Spec.Height; }

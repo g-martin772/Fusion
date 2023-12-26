@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <filesystem>
+
 namespace FusionEngine
 {
     class File

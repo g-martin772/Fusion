@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "VulkanShader.h"
 
+#include <filesystem>
+
 #include "IO/File.h"
 
 #include <shaderc/shaderc.hpp>

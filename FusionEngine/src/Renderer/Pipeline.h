@@ -9,7 +9,7 @@ namespace FusionEngine
     class Pipeline
     {
     public:
-        enum class DescriptorType
+        enum class EDescriptorType
         {
             None = 0,
             UniformBuffer,
@@ -21,13 +21,13 @@ namespace FusionEngine
             uint32_t Index;
             uint32_t Count;
             ShaderType Stage;
-            DescriptorType Type;
+            EDescriptorType Type;
         };
         
         struct PipelineSpecification
         {
-            DrawMode DrawMode = DrawMode::Triangles;
-            Shared<Shader> Shader;
+            EDrawMode DrawMode = EDrawMode::Triangles;
+            Shared<Shader> MainShader;
             Shared<Framebuffer> FrameBuffer;
             bool WireFrame = false;
 

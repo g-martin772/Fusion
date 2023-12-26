@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "ObjModel.h"
 
+#include <filesystem>
+
 #include "IO/File.h"
 #include "IO/StringUitls.h"
 

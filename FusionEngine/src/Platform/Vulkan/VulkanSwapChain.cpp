@@ -178,8 +178,8 @@ namespace FusionEngine
         {
             frame.CommandBuffer = m_RenderApi->CreateCommandBuffer();
             frame.InFlightFence = VulkanUtils::CreateFence(m_RenderApi->m_Device->Logical());
-            frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_Device->Logical());
-            frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_RenderApi->m_Device->Logical());
+            frame.ImageAvailable = VulkanUtils::CreateSemaphore(m_RenderApi->m_Device->Logical());
+            frame.RenderFinished = VulkanUtils::CreateSemaphore(m_RenderApi->m_Device->Logical());
         }
     }
 

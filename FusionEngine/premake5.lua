@@ -40,6 +40,11 @@
         "%{VULKAN_SDK}/Lib/vulkan-1.lib",
     }
 
+    buildoptions {
+        "-fno-ms-extensions",
+        "-lstdc++fs"
+    }
+
     -- postbuildcommands {
     --     ("{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox")
     -- }

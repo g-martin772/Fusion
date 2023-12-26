@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "VulkanResourceManager.h"
 
+#include <map>
+
 #include "VulkanDevice.h"
 #include "VulkanRenderApi.h"
 #include "Renderer/RenderCommand.h"

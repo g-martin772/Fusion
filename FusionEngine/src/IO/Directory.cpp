@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "Directory.h"
 
+#include <filesystem>
+
 namespace FusionEngine
 {
     bool Directory::Create(const std::filesystem::path& path)

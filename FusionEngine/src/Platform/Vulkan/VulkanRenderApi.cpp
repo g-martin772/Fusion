@@ -6,7 +6,7 @@
 
 #include "VulkanDevice.h"
 #include "VulkanUtils.h"
-#include "..\..\UI\ImGuiBackend.h"
+#include "UI/ImGuiBackend.h"
 
 #undef CreateSemaphore
 
@@ -38,8 +38,8 @@ namespace FusionEngine
     	{
     		frame.CommandBuffer = CreateCommandBuffer();
     		frame.InFlightFence = VulkanUtils::CreateFence(m_Device->Logical());
-    		frame.ImageAvailable = VulkanUtils::CreateSemaphoreW(m_Device->Logical());
-    		frame.RenderFinished = VulkanUtils::CreateSemaphoreW(m_Device->Logical());
+    		frame.ImageAvailable = VulkanUtils::CreateSemaphore(m_Device->Logical());
+    		frame.RenderFinished = VulkanUtils::CreateSemaphore(m_Device->Logical());
     	}
 
     	// ImGui
@@ -249,7 +249,7 @@ namespace FusionEngine
     	
     	try
     	{
-    		m_Device->GraphicsQueue().submit(1, &submitInfo, nullptr);
+    		vk::Result result = m_Device->GraphicsQueue().submit(1, &submitInfo, nullptr);
     	}
     	catch (vk::SystemError& err)
     	{
@@ -339,7 +339,7 @@ namespace FusionEngine
     	renderpassInfo.pAttachments = &colorAttachment;
     	renderpassInfo.subpassCount = 1;
     	renderpassInfo.pSubpasses = &subpass;
-    	renderpassInfo.dependencyCount = dependencies.size();
+    	renderpassInfo.dependencyCount = static_cast<uint32_t>(dependencies.size());
     	renderpassInfo.pDependencies = dependencies.data();
     	
     	try {

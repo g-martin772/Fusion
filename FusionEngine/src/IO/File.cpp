@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "File.h"
 
+#include <filesystem>
+
 namespace FusionEngine
 {
     std::vector<char> File::Read(const std::filesystem::path& path)

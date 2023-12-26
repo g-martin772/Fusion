@@ -7,7 +7,7 @@ namespace FusionEngine
 {
     class VulkanBuffer;
     class VulkanRenderApi;
-    enum class DrawMode;
+    enum class EDrawMode;
 }
 
 namespace FusionEngine

@@ -23,7 +23,7 @@ void EditorLayer::OnAttach()
 
     FramebufferSpecification framebufferSpecification;
     FrameBufferAttachment colorAttachment;
-    colorAttachment.Image = m_ViewportImage;
+    colorAttachment.AttachedImage = m_ViewportImage;
     framebufferSpecification.Attachments = { {colorAttachment} };
     framebufferSpecification.Width = 100;
     framebufferSpecification.Height = 100;

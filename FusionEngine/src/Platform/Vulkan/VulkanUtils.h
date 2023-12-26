@@ -5,16 +5,18 @@
 #include "Renderer/VertexBuffer.h"
 #include "Renderer/Pipeline.h"
 
+#undef CreateSemaphore
+
 namespace FusionEngine
 {
     namespace Utils
 	{
-		inline vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const DrawMode mode)
+		inline vk::PrimitiveTopology FusionDrawModeToVkPrimitiveTopology(const EDrawMode mode)
 		{
 			switch (mode) {
-			case DrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
-			case DrawMode::Lines: vk::PrimitiveTopology::eLineList;
-			case DrawMode::Points: vk::PrimitiveTopology::ePointList;
+			case EDrawMode::Triangles: vk::PrimitiveTopology::eTriangleList;
+			case EDrawMode::Lines: vk::PrimitiveTopology::eLineList;
+			case EDrawMode::Points: vk::PrimitiveTopology::ePointList;
 			}
 			return vk::PrimitiveTopology::eTriangleList;
 		}
@@ -68,12 +70,12 @@ namespace FusionEngine
 			return vk::ShaderStageFlagBits::eVertex;
 		}
 
-		inline vk::DescriptorType FusionDescriptorTypeToVkDescriptorType(Pipeline::DescriptorType descriptorType)
+		inline vk::DescriptorType FusionDescriptorTypeToVkDescriptorType(Pipeline::EDescriptorType descriptorType)
 		{
 			switch (descriptorType)
 			{
-				case Pipeline::DescriptorType::UniformBuffer: return vk::DescriptorType::eUniformBuffer;
-				case Pipeline::DescriptorType::StorageBuffer: return vk::DescriptorType::eStorageBuffer;
+				case Pipeline::EDescriptorType::UniformBuffer: return vk::DescriptorType::eUniformBuffer;
+				case Pipeline::EDescriptorType::StorageBuffer: return vk::DescriptorType::eStorageBuffer;
 			}
 
 			FE_ASSERT(false, "Invalid descriptorType, defaulting to uniform buffer");

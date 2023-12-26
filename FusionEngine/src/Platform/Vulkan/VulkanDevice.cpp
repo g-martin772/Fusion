@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "VulkanDevice.h"
 
+#include <set>
+
 #include "VulkanSwapChain.h"
 
 namespace FusionEngine

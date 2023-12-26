@@ -11,7 +11,7 @@ namespace FusionEngine
 {
     VulkanPipeline::VulkanPipeline(const PipelineSpecification& spec)
     {
-        m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.Shader);
+        m_Shader = std::dynamic_pointer_cast<VulkanShader>(spec.MainShader);
         m_RenderApi = std::dynamic_pointer_cast<VulkanRenderApi>(RenderCommand::GetRenderApi());
 		m_Spec = spec;
 
@@ -162,12 +162,14 @@ namespace FusionEngine
 
     void VulkanPipeline::Bind()
     {
+		vk::DescriptorSet ds = m_RenderApi->m_ResourceManager->GetFrameDescriptorSet(m_RenderApi->m_CurrentFrame);
+    	
     	if(m_RenderApi->m_ResourceManager->HasFrameDescriptorSet(m_RenderApi->m_CurrentFrame))
     		m_RenderApi->m_Frames[m_RenderApi->m_CurrentFrame].CommandBuffer.bindDescriptorSets(
 				vk::PipelineBindPoint::eGraphics, m_PipelineLayout,
 				0,
 				1,
-				&m_RenderApi->m_ResourceManager->GetFrameDescriptorSet(m_RenderApi->m_CurrentFrame),
+				&ds,
 				0,
 				nullptr);
     	

@@ -2,8 +2,6 @@
 
 // C++ Standard Library headers
 #include <iostream>
-#include <fstream>
-#include <iomanip>
 #include <sstream>
 #include <cstdio>
 #include <cstdlib>
@@ -19,7 +17,6 @@
 #include <memory>
 #include <bitset>
 #include <chrono>
-#include <random>
 #include <tuple>
 #include <variant>
 #include <optional>
@@ -27,20 +24,12 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
-#include <filesystem>
 
 // Containers
 #include <array>
 #include <vector>
-#include <deque>
-#include <list>
-#include <forward_list>
-#include <set>
-#include <map>
 #include <unordered_set>
 #include <unordered_map>
-#include <queue>
-#include <stack>
 
 // Utility
 #include <utility>
@@ -49,8 +38,6 @@
 #include <cstdint>
 #include <cstring>
 #include <cctype>
-#include <locale>
-#include <regex>
 
 // C headers
 #include <cstddef>
@@ -63,7 +50,6 @@
 
 // Platform-specific headers
 #ifdef _WIN32
-#include <Windows.h>
 #endif
 
 // Project-specific headers

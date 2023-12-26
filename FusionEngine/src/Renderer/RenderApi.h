@@ -2,7 +2,7 @@
 
 namespace FusionEngine
 {
-    enum class DrawMode
+    enum class EDrawMode
     {
         None = 0,
         Triangles,
