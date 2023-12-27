@@ -1,6 +1,8 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
+#include "Result.h"
+
 namespace FusionEngine
 {
     static Application* s_Application;

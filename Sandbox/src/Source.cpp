@@ -6,6 +6,5 @@ using namespace FusionEngine;
 Application* CreateApplication()
 {
     auto* app = new Application();
-    app->Run();
     return app;
 }

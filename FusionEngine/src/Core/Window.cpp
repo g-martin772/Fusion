@@ -4,6 +4,7 @@
 #include "Input.h"
 #include "Layer.h"
 #include "Platform/Windows/WindowsWindow.h"
+#include "Result.h"
 
 namespace FusionEngine
 {
