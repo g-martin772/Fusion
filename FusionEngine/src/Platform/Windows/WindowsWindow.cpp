@@ -4,19 +4,19 @@
 #include <GLFW/glfw3.h>
 
 #include "Core/Application.h"
-#include "Renderer/RenderCommand.h"
+//#include "Renderer/RenderCommand.h"
 
 namespace FusionEngine
 {
 #pragma region Callbacks
     void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     {
-        RenderCommand::ResizeWindow(width, height);
+        //RenderCommand::ResizeWindow(width, height);
     }
 
     void window_size_callback(GLFWwindow* window, int width, int height)
     {
-        RenderCommand::ResizeWindow(width, height);
+        //RenderCommand::ResizeWindow(width, height);
     }
 #pragma endregion Callbacks
     

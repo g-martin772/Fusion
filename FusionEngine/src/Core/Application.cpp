@@ -1,11 +1,6 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
-#include "Input.h"
-#include "Renderer/Pipeline.h"
-#include "Renderer/RenderCommand.h"
-#include "Renderer/Renderer2D.h"
-
 namespace FusionEngine
 {
     static Application* s_Application;
@@ -20,19 +15,25 @@ namespace FusionEngine
         s_Application = this;
         
         Log::Init();
-        FE_INFO("Startin Fusion Engine");
+        FE_INFO("Starting Fusion Engine");
+
+        m_PrimaryWindow = Window::Create();
+        m_PrimaryWindow->Init();
     }
 
     void Application::Run()
     {
         while(m_Running)
         {
+            m_PrimaryWindow->OnUpdate();
         }
     }
 
     void Application::Shutdown()
     {
         FE_INFO("Fusion Engine Shutdown");
+
+        m_PrimaryWindow->ShutDown();
     }
 
     void Application::Close()

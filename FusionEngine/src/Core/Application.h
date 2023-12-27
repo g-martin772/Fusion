@@ -3,10 +3,7 @@
 #include <memory>
 
 #include "Base.h"
-#include "LayerStack.h"
-#include "Time.h"
 #include "Window.h"
-#include "Renderer/Pipeline.h"
 
 namespace FusionEngine
 {
@@ -21,9 +18,9 @@ namespace FusionEngine
 
         void Close();
 
-        Shared<Window> GetWindow() { return nullptr; }
-        Shared<Window> GetTestWindow() { return nullptr; }
+        Window* GetPrimaryWindow() { return m_PrimaryWindow; }
     private:
         bool m_Running = true;
+        Window* m_PrimaryWindow;
     };
 }

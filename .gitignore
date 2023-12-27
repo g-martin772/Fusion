@@ -10,4 +10,6 @@ __pycache__/
 *.filters
 *.spv
 
+Makefile
+
 VulkanSDK.exe
