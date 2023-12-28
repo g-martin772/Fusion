@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Time.h"
 #include "Platform/Platform.h"
 
 namespace FusionEngine
@@ -13,7 +12,7 @@ namespace FusionEngine
 
         void Init();
         void OnUpdate();
-        void ShutDown() const;
+        void ShutDown();
 
         [[nodiscard]] WindowHandle GetPlatformHandle() const { return m_PlatformHandle; }
     private:

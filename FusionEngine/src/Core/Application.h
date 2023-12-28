@@ -2,8 +2,8 @@
 #include <iostream>
 #include <memory>
 
-#include "Base.h"
-#include "Window.h"
+#include "Core/Base.h"
+#include "Core/Window/Window.h"
 
 namespace FusionEngine
 {

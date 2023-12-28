@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Core/Result.h"
+
 namespace FusionEngine
 {
     struct PlatformState

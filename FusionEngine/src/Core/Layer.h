@@ -2,8 +2,6 @@
 
 #include <string>
 
-#include "Time.h"
-
 namespace FusionEngine
 {
     class Layer

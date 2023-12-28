@@ -35,9 +35,9 @@
     }
     
     links {
-        "glfw",
-        "imgui",
-        "%{VULKAN_SDK}/Lib/vulkan-1.lib",
+        -- "glfw",
+        -- "imgui",
+        -- "%{VULKAN_SDK}/Lib/vulkan-1.lib",
     }
 
     buildoptions {
@@ -62,7 +62,7 @@
         symbols "On"
 
         links {
-            "%{VULKAN_SDK}/Lib/shaderc_combinedd.lib"
+            -- "%{VULKAN_SDK}/Lib/shaderc_combinedd.lib"
         }
     
     filter "configurations:Release"
@@ -71,7 +71,7 @@
         optimize "On"
 
         links {
-            "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+            -- "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
         }
 
     filter "configurations:Dist"
@@ -80,7 +80,7 @@
         optimize "On"
 
         links {
-            "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+            -- "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
         }
 
 

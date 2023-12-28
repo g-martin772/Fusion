@@ -1,5 +1,7 @@
 #include "fepch.h"
 
+#include "Core/Events/Event.h"
+
 
 #ifdef FE_WINDOWS
 
@@ -138,18 +140,20 @@ namespace FusionEngine
 
     LRESULT CALLBACK Win32ProcessMessage(HWND window, uint32_t msg, WPARAM wParam, LPARAM lParam)
     {
-        // TODO: Events
         switch (msg)
         {
             case WM_ERASEBKGND:
                 return 1;
-            case WM_CLOSE:
+        case WM_CLOSE:
+                Event::Raise(EventContext(SystemEvent::WindowClose, window));
                 return 0;
             case WM_SIZE:
                 {
                     RECT r;
                     GetClientRect(window, &r);
-                    glm::uvec2 size(r.right - r.left, r.bottom - r.top);
+                    EventContext e(SystemEvent::WindowResize, window);
+                    e.Data.uvec2[0] = glm::uvec2(r.right - r.left, r.bottom - r.top);
+                    Event::Raise(e);
                 } break;
             case WM_KEYDOWN:
             case WM_SYSKEYDOWN:

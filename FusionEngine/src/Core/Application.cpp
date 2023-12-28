@@ -30,16 +30,26 @@ namespace FusionEngine
 
     void Application::Run()
     {
+        Window* secondWindow = Window::Create();
+        secondWindow->Init();
+        
         while(m_Running)
         {
             Platform::Update();
             m_PrimaryWindow->OnUpdate();
+            secondWindow->OnUpdate();
         }
+
+        secondWindow->ShutDown();
     }
 
     void Application::Shutdown()
     {
+        if(!m_Running)
+            return;
+        
         FE_INFO("Fusion Engine Shutdown");
+        m_Running = false;
 
         m_PrimaryWindow->ShutDown();
     }
