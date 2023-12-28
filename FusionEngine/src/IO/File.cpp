@@ -2,6 +2,7 @@
 #include "File.h"
 
 #include <filesystem>
+#include <fstream>
 
 namespace FusionEngine
 {

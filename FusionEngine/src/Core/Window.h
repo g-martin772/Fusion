@@ -1,25 +1,22 @@
 ﻿#pragma once
 #include "Time.h"
+#include "Platform/Platform.h"
 
 namespace FusionEngine
 {
-    class Window
+    class Window final
     {
     public:
         static Window* Create();
-        virtual ~Window() = default;    
-    
+        Window();
+        ~Window() = default;    
+
         void Init();
         void OnUpdate();
-        void ShutDown();
+        void ShutDown() const;
 
-        virtual void* GetNativeWindow() = 0;
-    protected:
-        Window() = default;
-        virtual void InitPlatform() = 0;
-        virtual void OnUpdatePlatform() = 0;
-        virtual void ShutDownPlatform() = 0;
-    protected:
-        Time m_Time;
+        [[nodiscard]] WindowHandle GetPlatformHandle() const { return m_PlatformHandle; }
+    private:
+        WindowHandle m_PlatformHandle;
     };
 }

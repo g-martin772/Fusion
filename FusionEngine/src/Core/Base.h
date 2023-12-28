@@ -8,6 +8,16 @@
     #define FE_API //__declspec(dllimport)
 #endif
 
+#define BIT(x) (1 << x)
+
+#ifdef FE_DEBUG
+    #define FE_LOG_LEVEL_TRACE 
+#elif FE_RELEASE
+    #define FE_LOG_LEVEL_INFO
+#else
+    #defineFE_LOG_LEVEL_WARN
+#endif
+
 namespace FusionEngine
 {
     template<typename T>

@@ -56,3 +56,4 @@
 #include "Core/Base.h"
 #include "Core/Log.h"
 #include "Core/Assert.h"
+#include "Core/Result.h"

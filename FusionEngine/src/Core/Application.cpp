@@ -2,6 +2,7 @@
 #include "Application.h"
 
 #include "Result.h"
+#include "Platform/Platform.h"
 
 namespace FusionEngine
 {
@@ -19,6 +20,10 @@ namespace FusionEngine
         Log::Init();
         FE_INFO("Starting Fusion Engine");
 
+        auto result = Platform::Init();
+        FE_ASSERT(result.is_ok(), "Platform Init Failed");
+        Platform::State = result.unwrap();
+        
         m_PrimaryWindow = Window::Create();
         m_PrimaryWindow->Init();
     }
@@ -27,6 +32,7 @@ namespace FusionEngine
     {
         while(m_Running)
         {
+            Platform::Update();
             m_PrimaryWindow->OnUpdate();
         }
     }

@@ -3,35 +3,32 @@
 
 #include "Input.h"
 #include "Layer.h"
-#include "Platform/Windows/WindowsWindow.h"
 #include "Result.h"
 
 namespace FusionEngine
 {
     Window* Window::Create()
     {
-        #ifdef FE_WINDOWS
-            return new WindowsWindow();
-        #elif FE_LINUX
-            return nullptr;
-        #else
-            return nullptr;
-        #endif
+        return new Window();
     }
 
     void Window::Init()
     {
-        InitPlatform();
+        auto result = Platform::CreateNativeWindow();
+        FE_ASSERT(result.is_ok(), "Window creation failed");
+        m_PlatformHandle = result.unwrap();
     }
 
     void Window::OnUpdate()
     {
-        OnUpdatePlatform();
-        m_Time.Update();
+        
     }
 
-    void Window::ShutDown()
+    void Window::ShutDown() const
     {
-        ShutDownPlatform();
+        Platform::DestroyNativeWindow(m_PlatformHandle);
     }
+
+    Window::Window()
+    = default;
 }
