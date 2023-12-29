@@ -3,13 +3,13 @@
 
 #include "Core/Application.h"
 #include "Core/Result.h"
-#include "Core/Events/Event.h"
+#include "Core/Events/EventSystem.h"
 
 namespace FusionEngine
 {
-    Window* Window::Create()
+    Shared<Window> Window::Create()
     {
-        return new Window();
+        return MakeShared<Window>();
     }
 
     void Window::Init()
@@ -20,7 +20,7 @@ namespace FusionEngine
 
         FE_INFO("Opend window {0}", m_PlatformHandle.Handle);
         
-        Event::Register(SystemEvent::WindowClose, FE_EVENT_CALLBACK {
+        EventSystem::Register(Event::WindowClose, FE_EVENT_CALLBACK {
             Window* window = static_cast<Window*>(instance);
             
             if (window->m_PlatformHandle.Handle != context.Sender)

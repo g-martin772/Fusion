@@ -1,6 +1,6 @@
 #include "fepch.h"
 
-#include "Core/Events/Event.h"
+#include "Core/Events/EventSystem.h"
 
 
 #ifdef FE_WINDOWS
@@ -145,15 +145,15 @@ namespace FusionEngine
             case WM_ERASEBKGND:
                 return 1;
         case WM_CLOSE:
-                Event::Raise(EventContext(SystemEvent::WindowClose, window));
+                EventSystem::Raise(EventContext(Event::WindowClose, window));
                 return 0;
             case WM_SIZE:
                 {
                     RECT r;
                     GetClientRect(window, &r);
-                    EventContext e(SystemEvent::WindowResize, window);
+                    EventContext e(Event::WindowResize, window);
                     e.Data.uvec2[0] = glm::uvec2(r.right - r.left, r.bottom - r.top);
-                    Event::Raise(e);
+                    EventSystem::Raise(e);
                 } break;
             case WM_KEYDOWN:
             case WM_SYSKEYDOWN:

@@ -6,7 +6,7 @@ namespace FusionEngine
     class Window final
     {
     public:
-        static Window* Create();
+        static Shared<Window> Create();
         Window();
         ~Window() = default;    
 

@@ -4,7 +4,41 @@
 
 namespace FusionEngine
 {
-    enum class SystemEvent : uint32_t
+    using EventCode = uint32_t;
+
+    #define DEFINE_EVENT_GROUP(name, id) name = (id) << 16 
+    
+    enum class EventGroup : EventCode
+    {
+        DEFINE_EVENT_GROUP(None, 0), 
+        DEFINE_EVENT_GROUP(System, 1),
+        DEFINE_EVENT_GROUP(Window, 2),
+        DEFINE_EVENT_GROUP(Application, 3),
+        DEFINE_EVENT_GROUP(Input, 4),
+        DEFINE_EVENT_GROUP(Network, 5),
+        DEFINE_EVENT_GROUP(Audio, 6),
+        DEFINE_EVENT_GROUP(Graphics, 7),
+        DEFINE_EVENT_GROUP(Physics, 8),
+        DEFINE_EVENT_GROUP(Scripting, 9),
+        DEFINE_EVENT_GROUP(Device, 10),
+        DEFINE_EVENT_GROUP(Debug, 11),
+        DEFINE_EVENT_GROUP(Game, 12)
+    };
+
+    #define DEFINE_EVENT(name, group, id) constexpr EventCode name = static_cast<EventCode>(group) | (id)  // NOLINT(bugprone-macro-parentheses)
+
+    namespace Event
+    {
+        DEFINE_EVENT(ApplicationShutdown, EventGroup::Application, 0x01);
+        DEFINE_EVENT(WindowResize, EventGroup::Window, 0x02);
+        DEFINE_EVENT(WindowClose, EventGroup::Window, 0x02);
+        DEFINE_EVENT(WindowMove, EventGroup::Window, 0x03);
+    };
+
+    #define EVENT_GROUP(event) static_cast<EventGroup>(static_cast<EventCode>(event) & 0xFFFF0000)
+    #define EVENT_ID(event) (static_cast<EventCode>(event) & 0x0000FFFF)
+
+    enum class SystemEvents : uint32_t
     {
         ApplicationShutdown = 0x01,
         WindowResize = 0x02,
@@ -23,7 +57,7 @@ namespace FusionEngine
         MouseScrolled = 0x15,
         Max = 0xff
     };
-    
+
     struct EventContext
     {
         union EventContextData // 128bits
@@ -61,18 +95,20 @@ namespace FusionEngine
 
             char c[16];
 
-            EventContextData() : u64{0, 0} {}
+            EventContextData() : u64{0, 0}
+            {
+            }
         } Data;
 
-        uint32_t Code;
+        EventCode Code;
         void* Sender;
 
         EventContext() = default;
-        EventContext(const uint32_t code, void* sender)
-            : Code(code), Sender(sender) {}
 
-        EventContext(const SystemEvent code, void* sender)
-            : Code(static_cast<uint32_t>(code)), Sender(sender) {}
+        EventContext(const EventCode code, void* sender)
+            : Code(code), Sender(sender)
+        {
+        }
+        
     };
 }
- 

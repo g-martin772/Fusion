@@ -30,7 +30,7 @@ namespace FusionEngine
 
     void Application::Run()
     {
-        Window* secondWindow = Window::Create();
+        const Shared<Window> secondWindow = Window::Create();
         secondWindow->Init();
         
         while(m_Running)

@@ -40,4 +40,31 @@ namespace FusionEngine
     {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
+
+    template<typename T>
+    using List = std::vector<T>;
+
+    template<typename T, typename ... Args>
+    constexpr List<T> MakeList(Args&& ... args)
+    {
+        return std::vector<T>(std::forward<Args>(args)...);
+    }
+
+    template<typename T, typename U>
+    using UMap = std::unordered_map<T, U>;
+
+    template<typename T, typename U, typename ... Args>
+    constexpr UMap<T, U> MakeUMap(Args&& ... args)
+    {
+        return std::unordered_map<T, U>(std::forward<Args>(args)...);
+    }
+
+    template<typename T, typename U>
+    using Map = std::unordered_map<T, U>;
+
+    template<typename T, typename U, typename ... Args>
+    constexpr Map<T, U> MakeMap(Args&& ... args)
+    {
+        return std::map<T, U>(std::forward<Args>(args)...);
+    }
 }
