@@ -1,4 +1,6 @@
-﻿#include "EditorLayer.h"
+﻿#include "fepch.h"
+
+#include "EditorLayer.h"
 #include "Core/Entrypoint.h"
 
 FusionEngine::Application* CreateApplication()

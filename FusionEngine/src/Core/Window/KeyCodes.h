@@ -3,6 +3,7 @@
 namespace FusionEngine
 {
     enum class KeyCode : int {
+        None = 0,
         // Printable keys
         Space = 32,
         Apostrophe = 39,
@@ -125,7 +126,18 @@ namespace FusionEngine
         RightControl = 345,
         RightAlt = 346,
         RightSuper = 347,
-        Menu = 348
+        Menu = 348,
+
+        Sleep = 400,
+        Clear = 401,
+        Stop = 402,
+        PlayPause = 403,
+        MediaPrev = 404,
+        MediaNext = 405,
+        VolumeUp = 406,
+        VolumeDown = 407,
+        VolumeMute = 408,
+        Pipe = 409
     };
 
     enum class MouseCode : int {

@@ -3,6 +3,7 @@
 
 #include "Result.h"
 #include "Platform/Platform.h"
+#include "Window/Input.h"
 
 namespace FusionEngine
 {
@@ -26,6 +27,8 @@ namespace FusionEngine
         
         m_PrimaryWindow = Window::Create();
         m_PrimaryWindow->Init();
+        m_CurrentWindow = m_PrimaryWindow; // TODO
+        m_FocusedWindow = m_PrimaryWindow; // TODO
     }
 
     void Application::Run()
@@ -37,6 +40,9 @@ namespace FusionEngine
         {
             Platform::Update();
             m_PrimaryWindow->OnUpdate();
+            glm::uvec2 pos = Input::GetMouse();
+            //FE_TRACE("x: {0}, y: {1}", pos.x, pos.y);
+            FE_TRACE("a down: {0}", Input::IsKeyDown(KeyCode::A));
             secondWindow->OnUpdate();
         }
 

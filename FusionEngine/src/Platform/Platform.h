@@ -1,9 +1,15 @@
 #pragma once
 
+#include <glm/vec2.hpp>
+
 #include "Core/Result.h"
+#include "Core/Window/KeyCodes.h"
 
 namespace FusionEngine
 {
+    class Window;
+    class InputMap;
+
     struct PlatformState
     {
         void* InternalState;
@@ -12,6 +18,7 @@ namespace FusionEngine
     struct WindowHandle
     {
         void* Handle;
+        InputMap* InputHandle;
     };
 
     enum class PlatformError
@@ -30,11 +37,16 @@ namespace FusionEngine
         static void Update();
         static void ShutDown();
 
-        static Result<WindowHandle, PlatformError> CreateNativeWindow();
-        static void DestroyNativeWindow(WindowHandle handle);
+        static Result<WindowHandle, PlatformError> CreateNativeWindow(Window* instance);
+        static void DestroyNativeWindow(WindowHandle& handle);
 
         static double GetAbsTime();
 
-        static void SleepM(double ms);       
+        static void SleepM(double ms);
+        
+        static bool IsKeyDown(KeyCode keycode);
+        static bool IsButtonDown(MouseCode button);
+        static glm::vec2 GetMouse();
+        static glm::vec2 GetMouseDelta();
     };
 }

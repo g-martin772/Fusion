@@ -38,6 +38,7 @@ namespace FusionEngine
     #define EVENT_GROUP(event) static_cast<EventGroup>(static_cast<EventCode>(event) & 0xFFFF0000)
     #define EVENT_ID(event) (static_cast<EventCode>(event) & 0x0000FFFF)
 
+    // TODO: Input events and EventContextData parser thing
     enum class SystemEvents : uint32_t
     {
         ApplicationShutdown = 0x01,

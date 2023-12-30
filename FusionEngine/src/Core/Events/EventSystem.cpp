@@ -17,6 +17,7 @@ namespace FusionEngine
             return false;
 
         s_EventMap[EVENT_GROUP(code)][code].push_back({instance, callback});
+        auto asd = s_EventMap;
         return true;
     }
 
@@ -45,12 +46,13 @@ namespace FusionEngine
 
     bool EventSystem::Raise(const EventContext& context)
     {
-        const auto groupIt = s_EventMap.find(EVENT_GROUP(context.Code));
+        auto g = EVENT_GROUP(context.Code);
+        const auto groupIt = s_EventMap.find(g);
         if (groupIt == s_EventMap.end())
             return false;
         
         const auto eventIt = groupIt->second.find(context.Code);
-        if (eventIt != groupIt->second.end())
+        if (eventIt == groupIt->second.end())
             return false;
 
         for (const auto& entry : eventIt->second)

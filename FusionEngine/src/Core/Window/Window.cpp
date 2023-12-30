@@ -7,6 +7,23 @@
 
 namespace FusionEngine
 {
+    FE_EVENT_CALLBACK_FN(WindowCloseCallback) {
+        if (instance != context.Sender)
+            return false;
+            
+        Window* window = static_cast<Window*>(instance);
+            
+        if (context.Sender == Application::Get()->GetPrimaryWindow().get())
+        {
+            Application::Get()->Shutdown();
+            return true;
+        }
+
+        window->ShutDown();
+            
+        return true;
+    }
+    
     Shared<Window> Window::Create()
     {
         return MakeShared<Window>();
@@ -14,28 +31,13 @@ namespace FusionEngine
 
     void Window::Init()
     {
-        auto result = Platform::CreateNativeWindow();
+        auto result = Platform::CreateNativeWindow(this);
         FE_ASSERT(result.is_ok(), "Window creation failed");
         m_PlatformHandle = result.unwrap();
 
         FE_INFO("Opend window {0}", m_PlatformHandle.Handle);
         
-        EventSystem::Register(Event::WindowClose, FE_EVENT_CALLBACK {
-            Window* window = static_cast<Window*>(instance);
-            
-            if (window->m_PlatformHandle.Handle != context.Sender)
-                return false;
-            
-            if (context.Sender == Application::Get()->GetPrimaryWindow()->m_PlatformHandle.Handle)
-            {
-                Application::Get()->Shutdown();
-                return true;
-            }
-
-            window->ShutDown();
-            
-            return true;
-        }, this);
+        EventSystem::Register(Event::WindowClose, WindowCloseCallback, this);
     }
 
     void Window::OnUpdate()
@@ -49,9 +51,8 @@ namespace FusionEngine
             return;
         FE_INFO("Closing window {0}", m_PlatformHandle.Handle);
         Platform::DestroyNativeWindow(m_PlatformHandle);
-        m_PlatformHandle.Handle = nullptr;
+        EventSystem::Unregister(Event::WindowClose, WindowCloseCallback, this);
     }
 
-    Window::Window()
-    = default;
+    Window::Window() = default;
 }

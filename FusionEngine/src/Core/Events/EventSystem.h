@@ -6,6 +6,7 @@ namespace FusionEngine
 {
     typedef bool (*EventCallback)(const EventContext& context, void* instance);
     #define FE_EVENT_CALLBACK [](const EventContext& context, void* instance)
+    #define FE_EVENT_CALLBACK_FN(name) static bool name(const EventContext& context, void* instance)
     
     struct EventSystem
     {

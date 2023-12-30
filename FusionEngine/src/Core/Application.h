@@ -26,7 +26,6 @@ namespace FusionEngine
         Shared<Window> m_PrimaryWindow;
         Shared<Window> m_CurrentWindow;
         Shared<Window> m_FocusedWindow;
-        List<Shared<Window>> m_Windows;
 
         friend class Window;
     };
