@@ -2,7 +2,7 @@
 
 namespace FusionEngine
 {
-    enum class KeyCode : int {
+    enum class KeyCode : uint32_t {
         None = 0,
         // Printable keys
         Space = 32,
@@ -140,7 +140,7 @@ namespace FusionEngine
         Pipe = 409
     };
 
-    enum class MouseCode : int {
+    enum class MouseCode : uint32_t {
         Button1 = 0,
         Button2 = 1,
         Button3 = 2,

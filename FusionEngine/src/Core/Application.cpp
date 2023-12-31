@@ -33,20 +33,18 @@ namespace FusionEngine
 
     void Application::Run()
     {
-        const Shared<Window> secondWindow = Window::Create();
+        Window* secondWindow = Window::Create();
         secondWindow->Init();
         
         while(m_Running)
         {
             Platform::Update();
             m_PrimaryWindow->OnUpdate();
-            glm::uvec2 pos = Input::GetMouse();
-            //FE_TRACE("x: {0}, y: {1}", pos.x, pos.y);
-            FE_TRACE("a down: {0}", Input::IsKeyDown(KeyCode::A));
             secondWindow->OnUpdate();
         }
 
         secondWindow->ShutDown();
+        delete secondWindow;
     }
 
     void Application::Shutdown()
@@ -58,6 +56,7 @@ namespace FusionEngine
         m_Running = false;
 
         m_PrimaryWindow->ShutDown();
+        delete m_PrimaryWindow;
     }
 
     void Application::Close()

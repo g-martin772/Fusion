@@ -13,7 +13,7 @@ namespace FusionEngine
             
         Window* window = static_cast<Window*>(instance);
             
-        if (context.Sender == Application::Get()->GetPrimaryWindow().get())
+        if (context.Sender == Application::Get()->GetPrimaryWindow())
         {
             Application::Get()->Shutdown();
             return true;
@@ -24,9 +24,9 @@ namespace FusionEngine
         return true;
     }
     
-    Shared<Window> Window::Create()
+    Window* Window::Create()
     {
-        return MakeShared<Window>();
+        return new Window();
     }
 
     void Window::Init()
@@ -42,7 +42,7 @@ namespace FusionEngine
 
     void Window::OnUpdate()
     {
-        
+        Platform::UpdateNativeWindow(m_PlatformHandle);
     }
 
     void Window::ShutDown()
@@ -52,6 +52,11 @@ namespace FusionEngine
         FE_INFO("Closing window {0}", m_PlatformHandle.Handle);
         Platform::DestroyNativeWindow(m_PlatformHandle);
         EventSystem::Unregister(Event::WindowClose, WindowCloseCallback, this);
+    }
+
+    void Window::MakeCurrent()
+    {
+        Application::Get()->m_CurrentWindow = this;
     }
 
     Window::Window() = default;

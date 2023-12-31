@@ -38,6 +38,7 @@ namespace FusionEngine
         static void ShutDown();
 
         static Result<WindowHandle, PlatformError> CreateNativeWindow(Window* instance);
+        static void UpdateNativeWindow(WindowHandle& handle);
         static void DestroyNativeWindow(WindowHandle& handle);
 
         static double GetAbsTime();
@@ -46,7 +47,7 @@ namespace FusionEngine
         
         static bool IsKeyDown(KeyCode keycode);
         static bool IsButtonDown(MouseCode button);
-        static glm::vec2 GetMouse();
-        static glm::vec2 GetMouseDelta();
+        static glm::uvec2 GetMouse();
+        static glm::uvec2 GetMouseDelta();
     };
 }

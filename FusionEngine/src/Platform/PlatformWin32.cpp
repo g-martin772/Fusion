@@ -72,6 +72,11 @@ namespace FusionEngine
             TranslateMessage(&message);
             DispatchMessageA(&message);
         }
+
+        const HWND focusedWindow = GetFocus();
+        const LONG_PTR lpUserData = GetWindowLongPtr(focusedWindow, GWLP_USERDATA);
+        Window* window = reinterpret_cast<Window*>(lpUserData);
+        Application::Get()->m_FocusedWindow = window;
     }
     
     void Platform::ShutDown()
@@ -126,7 +131,13 @@ namespace FusionEngine
 
         return Ok(WindowHandle{handle, new InputMap()});
     }
-    
+
+    void Platform::UpdateNativeWindow(WindowHandle& handle)
+    {
+        const LONG_PTR lpUserData = GetWindowLongPtr(static_cast<HWND>(handle.Handle), GWLP_USERDATA);
+        Window* window = reinterpret_cast<Window*>(lpUserData);
+    }
+
     void Platform::DestroyNativeWindow(WindowHandle& handle)
     {
         DestroyWindow(static_cast<HWND>(handle.Handle));
@@ -161,9 +172,12 @@ namespace FusionEngine
         {
             case WM_ERASEBKGND:
                 return 1;
-        case WM_CLOSE:
-                EventSystem::Raise(EventContext(Event::WindowClose, window));
-                return 0;
+            case WM_CLOSE:
+                {
+                    EventContext e(Event::WindowClose, window);
+                    e.Data.ptr[0] = window;
+                    EventSystem::Raise(e);
+                } return 0;
             case WM_SIZE:
                 {
                     RECT r;
@@ -175,19 +189,28 @@ namespace FusionEngine
             case WM_KEYDOWN:
             case WM_SYSKEYDOWN:
                 {
-                    const KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
+                    KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
                     im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::KeyPress, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(keycode);
+                    EventSystem::Raise(e);
                 } break;
             case WM_KEYUP:
             case WM_SYSKEYUP:
                 {
                     const KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
                     im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::KeyRelease, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(keycode);
+                    EventSystem::Raise(e);
                 } break;
             case WM_MOUSEMOVE:
                 {
                     const glm::uvec2 pos(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
                     im->UpdateMousePosition(pos);
+                    EventContext e(Event::MouseMoved, window);
+                    e.Data.uvec2[0] = pos;
+                    EventSystem::Raise(e);
                 } break;
             case WM_MOUSEWHEEL:
                 {
@@ -196,14 +219,53 @@ namespace FusionEngine
                     {
                         delta_z = delta_z < 0 ? -1 : 1;
                         im->UpdateScrollPosition(delta_z);
+                        EventContext e(Event::MouseScrolled, window);
+                        e.Data.u32[0] = delta_z;
+                        EventSystem::Raise(e);
                     }
                 } break;
-            case WM_LBUTTONDOWN: im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed); break;
-            case WM_LBUTTONUP: im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Released ? KeyState::Up : KeyState::Released); break;
-            case WM_MBUTTONDOWN: im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed); break;
-            case WM_MBUTTONUP: im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Released ? KeyState::Up : KeyState::Released); break;
-            case WM_RBUTTONDOWN: im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed); break;
-            case WM_RBUTTONUP: im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Released ? KeyState::Up : KeyState::Released); break;
+            case WM_LBUTTONDOWN:
+                {
+                    im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::ButtonPress, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
+                    EventSystem::Raise(e);
+                } break;
+            case WM_LBUTTONUP:
+                {
+                    im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::ButtonRelease, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
+                    EventSystem::Raise(e);
+                } break;
+            case WM_MBUTTONDOWN:
+                {
+                    im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::ButtonPress, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
+                    EventSystem::Raise(e);
+                } break;
+            case WM_MBUTTONUP:
+                {
+                    im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::ButtonRelease, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
+                    EventSystem::Raise(e);
+                } break;
+            case WM_RBUTTONDOWN:
+                {
+                    im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::ButtonPress, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
+                    EventSystem::Raise(e);
+                } break;
+            case WM_RBUTTONUP:
+                {
+                    im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::ButtonRelease, window);
+                    e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
+                    EventSystem::Raise(e);
+                } break;
             default: break;
         }
 
@@ -212,26 +274,30 @@ namespace FusionEngine
 
     bool Platform::IsKeyDown(KeyCode keycode)
     {
-        const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle;
-        return im->GetKeyState(keycode) == KeyState::Down || im->GetKeyState(keycode) == KeyState::Pressed;
+        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+            return im->GetKeyState(keycode) == KeyState::Down || im->GetKeyState(keycode) == KeyState::Pressed;
+        return false;
     }
 
     bool Platform::IsButtonDown(MouseCode button)
     {
-        const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle;
-        return im->GetButtonState(button) == KeyState::Down || im->GetButtonState(button) == KeyState::Pressed;
+        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+            return im->GetButtonState(button) == KeyState::Down || im->GetButtonState(button) == KeyState::Pressed;
+        return false;
     }
 
-    glm::vec2 Platform::GetMouse()
+    glm::uvec2 Platform::GetMouse()
     {
-        const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle;
-        return im->GetMouse();
+        if(const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+            return im->GetMouse();
+        return {0, 0};
     }
 
-    glm::vec2 Platform::GetMouseDelta()
+    glm::uvec2 Platform::GetMouseDelta()
     {
-        const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle;
-        return im->GetMouseDelta();
+        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+            return im->GetMouseDelta();
+        return {0, 0};
     }
 
     // https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes

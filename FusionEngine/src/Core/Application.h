@@ -18,15 +18,16 @@ namespace FusionEngine
 
         void Close();
 
-        [[nodiscard]] Shared<Window> GetPrimaryWindow() const { return m_PrimaryWindow; }
-        [[nodiscard]] Shared<Window> GetCurrentWindow() const { return m_PrimaryWindow; }
-        [[nodiscard]] Shared<Window> GetFocusedWindow() const { return m_PrimaryWindow; }
+        [[nodiscard]] Window* GetPrimaryWindow() const { return m_PrimaryWindow; }
+        [[nodiscard]] Window* GetCurrentWindow() const { return m_PrimaryWindow; }
+        [[nodiscard]] Window* GetFocusedWindow() const { return m_PrimaryWindow; }
     private:
         bool m_Running = true;
-        Shared<Window> m_PrimaryWindow;
-        Shared<Window> m_CurrentWindow;
-        Shared<Window> m_FocusedWindow;
+        Window* m_PrimaryWindow;
+        Window* m_CurrentWindow;
+        Window* m_FocusedWindow;
 
         friend class Window;
+        friend class Platform;
     };
 }

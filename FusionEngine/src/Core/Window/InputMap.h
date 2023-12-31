@@ -41,13 +41,13 @@ namespace FusionEngine
 
         [[nodiscard]] KeyState GetKeyState(KeyCode key) const
         {
-            auto it = m_KeyStates.find(key);
+            const auto it = m_KeyStates.find(key);
             return it != m_KeyStates.end() ? it->second : KeyState::Up;
         }
 
         [[nodiscard]] KeyState GetButtonState(MouseCode button) const
         {
-            auto it = m_MouseButtonStates.find(button);
+            const auto it = m_MouseButtonStates.find(button);
             return it != m_MouseButtonStates.end() ? it->second : KeyState::Up;
         }
 

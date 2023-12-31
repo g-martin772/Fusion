@@ -10,8 +10,8 @@ namespace FusionEngine
     {
         inline bool IsKeyDown(const KeyCode keycode) { return Platform::IsKeyDown(keycode); }
         inline bool IsButtonDown(const MouseCode button) { return Platform::IsButtonDown(button); }
-        inline glm::vec2 GetMouse() { return Platform::GetMouse(); }
-        inline glm::vec2 GetMouseDelta() { return Platform::GetMouseDelta(); }
+        inline glm::uvec2 GetMouse() { return Platform::GetMouse(); }
+        inline glm::uvec2 GetMouseDelta() { return Platform::GetMouseDelta(); }
  
         // inline void CaptureMouse(bool capture) { s_Instance->CaptureMouseImpl(capture); }
     };

@@ -25,40 +25,30 @@ namespace FusionEngine
         DEFINE_EVENT_GROUP(Game, 12)
     };
 
-    #define DEFINE_EVENT(name, group, id) constexpr EventCode name = static_cast<EventCode>(group) | (id)  // NOLINT(bugprone-macro-parentheses)
+    #define DEFINE_EVENT(name, group) constexpr EventCode name = (static_cast<EventCode>(group) | (__COUNTER__))
 
     namespace Event
     {
-        DEFINE_EVENT(ApplicationShutdown, EventGroup::Application, 0x01);
-        DEFINE_EVENT(WindowResize, EventGroup::Window, 0x02);
-        DEFINE_EVENT(WindowClose, EventGroup::Window, 0x02);
-        DEFINE_EVENT(WindowMove, EventGroup::Window, 0x03);
-    };
+        DEFINE_EVENT(ApplicationShutdown, EventGroup::Application); // None
+        DEFINE_EVENT(WindowResize, EventGroup::Window); // Data.uvec2[0] -> NewWindowSize
+        DEFINE_EVENT(WindowClose, EventGroup::Window); // Data.ptr[0} -> Window*
+        //DEFINE_EVENT(WindowMove, EventGroup::Window); // Data.uvec2[0] -> NewWindowPos
+        //DEFINE_EVENT(WindowFocus, EventGroup::Window); // Data.ptr[0} -> Window*
+        //DEFINE_EVENT(WindowLostFocus, EventGroup::Window); // Data.ptr[0} -> Window*
+        //DEFINE_EVENT(WindowMinimize, EventGroup::Window); // Data.ptr[0} -> Window*
+        //DEFINE_EVENT(WindowMaximize, EventGroup::Window); // Data.ptr[0} -> Window*
+        //DEFINE_EVENT(WindowRestore, EventGroup::Window); // Data.ptr[0} -> Window*
+        DEFINE_EVENT(KeyPress, EventGroup::Application); // Data.u32[0] -> KeyCode
+        DEFINE_EVENT(KeyRelease, EventGroup::Application); // Data.u32[0] -> KeyCode
+        DEFINE_EVENT(ButtonPress, EventGroup::Application); // Data.u32[0] -> MouseCode
+        DEFINE_EVENT(ButtonRelease, EventGroup::Application); // Data.u32[0] -> MouseCode
+        DEFINE_EVENT(MouseMoved, EventGroup::Application); // Data.uvec2[0] -> NewMousePos
+        DEFINE_EVENT(MouseScrolled, EventGroup::Application); // Data.u32[0] -> delta Z
+    }
 
     #define EVENT_GROUP(event) static_cast<EventGroup>(static_cast<EventCode>(event) & 0xFFFF0000)
     #define EVENT_ID(event) (static_cast<EventCode>(event) & 0x0000FFFF)
-
-    // TODO: Input events and EventContextData parser thing
-    enum class SystemEvents : uint32_t
-    {
-        ApplicationShutdown = 0x01,
-        WindowResize = 0x02,
-        WindowMove = 0x03,
-        WindowFocus = 0x04,
-        WindowLostFocus = 0x05,
-        WindowClose = 0x06,
-        WindowMinimize = 0x07,
-        WindowMaximize = 0x08,
-        WindowRestore = 0x09,
-        KeyPress = 0x10,
-        KeyRelease = 0x11,
-        ButtonPress = 0x12,
-        ButtonRelease = 0x13,
-        MouseMoved = 0x14,
-        MouseScrolled = 0x15,
-        Max = 0xff
-    };
-
+    
     struct EventContext
     {
         union EventContextData // 128bits
@@ -82,34 +72,28 @@ namespace FusionEngine
             glm::vec4 vec4;
             glm::mat2 mat2;
 
-            glm::vec2 uvec2[2];
-            glm::vec3 uvec3;
-            glm::vec4 uvec4;
-            glm::mat2 umat2;
+            glm::uvec2 uvec2[2];
+            glm::uvec3 uvec3;
+            glm::uvec4 uvec4;
 
-            glm::vec2 ivec2[2];
-            glm::vec3 ivec3;
-            glm::vec4 ivec4;
-            glm::mat2 imat2;
+            glm::ivec2 ivec2[2];
+            glm::ivec3 ivec3;
+            glm::ivec4 ivec4;
 
             void* ptr[2];
 
             char c[16];
 
-            EventContextData() : u64{0, 0}
-            {
-            }
+            EventContextData() : u64{0, 0} {}
         } Data;
-
+        
         EventCode Code;
         void* Sender;
 
-        EventContext() = default;
-
         EventContext(const EventCode code, void* sender)
-            : Code(code), Sender(sender)
-        {
-        }
-        
+            : Code(code), Sender(sender) {}
+
+        EventContext(EventContextData data, const EventCode code, void* sender)
+            : Data(data), Code(code), Sender(sender) {}
     };
 }
