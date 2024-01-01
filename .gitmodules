@@ -11,3 +11,6 @@
 [submodule "FusionEngine/dependencies/EnTT/entt"]
 	path = FusionEngine/dependencies/EnTT/entt
 	url = https://github.com/g-martin772/entt.git
+[submodule "scripts/Dependencies/vscode"]
+	path = scripts/Dependencies/vscode
+	url = https://github.com/Enhex/premake-vscode
