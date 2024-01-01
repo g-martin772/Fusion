@@ -40,11 +40,6 @@
         -- "%{VULKAN_SDK}/Lib/vulkan-1.lib",
     }
 
-    buildoptions {
-        "-fno-ms-extensions",
-        "-lstdc++fs"
-    }
-
     -- postbuildcommands {
     --     ("{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox")
     -- }
@@ -54,6 +49,35 @@
         
         defines {
             "FE_WINDOWS"
+        }
+
+        buildoptions {
+            "-fno-ms-extensions",
+            "-lstdc++fs"
+        }
+
+    filter "system:linux"
+        systemversion "latest"
+        
+        defines {
+            "FE_LINUX",
+            "FE_X11"
+        }
+
+        links {
+            "dl",
+            "pthread",
+            "Xrandr",
+            "Xi",
+            "Xinerama",
+            "Xcursor",
+            "Xxf86vm",
+            "X11"
+        }
+
+        buildoptions {
+            "-ftime-report",
+            "-v"
         }
     
     filter "configurations:Debug"

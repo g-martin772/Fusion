@@ -27,8 +27,8 @@ namespace FusionEngine
         
         m_PrimaryWindow = Window::Create();
         m_PrimaryWindow->Init();
-        m_CurrentWindow = m_PrimaryWindow; // TODO
-        m_FocusedWindow = m_PrimaryWindow; // TODO
+        m_CurrentWindow = m_PrimaryWindow;
+        m_FocusedWindow = m_PrimaryWindow;
     }
 
     void Application::Run()

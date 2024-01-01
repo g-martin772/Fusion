@@ -25,7 +25,8 @@ namespace FusionEngine
     {
         NotImplemented,
         RegisterWindowClassFailed,
-        WindowCreationFailed
+        WindowCreationFailed,
+        NoDisplayFound,
     };
     
     class Platform

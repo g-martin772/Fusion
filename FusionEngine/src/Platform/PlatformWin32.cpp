@@ -58,6 +58,7 @@ namespace FusionEngine
         if (!RegisterClassA(&wc))
         {
             FE_ASSERT(false, "Window class resgistration failed");
+            delete state;
             return Err(PlatformError::RegisterWindowClassFailed);
         }
         

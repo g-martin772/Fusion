@@ -32,12 +32,41 @@
     links {
         "FusionEngine"
     }
-    
+
     filter "system:windows"
         systemversion "latest"
     
         defines {
             "FE_WINDOWS"
+        }
+    
+        buildoptions {
+            "-fno-ms-extensions",
+            "-lstdc++fs"
+        }
+    
+    filter "system:linux"
+        systemversion "latest"
+        
+        defines {
+            "FE_LINUX",
+            "FE_X11"
+        }
+        
+        links {
+            "dl",
+            "pthread",
+            "Xrandr",
+            "Xi",
+            "Xinerama",
+            "Xcursor",
+            "Xxf86vm",
+            "X11"
+        }
+        
+        buildoptions {
+            "-ftime-report",
+            "-v"
         }
     
     filter "configurations:Debug"

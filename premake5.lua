@@ -1,3 +1,5 @@
+require("scripts/Dependencies/vscode")
+
 workspace "Fusion"
 
 architecture "x86_64"
