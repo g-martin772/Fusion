@@ -40,6 +40,8 @@ namespace FusionEngine
         {
             Platform::Update();
             m_PrimaryWindow->OnUpdate();
+            if (Input::IsKeyDown(KeyCode::A))
+                FE_INFO("A pressed");
             secondWindow->OnUpdate();
         }
 

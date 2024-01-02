@@ -8,12 +8,12 @@
 namespace FusionEngine
 {
     FE_EVENT_CALLBACK_FN(WindowCloseCallback) {
-        if (instance != context.Sender)
+        Window* window = static_cast<Window*>(instance);
+
+        if (window->GetPlatformHandle().Handle != context.Sender)
             return false;
             
-        Window* window = static_cast<Window*>(instance);
-            
-        if (context.Sender == Application::Get()->GetPrimaryWindow())
+        if (window == Application::Get()->GetPrimaryWindow())
         {
             Application::Get()->Shutdown();
             return true;

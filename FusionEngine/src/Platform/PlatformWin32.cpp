@@ -175,15 +175,15 @@ namespace FusionEngine
                 return 1;
             case WM_CLOSE:
                 {
-                    EventContext e(Event::WindowClose, window);
-                    e.Data.ptr[0] = window;
+                    EventContext e(Event::WindowClose, window->GetPlatformHandle().Handle);
+                    e.Data.ptr[0] = window->GetPlatformHandle().Handle;
                     EventSystem::Raise(e);
                 } return 0;
             case WM_SIZE:
                 {
                     RECT r;
                     GetClientRect(hwnd, &r);
-                    EventContext e(Event::WindowResize, window);
+                    EventContext e(Event::WindowResize, window->GetPlatformHandle().Handle);
                     e.Data.uvec2[0] = glm::uvec2(r.right - r.left, r.bottom - r.top);
                     EventSystem::Raise(e);
                 } break;
@@ -192,7 +192,7 @@ namespace FusionEngine
                 {
                     KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
                     im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-                    EventContext e(Event::KeyPress, window);
+                    EventContext e(Event::KeyPress, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(keycode);
                     EventSystem::Raise(e);
                 } break;
@@ -201,7 +201,7 @@ namespace FusionEngine
                 {
                     const KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
                     im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Released ? KeyState::Up : KeyState::Released);
-                    EventContext e(Event::KeyRelease, window);
+                    EventContext e(Event::KeyRelease, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(keycode);
                     EventSystem::Raise(e);
                 } break;
@@ -209,7 +209,7 @@ namespace FusionEngine
                 {
                     const glm::uvec2 pos(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
                     im->UpdateMousePosition(pos);
-                    EventContext e(Event::MouseMoved, window);
+                    EventContext e(Event::MouseMoved, window->GetPlatformHandle().Handle);
                     e.Data.uvec2[0] = pos;
                     EventSystem::Raise(e);
                 } break;
@@ -220,7 +220,7 @@ namespace FusionEngine
                     {
                         delta_z = delta_z < 0 ? -1 : 1;
                         im->UpdateScrollPosition(delta_z);
-                        EventContext e(Event::MouseScrolled, window);
+                        EventContext e(Event::MouseScrolled, window->GetPlatformHandle().Handle);
                         e.Data.u32[0] = delta_z;
                         EventSystem::Raise(e);
                     }
@@ -228,42 +228,42 @@ namespace FusionEngine
             case WM_LBUTTONDOWN:
                 {
                     im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-                    EventContext e(Event::ButtonPress, window);
+                    EventContext e(Event::ButtonPress, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
                     EventSystem::Raise(e);
                 } break;
             case WM_LBUTTONUP:
                 {
                     im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Released ? KeyState::Up : KeyState::Released);
-                    EventContext e(Event::ButtonRelease, window);
+                    EventContext e(Event::ButtonRelease, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
                     EventSystem::Raise(e);
                 } break;
             case WM_MBUTTONDOWN:
                 {
                     im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-                    EventContext e(Event::ButtonPress, window);
+                    EventContext e(Event::ButtonPress, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
                     EventSystem::Raise(e);
                 } break;
             case WM_MBUTTONUP:
                 {
                     im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Released ? KeyState::Up : KeyState::Released);
-                    EventContext e(Event::ButtonRelease, window);
+                    EventContext e(Event::ButtonRelease, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
                     EventSystem::Raise(e);
                 } break;
             case WM_RBUTTONDOWN:
                 {
                     im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-                    EventContext e(Event::ButtonPress, window);
+                    EventContext e(Event::ButtonPress, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
                     EventSystem::Raise(e);
                 } break;
             case WM_RBUTTONUP:
                 {
                     im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Released ? KeyState::Up : KeyState::Released);
-                    EventContext e(Event::ButtonRelease, window);
+                    EventContext e(Event::ButtonRelease, window->GetPlatformHandle().Handle);
                     e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
                     EventSystem::Raise(e);
                 } break;

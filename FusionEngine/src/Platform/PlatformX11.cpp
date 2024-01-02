@@ -9,14 +9,19 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/keysymdef.h>
 
 #include <glm/glm.hpp>
 
 #include "Platform.h"
 
-KeyCode X11TranslateKeyCode(const uint32_t key);
+#undef None
 
-FusionEngine::PlatformState FusionEngine::Platform::State;
+namespace FusionEngine {
+    KeyCode X11TranslateKeyCode(const uint32_t key);
+    PlatformState Platform::State;
+}
+
 
 struct X11State
 {
@@ -78,10 +83,75 @@ FusionEngine::Result<FusionEngine::WindowHandle, FusionEngine::PlatformError>
 void FusionEngine::Platform::UpdateNativeWindow(WindowHandle& handle)
 {
     const X11State* state = static_cast<X11State*>(State.InternalState);
+    unsigned long long window = reinterpret_cast<unsigned long long>(handle.Handle);
     XEvent event;
-    while (XNextEvent(static_cast<X11State*>(State.InternalState)->display, &event))
+    while (XNextEvent(state->display, &event))
     {
-        
+        switch (event.type)
+        {
+            case Expose:
+                {
+                    XWindowAttributes attributes;
+                    XGetWindowAttributes(state->display, window, &attributes);
+                    EventContext e(Event::WindowResize, handle.Handle);
+                    e.Data.uvec2[0] = glm::uvec2(attributes.width, attributes.height);
+                    EventSystem::Raise(e);
+                } break;
+            case KeyPress: 
+                {
+                    #undef KeyPress
+                    const KeyCode keycode = FusionEngine::X11TranslateKeyCode(event.xkey.keycode);
+                    handle.InputHandle->UpdateKeyState(keycode, handle.InputHandle->GetKeyState(keycode) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::KeyPress, handle.Handle);
+                    e.Data.u32[0] = static_cast<uint32_t>(keycode);
+                    EventSystem::Raise(e);
+                } break;
+            case KeyRelease:
+                {
+                    #undef KeyRelease
+                    const KeyCode keycode = FusionEngine::X11TranslateKeyCode(event.xkey.keycode);
+                    handle.InputHandle->UpdateKeyState(keycode, handle.InputHandle->GetKeyState(keycode) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::KeyRelease, handle.Handle);
+                    e.Data.u32[0] = static_cast<uint32_t>(keycode);
+                    EventSystem::Raise(e);
+                } break;
+            case ButtonPress:
+                {
+                    #undef ButtonPress
+                    const MouseCode button = static_cast<MouseCode>(event.xbutton.button);
+                    handle.InputHandle->UpdateButtonState(button, handle.InputHandle->GetButtonState(button) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
+                    EventContext e(Event::ButtonPress, handle.Handle);
+                    e.Data.u32[0] = static_cast<uint32_t>(button);
+                    EventSystem::Raise(e);
+                } break;
+            case ButtonRelease:
+                {
+                    #undef ButtonRelease
+                    const MouseCode button = static_cast<MouseCode>(event.xbutton.button);
+                    handle.InputHandle->UpdateButtonState(button, handle.InputHandle->GetButtonState(button) == KeyState::Released ? KeyState::Up : KeyState::Released);
+                    EventContext e(Event::ButtonRelease, handle.Handle);
+                    e.Data.u32[0] = static_cast<uint32_t>(button);
+                    EventSystem::Raise(e);
+                } break;
+            case MotionNotify:
+                {
+                    const glm::uvec2 pos(event.xmotion.x, event.xmotion.y);
+                    handle.InputHandle->UpdateMousePosition(pos);
+                    EventContext e(Event::MouseMoved, handle.Handle);
+                    e.Data.uvec2[0] = pos;
+                    EventSystem::Raise(e);
+                } break;
+            case ClientMessage:
+                {
+                    if (event.xclient.data.l[0] == static_cast<long>(XInternAtom(state->display, "WM_DELETE_WINDOW", False)))
+                    {
+                        EventContext e(Event::WindowClose, handle.Handle);
+                        e.Data.ptr[0] = handle.Handle;
+                        EventSystem::Raise(e);
+                    }
+                } break;
+            default: break;
+        }
     }
 }
 
@@ -105,120 +175,6 @@ void FusionEngine::Platform::SleepM(const double ms)
 {
     sleep(ms);
 }
-
-// LRESULT CALLBACK Win32ProcessMessage(HWND hwnd, uint32_t msg, WPARAM wParam, LPARAM lParam)
-// {
-//     const LONG_PTR lpUserData = GetWindowLongPtr(hwnd, GWLP_USERDATA);
-//     Window* window = reinterpret_cast<Window*>(lpUserData);
-//
-//     if (window == nullptr)
-//         return DefWindowProcA(hwnd, msg, wParam, lParam);
-//     
-//     InputMap* im = window->GetPlatformHandle().InputHandle;
-//     
-//     switch (msg)
-//     {
-//         case WM_ERASEBKGND:
-//             return 1;
-//         case WM_CLOSE:
-//             {
-//                 EventContext e(Event::WindowClose, window);
-//                 e.Data.ptr[0] = window;
-//                 EventSystem::Raise(e);
-//             } return 0;
-//         case WM_SIZE:
-//             {
-//                 RECT r;
-//                 GetClientRect(hwnd, &r);
-//                 EventContext e(Event::WindowResize, window);
-//                 e.Data.uvec2[0] = glm::uvec2(r.right - r.left, r.bottom - r.top);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_KEYDOWN:
-//         case WM_SYSKEYDOWN:
-//             {
-//                 KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
-//                 im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-//                 EventContext e(Event::KeyPress, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(keycode);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_KEYUP:
-//         case WM_SYSKEYUP:
-//             {
-//                 const KeyCode keycode = Win32TranslateKeyCode(wParam, lParam);
-//                 im->UpdateKeyState(keycode, im->GetKeyState(keycode) == KeyState::Released ? KeyState::Up : KeyState::Released);
-//                 EventContext e(Event::KeyRelease, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(keycode);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_MOUSEMOVE:
-//             {
-//                 const glm::uvec2 pos(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-//                 im->UpdateMousePosition(pos);
-//                 EventContext e(Event::MouseMoved, window);
-//                 e.Data.uvec2[0] = pos;
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_MOUSEWHEEL:
-//             {
-//                 int32_t delta_z = GET_WHEEL_DELTA_WPARAM(wParam);
-//                 if (delta_z != 0)
-//                 {
-//                     delta_z = delta_z < 0 ? -1 : 1;
-//                     im->UpdateScrollPosition(delta_z);
-//                     EventContext e(Event::MouseScrolled, window);
-//                     e.Data.u32[0] = delta_z;
-//                     EventSystem::Raise(e);
-//                 }
-//             } break;
-//         case WM_LBUTTONDOWN:
-//             {
-//                 im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-//                 EventContext e(Event::ButtonPress, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_LBUTTONUP:
-//             {
-//                 im->UpdateButtonState(MouseCode::Left, im->GetButtonState(MouseCode::Left) == KeyState::Released ? KeyState::Up : KeyState::Released);
-//                 EventContext e(Event::ButtonRelease, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Left);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_MBUTTONDOWN:
-//             {
-//                 im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-//                 EventContext e(Event::ButtonPress, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_MBUTTONUP:
-//             {
-//                 im->UpdateButtonState(MouseCode::Middle, im->GetButtonState(MouseCode::Middle) == KeyState::Released ? KeyState::Up : KeyState::Released);
-//                 EventContext e(Event::ButtonRelease, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Middle);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_RBUTTONDOWN:
-//             {
-//                 im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Pressed ? KeyState::Down : KeyState::Pressed);
-//                 EventContext e(Event::ButtonPress, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
-//                 EventSystem::Raise(e);
-//             } break;
-//         case WM_RBUTTONUP:
-//             {
-//                 im->UpdateButtonState(MouseCode::Right, im->GetButtonState(MouseCode::Right) == KeyState::Released ? KeyState::Up : KeyState::Released);
-//                 EventContext e(Event::ButtonRelease, window);
-//                 e.Data.u32[0] = static_cast<uint32_t>(MouseCode::Right);
-//                 EventSystem::Raise(e);
-//             } break;
-//         default: break;
-//     }
-//
-//     return DefWindowProcA(hwnd, msg, wParam, lParam);
-// }
 
 namespace FusionEngine
 {
@@ -251,134 +207,101 @@ namespace FusionEngine
     }
 }
 
-KeyCode X11TranslateKeyCode(const uint32_t key)
-{
-    switch (key)
+namespace FusionEngine {
+    KeyCode X11TranslateKeyCode(const uint32_t key)
     {
-        case VK_ESCAPE: return KeyCode::Escape;
-        case VK_TAB: return KeyCode::Tab;
-        case VK_CAPITAL: return KeyCode::CapsLock;
-        case VK_SHIFT: return (flags & 0x01000000) ? KeyCode::RightShift : KeyCode::LeftShift;
-        case VK_CONTROL: return (flags & 0x01000000) ? KeyCode::RightControl : KeyCode::LeftControl;
-        case VK_MENU: return (flags & 0x01000000) ? KeyCode::RightAlt : KeyCode::LeftAlt;
-        case VK_LWIN: return KeyCode::LeftSuper;
-        case VK_RWIN: return KeyCode::RightSuper;
-        case VK_APPS: return KeyCode::Menu;
-        case VK_OEM_1: return KeyCode::Semicolon;
-        case VK_OEM_2: return KeyCode::Slash;
-        case VK_OEM_3: return KeyCode::GraveAccent;
-        case VK_OEM_4: return KeyCode::LeftBracket;
-        case VK_OEM_5: return KeyCode::Backslash;
-        case VK_OEM_6: return KeyCode::RightBracket;
-        case VK_OEM_7: return KeyCode::Apostrophe;
-        case VK_OEM_PLUS: return KeyCode::Equal;
-        case VK_OEM_MINUS: return KeyCode::Minus;
-        case VK_OEM_COMMA: return KeyCode::Comma;
-        case VK_OEM_PERIOD: return KeyCode::Period;
-        case VK_RETURN: return KeyCode::Enter;
-        case VK_BACK: return KeyCode::Backspace;
-        case VK_INSERT: return KeyCode::Insert;
-        case VK_DELETE: return KeyCode::Delete;
-        case VK_HOME: return KeyCode::Home;
-        case VK_END: return KeyCode::End;
-        case VK_PRIOR: return KeyCode::PageUp;
-        case VK_NEXT: return KeyCode::PageDown;
-        case VK_NUMLOCK: return KeyCode::NumLock;
-        case VK_SCROLL: return KeyCode::ScrollLock;
-        case VK_PAUSE: return KeyCode::Pause;
-        case VK_PRINT: return KeyCode::PrintScreen;
-        case VK_CLEAR: return KeyCode::Clear;
-        case VK_SLEEP: return KeyCode::Sleep;
-        case VK_F1: return KeyCode::F1;
-        case VK_F2: return KeyCode::F2;
-        case VK_F3: return KeyCode::F3;
-        case VK_F4: return KeyCode::F4;
-        case VK_F5: return KeyCode::F5;
-        case VK_F6: return KeyCode::F6;
-        case VK_F7: return KeyCode::F7;
-        case VK_F8: return KeyCode::F8;
-        case VK_F9: return KeyCode::F9;
-        case VK_F10: return KeyCode::F10;
-        case VK_F11: return KeyCode::F11;
-        case VK_F12: return KeyCode::F12;
-        case VK_F13: return KeyCode::F13;
-        case VK_F14: return KeyCode::F14;
-        case VK_F15: return KeyCode::F15;
-        case VK_F16: return KeyCode::F16;
-        case VK_F17: return KeyCode::F17;
-        case VK_F18: return KeyCode::F18;
-        case VK_F19: return KeyCode::F19;
-        case VK_F20: return KeyCode::F20;
-        case VK_F21: return KeyCode::F21;
-        case VK_F22: return KeyCode::F22;
-        case VK_F23: return KeyCode::F23;
-        case VK_F24: return KeyCode::F24;
-        case VK_NUMPAD0: return KeyCode::KP_0;
-        case VK_NUMPAD1: return KeyCode::KP_1;
-        case VK_NUMPAD2: return KeyCode::KP_2;
-        case VK_NUMPAD3: return KeyCode::KP_3;
-        case VK_NUMPAD4: return KeyCode::KP_4;
-        case VK_NUMPAD5: return KeyCode::KP_5;
-        case VK_NUMPAD6: return KeyCode::KP_6;
-        case VK_NUMPAD7: return KeyCode::KP_7;
-        case VK_NUMPAD8: return KeyCode::KP_8;
-        case VK_NUMPAD9: return KeyCode::KP_9;
-        case VK_DECIMAL: return KeyCode::KP_Decimal;
-        case VK_DIVIDE: return KeyCode::KP_Divide;
-        case VK_MULTIPLY: return KeyCode::KP_Multiply;
-        case VK_SUBTRACT: return KeyCode::KP_Subtract;
-        case VK_ADD: return KeyCode::KP_Add;
-        case VK_SEPARATOR: return KeyCode::KP_Equal;
-        case VK_UP: return KeyCode::Up;
-        case VK_DOWN: return KeyCode::Down;
-        case VK_LEFT: return KeyCode::Left;
-        case VK_RIGHT: return KeyCode::Right;
-        case VK_SPACE: return KeyCode::Space;
-        case 0x30: return KeyCode::D0;
-        case 0x31: return KeyCode::D1;
-        case 0x32: return KeyCode::D2;
-        case 0x33: return KeyCode::D3;
-        case 0x34: return KeyCode::D4;
-        case 0x35: return KeyCode::D5;
-        case 0x36: return KeyCode::D6;
-        case 0x37: return KeyCode::D7;
-        case 0x38: return KeyCode::D8;
-        case 0x39: return KeyCode::D9;
-        case 0x41: return KeyCode::A;
-        case 0x42: return KeyCode::B;
-        case 0x43: return KeyCode::C;
-        case 0x44: return KeyCode::D;
-        case 0x45: return KeyCode::E;
-        case 0x46: return KeyCode::F;
-        case 0x47: return KeyCode::G;
-        case 0x48: return KeyCode::H;
-        case 0x49: return KeyCode::I;
-        case 0x4A: return KeyCode::J;
-        case 0x4B: return KeyCode::K;
-        case 0x4C: return KeyCode::L;
-        case 0x4D: return KeyCode::M;
-        case 0x4E: return KeyCode::N;
-        case 0x4F: return KeyCode::O;
-        case 0x50: return KeyCode::P;
-        case 0x51: return KeyCode::Q;
-        case 0x52: return KeyCode::R;
-        case 0x53: return KeyCode::S;
-        case 0x54: return KeyCode::T;
-        case 0x55: return KeyCode::U;
-        case 0x56: return KeyCode::V;
-        case 0x57: return KeyCode::W;
-        case 0x58: return KeyCode::X;
-        case 0x59: return KeyCode::Y;
-        case 0x5A: return KeyCode::Z;
-        case VK_MEDIA_STOP: return KeyCode::Stop;
-        case VK_MEDIA_PLAY_PAUSE: return KeyCode::PlayPause;
-        case VK_MEDIA_PREV_TRACK: return KeyCode::MediaPrev;
-        case VK_MEDIA_NEXT_TRACK: return KeyCode::MediaNext;
-        case VK_VOLUME_DOWN: return KeyCode::VolumeDown;
-        case VK_VOLUME_UP: return KeyCode::VolumeUp;
-        case VK_VOLUME_MUTE: return KeyCode::VolumeMute;
-        case VK_OEM_102: return KeyCode::Pipe;
-        default: return KeyCode::None;
+        switch (key)
+        {
+            case XK_Escape: return KeyCode::Escape;
+            case XK_Tab: return KeyCode::Tab;
+            case XK_Caps_Lock: return KeyCode::CapsLock;
+            case XK_Shift_L: return KeyCode::LeftShift;
+            case XK_Shift_R: return KeyCode::RightShift;
+            case XK_Control_L: return KeyCode::LeftControl;
+            case XK_Control_R: return KeyCode::RightControl;
+            case XK_Alt_L: return KeyCode::LeftAlt;
+            case XK_Alt_R: return KeyCode::RightAlt;
+            case XK_Super_L: return KeyCode::LeftSuper;
+            case XK_Super_R: return KeyCode::RightSuper;
+            case XK_Print: return KeyCode::PrintScreen;
+            case XK_space: return KeyCode::Space;
+            case XK_apostrophe: return KeyCode::Apostrophe;
+            case XK_comma: return KeyCode::Comma;
+            case XK_minus: return KeyCode::Minus;
+            case XK_period: return KeyCode::Period;
+            case XK_slash: return KeyCode::Slash;
+            case XK_0: return KeyCode::D0;
+            case XK_1: return KeyCode::D1;
+            case XK_2: return KeyCode::D2;
+            case XK_3: return KeyCode::D3;
+            case XK_4: return KeyCode::D4;
+            case XK_5: return KeyCode::D5;
+            case XK_6: return KeyCode::D6;
+            case XK_7: return KeyCode::D7;
+            case XK_8: return KeyCode::D8;
+            case XK_9: return KeyCode::D9;
+            case XK_semicolon: return KeyCode::Semicolon;
+            case XK_equal: return KeyCode::Equal;
+            case XK_Menu: return KeyCode::Menu;
+            case XK_a: return KeyCode::A;
+            case XK_b: return KeyCode::B;
+            case XK_c: return KeyCode::C;
+            case XK_d: return KeyCode::D;
+            case XK_e: return KeyCode::E;
+            case XK_f: return KeyCode::F;
+            case XK_g: return KeyCode::G;
+            case XK_h: return KeyCode::H;
+            case XK_i: return KeyCode::I;
+            case XK_j: return KeyCode::J;
+            case XK_k: return KeyCode::K;
+            case XK_l: return KeyCode::L;
+            case XK_m: return KeyCode::M;
+            case XK_n: return KeyCode::N;
+            case XK_o: return KeyCode::O;
+            case XK_p: return KeyCode::P;
+            case XK_q: return KeyCode::Q;
+            case XK_r: return KeyCode::R;
+            case XK_s: return KeyCode::S;
+            case XK_t: return KeyCode::T;
+            case XK_u: return KeyCode::U;
+            case XK_v: return KeyCode::V;
+            case XK_w: return KeyCode::W;
+            case XK_x: return KeyCode::X;
+            case XK_y: return KeyCode::Y;
+            case XK_z: return KeyCode::Z;
+            case XK_bracketleft: return KeyCode::LeftBracket;
+            case XK_backslash: return KeyCode::Backslash;
+            case XK_bracketright: return KeyCode::RightBracket;
+            case XK_grave: return KeyCode::GraveAccent;
+            case XK_Delete: return KeyCode::Delete;
+            case XK_Left: return KeyCode::Left;
+            case XK_Right: return KeyCode::Right;
+            case XK_Up: return KeyCode::Up;
+            case XK_Down: return KeyCode::Down;
+            case XK_Insert: return KeyCode::Insert;
+            case XK_Home: return KeyCode::Home;
+            case XK_End: return KeyCode::End;
+            case XK_Page_Up: return KeyCode::PageUp;
+            case XK_Page_Down: return KeyCode::PageDown;
+            case XK_Num_Lock: return KeyCode::NumLock;
+            case XK_KP_Divide: return KeyCode::KP_Divide;
+            case XK_KP_Multiply: return KeyCode::KP_Multiply;
+            case XK_KP_Subtract: return KeyCode::KP_Subtract;
+            case XK_KP_Add: return KeyCode::KP_Add;
+            case XK_KP_Enter: return KeyCode::KP_Enter;
+            case XK_KP_0: return KeyCode::KP_0;
+            case XK_KP_1: return KeyCode::KP_1;
+            case XK_KP_2: return KeyCode::KP_2;
+            case XK_KP_3: return KeyCode::KP_3;
+            case XK_KP_4: return KeyCode::KP_4;
+            case XK_KP_5: return KeyCode::KP_5;
+            case XK_KP_6: return KeyCode::KP_6;
+            case XK_KP_7: return KeyCode::KP_7;
+            case XK_KP_8: return KeyCode::KP_8;
+            case XK_KP_9: return KeyCode::KP_9;
+            case XK_KP_Decimal: return KeyCode::KP_Decimal;
+            default: return KeyCode::None;
+        }
     }
 }
 
