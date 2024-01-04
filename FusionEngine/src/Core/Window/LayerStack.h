@@ -9,6 +9,8 @@ namespace FusionEngine
         LayerStack() = default;
         ~LayerStack();
 
+        void Update() const;
+
         void PushLayer(Layer* layer);
         void PushOverlay(Layer* overlay);
         void PopLayer(Layer* layer);

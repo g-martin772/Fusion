@@ -43,6 +43,7 @@ namespace FusionEngine
     void Window::OnUpdate()
     {
         Platform::UpdateNativeWindow(m_PlatformHandle);
+        m_LayerStack.Update();
     }
 
     void Window::ShutDown()
@@ -57,6 +58,31 @@ namespace FusionEngine
     void Window::MakeCurrent()
     {
         Application::Get()->m_CurrentWindow = this;
+    }
+
+    Window* Window::Current()
+    {
+        return Application::Get()->GetCurrentWindow();
+    }
+
+    void Window::PushLayer(Layer* layer)
+    {
+        m_LayerStack.PushLayer(layer);
+    }
+
+    void Window::PushOverlay(Layer* overlay)
+    {
+        m_LayerStack.PushOverlay(overlay);
+    }
+
+    void Window::PopLayer(Layer* layer)
+    {
+        m_LayerStack.PopLayer(layer);
+    }
+
+    void Window::PopOverlay(Layer* overlay)
+    {
+        m_LayerStack.PopOverlay(overlay);
     }
 
     Window::Window() = default;
