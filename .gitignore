@@ -10,6 +10,8 @@ __pycache__/
 *.csproj
 *.filters
 *.spv
+*.user
+*.code-workspace
 
 Makefile
 

@@ -30,7 +30,15 @@
     }
 
     links {
-        "FusionEngine"
+        "FusionEngine",
+    }
+
+    links {
+        "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule/VulkanModule"
+    }
+
+    postbuildcommands {
+        "{COPY} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox",
     }
 
     filter "system:windows"

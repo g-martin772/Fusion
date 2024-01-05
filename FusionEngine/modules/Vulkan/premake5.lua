@@ -1,5 +1,5 @@
-﻿project "FusionEngine"
-    kind "StaticLib"
+﻿project "VulkanModule"
+    kind "SharedLib"
     language "C++"
     cppdialect "C++20"
     staticruntime "off"
@@ -7,43 +7,33 @@
     targetdir ("%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
     objdir ("%{wks.location}/obj/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
 
-    pchheader "fepch.h"
-    pchsource "src/fepch.cpp"
-
     files { 
         "src/**.h", 
         "src/**.cpp",
         "src/**.hpp",
+        "include/**.h",
+        "include/**.cpp",
+        "include/**.hpp",
     }
     
     defines {
-        "FUSION_ENGINE",
-        "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
+        "VULKAN_MODULE",
+        "_CRT_SECURE_NO_WARNINGS"
     }
     
     VULKAN_SDK = os.getenv("VULKAN_SDK")
 
     includedirs {
         "src",
+        "include",
         "dependencies/spdlog/include",
-        "dependencies/glfw/include",
-        "dependencies/imgui",
-        "dependencies/imgui/imgui",
-        "dependencies/EnTT/entt/single_include",
-        "Modules/Vulkan/include",
-        "%{VULKAN_SDK}/Include",
-    }
-    
-    links {
-        -- "glfw",
-        -- "imgui",
-        "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule/VulkanModule"
+        "%{wks.location}/FusionEngine/src",
+        "%{VULKAN_SDK}/Include"
     }
 
-    postbuildcommands {
-        "{COPY} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox",
-    }
+    -- postbuildcommands {
+    --     ("{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox")
+    -- }
 
     filter "system:windows"
         systemversion "latest"
@@ -52,10 +42,29 @@
             "FE_WINDOWS"
         }
 
+        links {
+            "%{VULKAN_SDK}/Lib/vulkan-1.lib",
+        }
+
         buildoptions {
             "-fno-ms-extensions",
             "-lstdc++fs"
         }
+
+        filter {"configurations:Debug", "system:windows"}
+            links {
+                "%{VULKAN_SDK}/Lib/shaderc_combinedd.lib"
+            }
+        
+        filter {"configurations:Release", "system:windows"}
+            links {
+                "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+            }
+
+        filter {"configurations:Dist", "system:windows"}
+            links {
+                "%{VULKAN_SDK}/Lib/shaderc_combined.lib"
+            }
 
     filter "system:linux"
         systemversion "latest"
@@ -76,6 +85,11 @@
             "X11"
         }
 
+        links {
+            "%{VULKAN_SDK}/lib/vulkan",
+            "%{VULKAN_SDK}/lib/shaderc_shared",
+        }
+
         buildoptions {
             "-ftime-report",
             "-v"
@@ -85,7 +99,7 @@
         defines { "FE_DEBUG" }
         runtime "Debug"
         symbols "On"
-
+    
     filter "configurations:Release"
         defines { "FE_RELEASE" }
         runtime "Release"

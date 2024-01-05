@@ -25,6 +25,6 @@ public:
 Application* CreateApplication()
 {
     auto* app = new Application();
-    Window::Current()->PushLayer(new SandboxLayer());
+    //Window::Current()->PushLayer(new SandboxLayer());
     return app;
 }

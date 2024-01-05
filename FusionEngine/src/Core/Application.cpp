@@ -3,6 +3,7 @@
 
 #include "Result.h"
 #include "Platform/Platform.h"
+#include "VulkanModule/VulkanModule.h"
 #include "Window/Input.h"
 
 namespace FusionEngine
@@ -20,6 +21,8 @@ namespace FusionEngine
         
         Log::Init();
         FE_INFO("Starting Fusion Engine");
+
+        testvulkan();
 
         auto result = Platform::Init();
         FE_ASSERT(result.is_ok(), "Platform Init Failed");
