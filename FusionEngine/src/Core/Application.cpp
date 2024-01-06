@@ -3,7 +3,7 @@
 
 #include "Result.h"
 #include "Platform/Platform.h"
-#include "VulkanModule/VulkanModule.h"
+#include "Platform/RenderModule.h"
 #include "Window/Input.h"
 
 namespace FusionEngine
@@ -30,6 +30,8 @@ namespace FusionEngine
         m_PrimaryWindow->Init();
         m_CurrentWindow = m_PrimaryWindow;
         m_FocusedWindow = m_PrimaryWindow;
+
+        m_RenderModule = RenderModule::Init();
     }
 
     void Application::Run()
@@ -56,6 +58,8 @@ namespace FusionEngine
         FE_INFO("Fusion Engine Shutdown");
         m_Running = false;
 
+        RenderModule::Shutdown(m_RenderModule);
+        
         m_PrimaryWindow->ShutDown();
         delete m_PrimaryWindow;
     }

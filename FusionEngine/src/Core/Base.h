@@ -1,11 +1,22 @@
 ﻿#pragma once
 
 #include <memory>
+#include <utility>
+
+#include <vector>
+#include <unordered_map>
+#include <map>
 
 #ifdef FUSION_ENGINE
-    #define FE_API //__declspec(dllexport)
+    #define FE_API __declspec(dllexport)
 #else
-    #define FE_API //__declspec(dllimport)
+    #define FE_API __declspec(dllimport)
+#endif
+
+#ifdef FUSION_ENGINE
+    #define FE_MODULE __declspec(dllimport)
+#else
+    #define FE_MODULE __declspec(dllexport)
 #endif
 
 #define BIT(x) (1 << x)

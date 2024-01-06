@@ -7,7 +7,12 @@
 
 namespace FusionEngine
 {
-    FE_API class Application
+    struct RenderModuleData;
+}
+
+namespace FusionEngine
+{
+    class Application
     {
     public:
         static Application* Get();
@@ -26,6 +31,8 @@ namespace FusionEngine
         Window* m_PrimaryWindow;
         Window* m_CurrentWindow;
         Window* m_FocusedWindow;
+
+        RenderModuleData* m_RenderModule;
 
         friend class Window;
         friend class Platform;
