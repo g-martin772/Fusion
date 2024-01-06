@@ -273,30 +273,45 @@ namespace FusionEngine
         return DefWindowProcA(hwnd, msg, wParam, lParam);
     }
 
+    InputMap* GetIM()
+    {
+        const Window* window = Application::Get()->GetCurrentWindow();
+
+        if(!window)
+            return nullptr;
+
+        const auto [Handle, InputHandle] = window->GetPlatformHandle();
+
+        if (!Handle || !InputHandle)
+            return nullptr;
+        
+        return InputHandle;
+    }
+
     bool Platform::IsKeyDown(KeyCode keycode)
     {
-        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+        if (const InputMap* im = GetIM())
             return im->GetKeyState(keycode) == KeyState::Down || im->GetKeyState(keycode) == KeyState::Pressed;
         return false;
     }
 
     bool Platform::IsButtonDown(MouseCode button)
     {
-        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+        if (const InputMap* im = GetIM())
             return im->GetButtonState(button) == KeyState::Down || im->GetButtonState(button) == KeyState::Pressed;
         return false;
     }
 
     glm::uvec2 Platform::GetMouse()
     {
-        if(const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+        if(const InputMap* im = GetIM())
             return im->GetMouse();
         return {0, 0};
     }
 
     glm::uvec2 Platform::GetMouseDelta()
     {
-        if (const InputMap* im = Application::Get()->GetCurrentWindow()->GetPlatformHandle().InputHandle)
+        if (const InputMap* im = GetIM())
             return im->GetMouseDelta();
         return {0, 0};
     }

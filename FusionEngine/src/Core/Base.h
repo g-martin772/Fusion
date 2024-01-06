@@ -15,7 +15,7 @@
 #elif FE_RELEASE
     #define FE_LOG_LEVEL_INFO
 #else
-    #defineFE_LOG_LEVEL_WARN
+    #define FE_LOG_LEVEL_WARN
 #endif
 
 namespace FusionEngine

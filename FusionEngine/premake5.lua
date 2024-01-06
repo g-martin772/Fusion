@@ -52,11 +52,6 @@
             "FE_WINDOWS"
         }
 
-        buildoptions {
-            "-fno-ms-extensions",
-            "-lstdc++fs"
-        }
-
     filter "system:linux"
         systemversion "latest"
         

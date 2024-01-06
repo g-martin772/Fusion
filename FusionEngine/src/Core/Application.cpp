@@ -22,8 +22,6 @@ namespace FusionEngine
         Log::Init();
         FE_INFO("Starting Fusion Engine");
 
-        testvulkan();
-
         auto result = Platform::Init();
         FE_ASSERT(result.is_ok(), "Platform Init Failed");
         Platform::State = result.unwrap();
@@ -41,11 +39,9 @@ namespace FusionEngine
         
         while(m_Running)
         {
-            Platform::Update();
             m_PrimaryWindow->OnUpdate();
-            if (Input::IsKeyDown(KeyCode::A))
-                FE_INFO("A pressed");
             secondWindow->OnUpdate();
+            Platform::Update();
         }
 
         secondWindow->ShutDown();
