@@ -12,25 +12,23 @@ if (VULKAN_SDK is None):
    exit(1)
 elif (VULKAN_VERSION not in VULKAN_SDK):
     print(f"Located Vulkan SDK at {VULKAN_SDK}")
-    print(f"You don't have the correct Vulkan SDK version! (Fusion requires {VULKAN_VERSION})")
+    print(f"You don't have the correct Vulkan SDK version! (Fusion requires version {VULKAN_VERSION})")
     
 print(f"Correct Vulkan SDK located at {VULKAN_SDK}")
 
-os.chdir('./../')
+if "scripts" in os.getcwd():
+    os.chdir('./../')
+    
+os.environ["FUSION_DIR"] = os.getcwd()
 
 print("\nUpdating git submodules ...")
 
 subprocess.call(["git", "submodule", "update", "--recursive", "--remote"])
 subprocess.call(["git", "submodule", "update", "--init", "--recursive", "--remote"])
 
-print("\nRunning premake...")
-
-if platform.system() == 'Windows':
-     subprocess.call([os.path.abspath("./scripts/GenerateVS22.bat"), "nopause"])
-elif platform.system() == 'Linux':
-    subprocess.call([os.path.abspath("./scripts/GenerateMakefile.sh"), "nopause"])
-else:
-    print('What os are you even on at this point xD? Macos or what xD')
-    exit(1)
-    
-
+if platform.system() == "Windows":
+    if not os.path.isfile("premake.exe"):
+        os.link("scripts/Dependencies/premake-5.0.0-beta2-windows/premake5.exe", "premake.exe")
+elif platform.system() == "Linux":
+    if not os.path.isfile("premake"):
+        os.link("scripts/Dependencies/premake-5.0.0-beta2-linux/premake5", "premake")

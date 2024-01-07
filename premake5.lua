@@ -10,7 +10,7 @@ flags { "MultiProcessorCompile" }
 group "Dependencies"
     include "FusionEngine/Dependencies/GLFW"
     include "FusionEngine/Dependencies/imgui/imgui"
-group "Core"
+group "Engine"
     include "FusionEngine"
     include "FusionForge"
 group "Tests"
