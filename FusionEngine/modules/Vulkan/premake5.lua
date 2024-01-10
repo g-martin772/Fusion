@@ -4,36 +4,23 @@
     cppdialect "C++20"
     staticruntime "off"
     
-    targetdir ("%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
-    objdir ("%{wks.location}/obj/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
+    targetdir "%{BIN}"
+    objdir "%{OBJ}"
 
     files { 
         "src/**.h", 
         "src/**.cpp",
-        "src/**.hpp",
-        "include/**.h",
-        "include/**.cpp",
-        "include/**.hpp",
     }
     
     defines {
         "VULKAN_MODULE",
         "_CRT_SECURE_NO_WARNINGS"
     }
-    
-    VULKAN_SDK = os.getenv("VULKAN_SDK")
 
     includedirs {
         "src",
-        "include",
-        "dependencies/spdlog/include",
-        "%{wks.location}/FusionEngine/src",
         "%{VULKAN_SDK}/Include"
     }
-
-    -- postbuildcommands {
-    --     ("{COPY} %{cfg.buildtarget.relpath} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox")
-    -- }
 
     filter "system:windows"
         systemversion "latest"
@@ -44,11 +31,6 @@
 
         links {
             "%{VULKAN_SDK}/Lib/vulkan-1.lib",
-        }
-
-        buildoptions {
-            "-fno-ms-extensions",
-            "-lstdc++fs"
         }
 
         filter {"configurations:Debug", "system:windows"}
@@ -75,24 +57,8 @@
         }
 
         links {
-            "dl",
-            "pthread",
-            "Xrandr",
-            "Xi",
-            "Xinerama",
-            "Xcursor",
-            "Xxf86vm",
-            "X11"
-        }
-
-        links {
             "%{VULKAN_SDK}/lib/vulkan",
             "%{VULKAN_SDK}/lib/shaderc_shared",
-        }
-
-        buildoptions {
-            "-ftime-report",
-            "-v"
         }
     
     filter "configurations:Debug"

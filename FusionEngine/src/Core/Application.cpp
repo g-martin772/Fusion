@@ -1,9 +1,9 @@
 ﻿#include "fepch.h"
 #include "Application.h"
 
-#include "Result.h"
+#include "Core/Result.h"
 #include "Platform/Platform.h"
-#include "Platform/RenderModule.h"
+#include "RenderModule.h"
 #include "Window/Input.h"
 
 namespace FusionEngine

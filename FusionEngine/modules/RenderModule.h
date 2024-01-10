@@ -1,6 +1,10 @@
 #pragma once
 
-#include "Core/Base.h"
+#if defined(FE_RENDER_MODULE)
+    #define FE_MODULE __declspec(dllexport)
+#else
+    #define FE_MODULE __declspec(dllimport)
+#endif
 
 namespace FusionEngine
 {

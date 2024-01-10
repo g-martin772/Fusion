@@ -3,14 +3,13 @@
     language "C++"
     cppdialect "C++20"
     staticruntime "off"
-    
-    targetdir ("%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
-    objdir ("%{wks.location}/obj/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
+
+    targetdir "%{BIN}"
+    objdir "%{OBJ}"
     
     files {
         "src/**.h",
-        "src/**.cpp",
-        "src/**.hpp"
+        "src/**.cpp"
     }
     
     defines {
@@ -18,11 +17,10 @@
         "GLFW_INCLUDE_NONE"
     }
 
-    VULKAN_SDK = os.getenv("VULKAN_SDK")
-    
     includedirs {
         "src",
         "%{wks.location}/FusionEngine/src",
+        "%{wks.location}/FusionEngine/Modules",
         "%{wks.location}/FusionEngine/dependencies/spdlog/include",
         "%{wks.location}/FusionEngine/dependencies/imgui/imgui",
         "%{wks.location}/FusionEngine/dependencies/EnTT/entt/single_include",
@@ -31,14 +29,8 @@
 
     links {
         "FusionEngine",
-    }
-
-    links {
-        "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule/VulkanModule"
-    }
-
-    postbuildcommands {
-        "{COPY} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox",
+        "VulkanModule",
+        "FusionCore",
     }
 
     filter "system:windows"
@@ -46,11 +38,6 @@
     
         defines {
             "FE_WINDOWS"
-        }
-    
-        buildoptions {
-            "-fno-ms-extensions",
-            "-lstdc++fs"
         }
     
     filter "system:linux"
@@ -71,12 +58,7 @@
             "Xxf86vm",
             "X11"
         }
-        
-        buildoptions {
-            "-ftime-report",
-            "-v"
-        }
-    
+
     filter "configurations:Debug"
         defines { "FE_DEBUG" }
         runtime "Debug"

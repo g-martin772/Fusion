@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Core/Log.h"
+#include "Log.h"
 
 #include <signal.h>
 

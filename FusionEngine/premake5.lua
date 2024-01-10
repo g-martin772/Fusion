@@ -4,45 +4,37 @@
     cppdialect "C++20"
     staticruntime "off"
     
-    targetdir ("%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
-    objdir ("%{wks.location}/obj/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/%{prj.name}")
+    targetdir "%{BIN}"
+    objdir "%{OBJ}"
 
     pchheader "fepch.h"
     pchsource "src/fepch.cpp"
 
     files { 
         "src/**.h", 
-        "src/**.cpp",
-        "src/**.hpp",
+        "src/**.cpp"
     }
     
     defines {
         "FUSION_ENGINE",
-        "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
+        "_CRT_SECURE_NO_WARNINGS"
     }
-    
-    VULKAN_SDK = os.getenv("VULKAN_SDK")
 
     includedirs {
         "src",
-        "dependencies/spdlog/include",
+        "Modules",
         "dependencies/glfw/include",
         "dependencies/imgui",
         "dependencies/imgui/imgui",
         "dependencies/EnTT/entt/single_include",
-        "Modules/Vulkan/include",
         "%{VULKAN_SDK}/Include",
     }
     
     links {
         -- "glfw",
         -- "imgui",
-        "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule/VulkanModule"
-    }
-
-    postbuildcommands {
-        "{COPY} %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/VulkanModule %{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}/Sandbox",
+        "FusionCore",
+        "VulkanModule",
     }
 
     filter "system:windows"
@@ -69,11 +61,6 @@
             "Xcursor",
             "Xxf86vm",
             "X11"
-        }
-
-        buildoptions {
-            "-ftime-report",
-            "-v"
         }
     
     filter "configurations:Debug"

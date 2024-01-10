@@ -3,7 +3,7 @@
 
 #include "Core/Application.h"
 #include "Core/Result.h"
-#include "Core/Events/EventSystem.h"
+#include "Core/EventSystem.h"
 
 namespace FusionEngine
 {

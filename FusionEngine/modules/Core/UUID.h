@@ -4,6 +4,7 @@
 #undef max
 
 #include <random>
+#include <string>
 
 namespace FusionEngine
 {
@@ -34,7 +35,6 @@ namespace FusionEngine
 
         std::string ToString() const { return std::to_string(Low) + std::to_string(High); }
 
-        // Why the heck is there no uint128_t
         uint64_t Low, High;
     };
 }

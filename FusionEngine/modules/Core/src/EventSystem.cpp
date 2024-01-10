@@ -1,8 +1,11 @@
-#include "fepch.h"
 #include "EventSystem.h"
+
+#include "Base.h"
 
 namespace FusionEngine
 {
+    struct EventContext;
+
     struct EventEntry
     {
         void* Listener;

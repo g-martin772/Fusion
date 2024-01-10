@@ -1,7 +1,7 @@
 #include "fepch.h"
 
 #include "Core/Application.h"
-#include "Core/Events/EventSystem.h"
+#include "Core/EventSystem.h"
 #include "Core/Window/InputMap.h"
 #include "Core/Window/KeyCodes.h"
 

@@ -1,5 +1,10 @@
 require("scripts/Dependencies/vscode")
 
+BIN = "%{wks.location}/bin/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+OBJ = "%{wks.location}/bin-int/%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
+
+VULKAN_SDK = os.getenv("VULKAN_SDK")
+
 workspace "Fusion"
 
 architecture "x86_64"
@@ -17,4 +22,5 @@ group "Tests"
     include "Sandbox"
 group "Modules"
     include "FusionEngine/Modules/Vulkan"
+    include "FusionEngine/Modules/Core"
 group ""

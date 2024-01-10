@@ -13,10 +13,16 @@
     #define FE_API __declspec(dllimport)
 #endif
 
-#ifdef FUSION_ENGINE
-    #define FE_MODULE __declspec(dllimport)
+#ifdef FUSION_CORE_MODULE
+    #define FE_CORE_MODULE_API __declspec(dllexport)
 #else
-    #define FE_MODULE __declspec(dllexport)
+    #define FE_CORE_MODULE_API __declspec(dllimport)
+#endif
+
+#ifdef VULKAN_MODULE
+    #define FE_VULKAN_MODULE_API __declspec(dllexport)
+#else
+    #define FE_VULKAN_MODULE_API __declspec(dllimport)
 #endif
 
 #define BIT(x) (1 << x)
