@@ -17,4 +17,6 @@ __pycache__/
 
 Makefile
 
+latest.log
+
 VulkanSDK.exe

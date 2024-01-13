@@ -9,6 +9,8 @@ namespace FusionEngine
     struct RendererBackendData
     {
         vk::Instance instance;
+        vk::DispatchLoaderDynamic instanceLoader;
+        vk::DebugUtilsMessengerEXT debugMessenger;
     };
 
     struct RendererBackendWindowData
