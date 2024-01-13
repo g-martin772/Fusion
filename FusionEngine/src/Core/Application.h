@@ -23,12 +23,12 @@ namespace FusionEngine
 
         void Close();
 
-        [[nodiscard]] Window* GetPrimaryWindow() const { return m_PrimaryWindow; }
-        [[nodiscard]] Window* GetCurrentWindow() const { return m_PrimaryWindow; }
-        [[nodiscard]] Window* GetFocusedWindow() const { return m_PrimaryWindow; }
+        [[nodiscard]] Window* GetPrimaryWindow() const { return m_PrimaryWindow.get(); }
+        [[nodiscard]] Window* GetCurrentWindow() const { return m_CurrentWindow; }
+        [[nodiscard]] Window* GetFocusedWindow() const { return m_FocusedWindow; }
     private:
         bool m_Running = true;
-        Window* m_PrimaryWindow;
+        Unique<Window> m_PrimaryWindow;
         Window* m_CurrentWindow;
         Window* m_FocusedWindow;
 

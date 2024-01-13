@@ -4,6 +4,8 @@
 
 #include "Core/Result.h"
 #include "Core/Window/KeyCodes.h"
+#include "Renderer/RenderBackend.h"
+#include "InputMap.h"
 
 namespace FusionEngine
 {
@@ -18,7 +20,8 @@ namespace FusionEngine
     struct WindowHandle
     {
         void* Handle;
-        InputMap* InputHandle;
+        Unique<InputMap> InputHandle;
+        Unique<RendererBackendWindowData> RendererData;
     };
 
     enum class PlatformError

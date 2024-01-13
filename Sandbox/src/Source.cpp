@@ -8,17 +8,17 @@ class SandboxLayer : public Layer
 public:
     void OnAttach() override
     {
-        FE_INFO("Layer1 Attached");
+        Log::Info("Layer1 Attached");
     }
     
     void OnDetach() override
     {
-        FE_INFO("Layer1 Detached");
+        Log::Info("Layer1 Detached");
     }
     
     void OnUpdate() override
     {
-        FE_INFO("Layer1 Updated");
+        Log::Info("Layer1 Updated");
     }
 };
 

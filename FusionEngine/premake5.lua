@@ -17,7 +17,8 @@
     
     defines {
         "FUSION_ENGINE",
-        "_CRT_SECURE_NO_WARNINGS"
+        "_CRT_SECURE_NO_WARNINGS",
+        "FE_RENDER_BACKEND_VULKAN"
     }
 
     includedirs {
@@ -34,6 +35,7 @@
     links {
         -- "glfw",
         -- "imgui",
+        "%{VULKAN_SDK}/Lib/vulkan-1.lib"
     }
 
     filter "system:windows"

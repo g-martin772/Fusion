@@ -18,7 +18,7 @@ namespace FusionEngine
         s_Application = this;
         
         Log::Init();
-        FE_INFO("Starting Fusion Engine");
+        Log::Info("Starting Fusion Engine");
 
         auto result = Platform::Init();
         FE_ASSERT(result.is_ok(), "Platform Init Failed");
@@ -26,13 +26,15 @@ namespace FusionEngine
         
         m_PrimaryWindow = Window::Create();
         m_PrimaryWindow->Init();
-        m_CurrentWindow = m_PrimaryWindow;
-        m_FocusedWindow = m_PrimaryWindow;
+        m_CurrentWindow = m_PrimaryWindow.get();
+        m_FocusedWindow = m_PrimaryWindow.get();
+
+        RendererBackend::Init();
     }
 
     void Application::Run()
     {
-        Window* secondWindow = Window::Create();
+        const Unique<Window> secondWindow = Window::Create();
         secondWindow->Init();
         
         while(m_Running)
@@ -43,7 +45,6 @@ namespace FusionEngine
         }
 
         secondWindow->ShutDown();
-        delete secondWindow;
     }
 
     void Application::Shutdown()
@@ -51,11 +52,12 @@ namespace FusionEngine
         if(!m_Running)
             return;
         
-        FE_INFO("Fusion Engine Shutdown");
+        Log::Info("Fusion Engine Shutdown");
         m_Running = false;
+
+        RendererBackend::Shutdown();
         
         m_PrimaryWindow->ShutDown();
-        delete m_PrimaryWindow;
     }
 
     void Application::Close()

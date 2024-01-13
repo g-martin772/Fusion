@@ -4,13 +4,14 @@
 #include "Core/Application.h"
 #include "Core/Result.h"
 #include "Core/EventSystem.h"
+#include "Renderer/RenderBackend.h"
 
 namespace FusionEngine
 {
     FE_EVENT_CALLBACK_FN(WindowCloseCallback) {
         Window* window = static_cast<Window*>(instance);
 
-        if (window->GetPlatformHandle().Handle != context.Sender)
+        if (window->GetPlatformHandle()->Handle != context.Sender)
             return false;
             
         if (window == Application::Get()->GetPrimaryWindow())
@@ -24,9 +25,9 @@ namespace FusionEngine
         return true;
     }
     
-    Window* Window::Create()
+    Unique<Window> Window::Create()
     {
-        return new Window();
+        return MakeUnique<Window>();
     }
 
     void Window::Init()
@@ -35,7 +36,7 @@ namespace FusionEngine
         FE_ASSERT(result.is_ok(), "Window creation failed");
         m_PlatformHandle = result.unwrap();
 
-        FE_INFO("Opend window {0}", m_PlatformHandle.Handle);
+        Log::Trace("Opend window {0}", m_PlatformHandle.Handle);
         
         EventSystem::Register(Event::WindowClose, WindowCloseCallback, this);
     }
@@ -50,7 +51,8 @@ namespace FusionEngine
     {
         if (!m_PlatformHandle.Handle)
             return;
-        FE_INFO("Closing window {0}", m_PlatformHandle.Handle);
+        Log::Trace("Closing window {0}", m_PlatformHandle.Handle);
+        
         Platform::DestroyNativeWindow(m_PlatformHandle);
         EventSystem::Unregister(Event::WindowClose, WindowCloseCallback, this);
     }

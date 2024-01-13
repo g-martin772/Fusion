@@ -7,7 +7,7 @@ namespace FusionEngine
     class Window final
     {
     public:
-        static Window* Create();
+        static Unique<Window> Create();
         Window();
         ~Window() = default;    
 
@@ -25,7 +25,7 @@ namespace FusionEngine
 
         [[nodiscard]] LayerStack& GetLayerStack() { return m_LayerStack; }
 
-        [[nodiscard]] WindowHandle GetPlatformHandle() const { return m_PlatformHandle; }
+        [[nodiscard]] WindowHandle* GetPlatformHandle() { return &m_PlatformHandle; }
     private:
         WindowHandle m_PlatformHandle;
         LayerStack m_LayerStack;

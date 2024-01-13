@@ -17,11 +17,11 @@
 #endif
 
 #ifdef FE_ENABLE_ASSERTS
-#define FE_ASSERT(x, ...) { if(!(x)) { FE_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
-#define FF_ASSERT(x, ...) { if(!(x)) { FF_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
-#define FG_ASSERT(x, ...) { if(!(x)) { FG_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
+#define FE_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
+#define FF_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
+#define FG_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); FE_BREAK; } }
 #else
-#define FE_ASSERT(x, ...) { if(!(x)) { FE_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
-#define FF_ASSERT(x, ...) { if(!(x)) { FF_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
-#define FG_ASSERT(x, ...) { if(!(x)) { FG_ERROR("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
+#define FE_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
+#define FF_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
+#define FG_ASSERT(x, ...) { if(!(x)) { Log::Error("Assertion Failed ({0}, {1}): {2}", __FILE__, __LINE__, __VA_ARGS__); } }
 #endif
