@@ -28,9 +28,7 @@
     }
 
     links {
-        "FusionEngine",
-        "VulkanModule",
-        "FusionCore",
+        "FusionEngine"
     }
 
     filter "system:windows"

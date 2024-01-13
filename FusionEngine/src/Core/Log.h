@@ -4,10 +4,10 @@
 
 namespace FusionEngine
 {
-    FE_CORE_MODULE_API class Log
+    class Log
     {
     public:
-        FE_CORE_MODULE_API static void Init();
+        static void Init();
     }; 
 }
 

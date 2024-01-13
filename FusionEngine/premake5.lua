@@ -24,6 +24,7 @@
         "src",
         "Modules",
         "dependencies/glfw/include",
+        "dependencies/spdlog/include",
         "dependencies/imgui",
         "dependencies/imgui/imgui",
         "dependencies/EnTT/entt/single_include",
@@ -33,8 +34,6 @@
     links {
         -- "glfw",
         -- "imgui",
-        "FusionCore",
-        "VulkanModule",
     }
 
     filter "system:windows"
