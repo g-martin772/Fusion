@@ -72,4 +72,22 @@ namespace FusionEngine
     {
         return std::map<T, U>(std::forward<Args>(args)...);
     }
+
+    template<typename T>
+    using USet = std::unordered_set<T>;
+
+    template<typename T, typename ... Args>
+    constexpr USet<T> MakeUSet(Args&& ... args)
+    {
+        return std::unordered_set<T>(std::forward<Args>(args)...);
+    }
+
+    template<typename T>
+    using Set = std::set<T>;
+
+    template<typename T, typename ... Args>
+    constexpr Set<T> MakeSet(Args&& ... args)
+    {
+        return std::set<T>(std::forward<Args>(args)...);
+    }
 }

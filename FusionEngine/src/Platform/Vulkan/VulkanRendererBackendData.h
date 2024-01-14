@@ -11,6 +11,9 @@ namespace FusionEngine
         vk::Instance instance;
         vk::DispatchLoaderDynamic instanceLoader;
         vk::DebugUtilsMessengerEXT debugMessenger;
+        vk::PhysicalDevice physicalDevice;
+        vk::SurfaceKHR surface;
+        uint32_t graphicsQueueIndex, presentQueueIndex, computeQueueIndex, transferQueueIndex;
     };
 
     struct RendererBackendWindowData
