@@ -23,17 +23,16 @@ namespace FusionEngine::VulkanHelpers
         int i = 0;
         for (auto family : queueFamilies)
         {
-            Log::Trace("\tQueue Family {0}:", i);
-            Log::Trace("\t\tQueue Count: {0}", family.queueCount);
-            Log::Trace("\t\tQueue Flags: {0}", vk::to_string(family.queueFlags));
+            Log::Trace("Queue Family {0}:", i);
+            Log::Trace("\tQueue Count: {0}", family.queueCount);
+            Log::Trace("\tQueue Flags: {0}", vk::to_string(family.queueFlags));
             i++;
         }
 
         i = 0;
         for (auto family : queueFamilies)
         {
-            // Check out dedicated queue families
-            if (family.queueFlags & vk::QueueFlagBits::eGraphics)
+            if (family.queueFlags & vk::QueueFlagBits::eGraphics && data->graphicsQueueIndex == UINT32_MAX)
                 data->graphicsQueueIndex = i;
             if (family.queueFlags & vk::QueueFlagBits::eCompute)
                 data->computeQueueIndex = i;
@@ -41,19 +40,79 @@ namespace FusionEngine::VulkanHelpers
                 data->transferQueueIndex = i;
             if (data->physicalDevice.getSurfaceSupportKHR(i, data->surface))
                 data->presentQueueIndex = i;
-
-            if (data->graphicsQueueIndex != UINT32_MAX && data->presentQueueIndex != UINT32_MAX && data->computeQueueIndex != UINT32_MAX && data->transferQueueIndex != UINT32_MAX)
-            {
-                Log::Trace("Picked queue families:");
-                Log::Trace("\tGraphics: {0}", data->graphicsQueueIndex);
-                Log::Trace("\tPresent: {0}", data->presentQueueIndex);
-                Log::Trace("\tCompute: {0}", data->computeQueueIndex);
-                Log::Trace("\tTransfer: {0}", data->transferQueueIndex);
-                return true;
-            }
             
             i++;
         }
+
+        if (data->graphicsQueueIndex != UINT32_MAX && data->presentQueueIndex != UINT32_MAX && data->computeQueueIndex != UINT32_MAX && data->transferQueueIndex != UINT32_MAX)
+        {
+            Log::Trace("Picked queue families:");
+            Log::Trace("\tGraphics: {0}", data->graphicsQueueIndex);
+            Log::Trace("\tPresent: {0}", data->presentQueueIndex);
+            Log::Trace("\tCompute: {0}", data->computeQueueIndex);
+            Log::Trace("\tTransfer: {0}", data->transferQueueIndex);
+            return true;
+        }
+        
+        return false;
+    }
+
+    inline bool CreateDevice(RendererBackendData* data)
+    {
+        constexpr float priorities = 1.0f;
+        List<vk::DeviceQueueCreateInfo> queues;
+        vk::DeviceQueueCreateInfo graphicsQueueInfo;
+        graphicsQueueInfo.queueFamilyIndex = data->graphicsQueueIndex;
+        graphicsQueueInfo.queueCount = 1;
+        graphicsQueueInfo.pQueuePriorities = &priorities;
+        queues.push_back(graphicsQueueInfo);
+
+        vk::DeviceQueueCreateInfo presentQueueInfo = graphicsQueueInfo;
+        presentQueueInfo.queueFamilyIndex = data->presentQueueIndex;
+        if (data->presentQueueIndex != data->graphicsQueueIndex)
+            queues.push_back(presentQueueInfo);
+
+        vk::DeviceQueueCreateInfo computeQueueInfo = graphicsQueueInfo;
+        computeQueueInfo.queueFamilyIndex = data->computeQueueIndex;
+        if (data->graphicsQueueIndex != data->computeQueueIndex
+            && data->presentQueueIndex != data->computeQueueIndex)
+            queues.push_back(computeQueueInfo);
+        
+        vk::DeviceQueueCreateInfo transferQueueInfo = graphicsQueueInfo;
+        transferQueueInfo.queueFamilyIndex = data->transferQueueIndex;
+        if (data->graphicsQueueIndex != data->transferQueueIndex
+            && data->presentQueueIndex != data->transferQueueIndex
+            && data->computeQueueIndex != data->transferQueueIndex)
+            queues.push_back(transferQueueInfo);
+
+        vk::PhysicalDeviceFeatures deviceFeatures{};
+        // Set device features here when required
+
+        List<const char*> requiredExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+        };
+
+        List<const char*> requiredLayers = {
+            "VK_LAYER_KHRONOS_validation"
+        };
+
+        vk::DeviceCreateInfo createInfo{};
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queues.size());
+        createInfo.pQueueCreateInfos = queues.data();
+        createInfo.pEnabledFeatures = &deviceFeatures;
+        createInfo.enabledLayerCount = static_cast<uint32_t>(requiredLayers.size());
+        createInfo.ppEnabledLayerNames = requiredLayers.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t>(requiredExtensions.size());
+        createInfo.ppEnabledExtensionNames = requiredExtensions.data();
+
+        Log::Info("Creating device...");
+        data->device = data->physicalDevice.createDevice(createInfo);
+
+        Log::Info("Retrieving queue handles...");
+        data->graphicsQueue = data->device.getQueue(data->graphicsQueueIndex, 0);
+        data->presentQueue = data->device.getQueue(data->presentQueueIndex, 0);
+        data->computeQueue = data->device.getQueue(data->computeQueueIndex, 0);
+        data->transferQueue = data->device.getQueue(data->transferQueueIndex, 0);
         
         return false;
     }
@@ -61,7 +120,8 @@ namespace FusionEngine::VulkanHelpers
     inline vk::SurfaceKHR AcquireSurface(const RendererBackendData* data)
     {
         vk::SurfaceKHR surface;
-        
+
+        Log::Info("Acquiring surface...");
         #ifdef FE_WINDOWS
         vk::Win32SurfaceCreateInfoKHR createInfo{};
         createInfo.hwnd = static_cast<HWND>(Application::Get()->GetPrimaryWindow()->GetPlatformHandle()->Handle);

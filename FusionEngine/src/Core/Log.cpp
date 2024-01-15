@@ -13,10 +13,9 @@ namespace FusionEngine
     void Log::Init()
     {
         spdlog::set_pattern("%^[%T][%t] %n: %v%$");
+        spdlog::set_level(spdlog::level::trace);
         logger = spdlog::stdout_color_mt("FusionEngine");
         fileLogger = spdlog::basic_logger_mt("FusionLog", "logs/latest.log");
     }
-
-    
 }
 
