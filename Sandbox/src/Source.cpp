@@ -1,5 +1,7 @@
 ﻿#include "fepch.h"
+#include "Core/ApplicationConfig.h"
 #include "Core/Entrypoint.h"
+#include "IO/File.h"
 
 using namespace FusionEngine;
 
@@ -24,6 +26,12 @@ public:
 
 Application* CreateApplication()
 {
+    if (!File::Exists("fusion.conf"))
+        ApplicationConfig::GenerateDefaultConfig("fusion.conf");
+
+    ApplicationConfig conf;
+    conf.LoadFromConfigFile("fusion.conf");
+        
     auto* app = new Application();
     //Window::Current()->PushLayer(new SandboxLayer());
     return app;

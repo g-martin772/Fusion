@@ -46,6 +46,16 @@ namespace FusionEngine
         file.close();
     }
 
+    void File::WriteLines(const std::filesystem::path& path, const std::vector<std::string>& data)
+    {
+        std::ofstream file(path);
+        for (const auto& line : data)
+        {
+            file << line << "\n";
+        }
+        file.close();
+    }
+
     bool File::Exists(const std::filesystem::path& path)
     {
         return std::filesystem::exists(path);
