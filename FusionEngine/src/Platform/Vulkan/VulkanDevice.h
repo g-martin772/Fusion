@@ -38,7 +38,7 @@ namespace FusionEngine::VulkanHelpers
                 data->computeQueueIndex = i;
             if (family.queueFlags & vk::QueueFlagBits::eTransfer)
                 data->transferQueueIndex = i;
-            if (data->physicalDevice.getSurfaceSupportKHR(i, data->surface))
+            if (data->physicalDevice.getSurfaceSupportKHR(i, Window::Current()->GetRenderData().surface))
                 data->presentQueueIndex = i;
             
             i++;
@@ -117,18 +117,20 @@ namespace FusionEngine::VulkanHelpers
         return false;
     }
 
-    inline vk::SurfaceKHR AcquireSurface(const RendererBackendData* data)
+    inline vk::SurfaceKHR AcquireSurface(const RendererBackendData* data, Window* window)
     {
         vk::SurfaceKHR surface;
 
         Log::Info("Acquiring surface...");
         #ifdef FE_WINDOWS
         vk::Win32SurfaceCreateInfoKHR createInfo{};
-        createInfo.hwnd = static_cast<HWND>(Application::Get()->GetPrimaryWindow()->GetPlatformHandle()->Handle);
+        createInfo.hwnd = static_cast<HWND>(Window::Current()->GetPlatformHandle()->Handle);
         createInfo.hinstance = GetModuleHandle(nullptr);
         surface = data->instance.createWin32SurfaceKHR(createInfo);
         #endif
 
+        window->GetRenderData().surface = surface;
+        
         return surface;
     }
     
@@ -176,7 +178,7 @@ namespace FusionEngine::VulkanHelpers
         Log::Info("Picked {0} as main rendering GPU", selectedDevice.getProperties().deviceName);
         
         return selectedDevice;
-    }
+    }   
 }
 
 #endif

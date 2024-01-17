@@ -19,7 +19,7 @@ namespace FusionEngine
         s_Data->instanceLoader.init(s_Data->instance);
         s_Data->debugMessenger = VulkanHelpers::CreateDebugUtilsMessengerEXT(s_Data);
         s_Data->physicalDevice = VulkanHelpers::PickPhysicalDevice(s_Data);
-        s_Data->surface = VulkanHelpers::AcquireSurface(s_Data);
+        VulkanHelpers::AcquireSurface(s_Data, Application::Get()->GetCurrentWindow());
         VulkanHelpers::PickQueueFamilies(s_Data);
         VulkanHelpers::CreateDevice(s_Data);
     }
@@ -27,7 +27,7 @@ namespace FusionEngine
     void RendererBackend::Shutdown()
     {
         s_Data->device.destroy();
-        s_Data->instance.destroySurfaceKHR(s_Data->surface);
+        s_Data->instance.destroySurfaceKHR(Application::Get()->GetPrimaryWindow()->GetRenderData().surface);
         s_Data->instance.destroyDebugUtilsMessengerEXT(s_Data->debugMessenger, nullptr, s_Data->instanceLoader);
         s_Data->instance.destroy();
 

@@ -14,7 +14,8 @@
     
     defines {
         "_CRT_SECURE_NO_WARNINGS",
-        "GLFW_INCLUDE_NONE"
+        "GLFW_INCLUDE_NONE",
+        "FE_RENDER_BACKEND_VULKAN"
     }
 
     includedirs {

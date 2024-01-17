@@ -7,9 +7,9 @@ namespace FusionEngine
 {
     void ApplicationConfig::LoadFromArgs(int argc, char** argv)
     {
-        for (int i = 0; i < argc; i++)
+        for (int i = 1; i < argc; i++)
         {
-            std::string arg = argv[i];
+            std::string arg = argv[i-1];
 
 
             const auto split = arg.find('=');
@@ -161,7 +161,7 @@ namespace FusionEngine
             "UseDebugAllocators=true",
             "UseDebugMarkers=true",
             "UseDebugNames=true",
-            "MainWindowSize=800,1200",
+            "MainWindowSize=1200,800",
             "MainWindowPosition=200,200",
             "MainWindowFullscreen=false",
             "MainWindowResizable=true",

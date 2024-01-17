@@ -24,21 +24,28 @@ namespace FusionEngine
             
         return true;
     }
-    
-    Unique<Window> Window::Create()
+
+    Unique<Window> Window::Create(const std::string& name, glm::uvec2 size, glm::uvec2 pos)
     {
-        return MakeUnique<Window>();
+        return MakeUnique<Window>(name, size, pos);
     }
 
-    void Window::Init()
+
+    Window::Window(std::string name, const glm::uvec2 size, glm::uvec2 pos): m_Size(size), m_Pos(pos), m_Name(std::move(name))
     {
         auto result = Platform::CreateNativeWindow(this);
         FE_ASSERT(result.is_ok(), "Window creation failed");
         m_PlatformHandle = result.unwrap();
 
-        Log::Trace("Opend window {0}", m_PlatformHandle.Handle);
+        Log::Trace("Opened window {0}", m_PlatformHandle.Handle);
         
         EventSystem::Register(Event::WindowClose, WindowCloseCallback, this);
+        m_IsActive = true;
+    }
+
+    Window::~Window()
+    {
+        ShutDown();
     }
 
     void Window::OnUpdate()
@@ -49,12 +56,17 @@ namespace FusionEngine
 
     void Window::ShutDown()
     {
+        if (!m_IsActive)
+            return;
+        
         if (!m_PlatformHandle.Handle)
             return;
         Log::Trace("Closing window {0}", m_PlatformHandle.Handle);
         
         Platform::DestroyNativeWindow(m_PlatformHandle);
         EventSystem::Unregister(Event::WindowClose, WindowCloseCallback, this);
+        
+        m_IsActive = false;
     }
 
     void Window::MakeCurrent()
@@ -86,6 +98,4 @@ namespace FusionEngine
     {
         m_LayerStack.PopOverlay(overlay);
     }
-
-    Window::Window() = default;
 }

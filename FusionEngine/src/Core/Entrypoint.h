@@ -2,11 +2,11 @@
 
 #include "Core/Application.h"
 
-extern FusionEngine::Application* CreateApplication();
+extern FusionEngine::Application* CreateApplication(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
-    FusionEngine::Application* app = CreateApplication();
+    FusionEngine::Application* app = CreateApplication(argc, argv);
     
     app->Run();
     

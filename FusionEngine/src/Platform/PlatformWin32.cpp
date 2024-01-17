@@ -88,16 +88,14 @@ namespace FusionEngine
     Result<WindowHandle, PlatformError> Platform::CreateNativeWindow(Window* instance)
     {
         const Win32State* state = static_cast<Win32State*>(State.InternalState);
-        
-        constexpr int32_t client_x = 100;
-        constexpr int32_t client_y = 100;
-        constexpr int32_t client_width = 1200;
-        constexpr int32_t client_height = 800;
 
-        int32_t window_x = client_x;
-        int32_t window_y = client_y;
-        int32_t window_width = client_width;
-        int32_t window_height = client_height;
+        const glm::ivec2 pos = instance->GetPos();
+        const glm::ivec2 size = instance->GetSize();
+        
+        int32_t window_x = pos.x;
+        int32_t window_y = pos.y;
+        int32_t window_width = size.x;
+        int32_t window_height = size.y;
 
         constexpr uint32_t window_style =
             WS_OVERLAPPED
@@ -117,7 +115,7 @@ namespace FusionEngine
         window_width += border_rect.right - border_rect.left;
         window_height += border_rect.bottom - border_rect.top;
 
-        const HWND handle = CreateWindowExA(window_ex_style, g_windowClassName, "Fusion Engine",
+        const HWND handle = CreateWindowExA(window_ex_style, g_windowClassName, instance->m_Name.c_str(),
                                             window_style, window_x, window_y, window_width, window_height,
                                             nullptr, nullptr, state->Instance, nullptr);
 

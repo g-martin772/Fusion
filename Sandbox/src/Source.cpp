@@ -24,15 +24,16 @@ public:
     }
 };
 
-Application* CreateApplication()
+Application* CreateApplication(int argc, char** argv)
 {
     if (!File::Exists("fusion.conf"))
         ApplicationConfig::GenerateDefaultConfig("fusion.conf");
 
     ApplicationConfig conf;
     conf.LoadFromConfigFile("fusion.conf");
+    conf.LoadFromArgs(argc, argv);
         
-    auto* app = new Application();
+    auto* app = new Application(conf);
     //Window::Current()->PushLayer(new SandboxLayer());
     return app;
 }

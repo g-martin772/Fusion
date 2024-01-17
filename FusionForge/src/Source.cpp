@@ -2,9 +2,17 @@
 
 #include "EditorLayer.h"
 #include "Core/Entrypoint.h"
+#include "IO/File.h"
 
-FusionEngine::Application* CreateApplication()
+FusionEngine::Application* CreateApplication(int argc, char** argv)
 {
-     auto* app = new FusionEngine::Application();
+     if (!FusionEngine::File::Exists("fusion.conf"))
+          FusionEngine::ApplicationConfig::GenerateDefaultConfig("fusion.conf");
+
+     FusionEngine::ApplicationConfig conf;
+     conf.LoadFromConfigFile("fusion.conf");
+     conf.LoadFromArgs(argc, argv);
+     
+     auto* app = new FusionEngine::Application(conf);
      return app;
 }
