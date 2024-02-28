@@ -1,4 +1,6 @@
 
+#include "spdlog/spdlog.h"
+
 import std;
 import glm;
 import vulkan_hpp;
@@ -13,6 +15,8 @@ int main() {
     vk::InstanceCreateInfo createInfo;
 
     vk::Instance instance = vk::createInstance(createInfo);
+
+    spdlog::info("Hello, {}!", "World");
 
     return 0;
 }

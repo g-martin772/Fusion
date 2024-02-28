@@ -1,8 +1,13 @@
-﻿#include "fepch.h"
-#include "Core/ApplicationConfig.h"
-#include "Core/Entrypoint.h"
-#include "IO/File.h"
+﻿#include "Core/Log.h"
 
+int main()
+{
+    FusionEngine::Log::Init();
+    FusionEngine::Log::Info("Hello, World!");
+    return 0;
+}
+
+/*
 using namespace FusionEngine;
 
 class SandboxLayer : public Layer
@@ -37,3 +42,4 @@ Application* CreateApplication(int argc, char** argv)
     //Window::Current()->PushLayer(new SandboxLayer());
     return app;
 }
+*/
