@@ -1,0 +1,6 @@
+[submodule "Dependencies/VulkanHpp"]
+	path = Dependencies/VulkanHpp
+	url = https://github.com/KhronosGroup/Vulkan-Hpp
+[submodule "Dependencies/spdlog"]
+	path = Dependencies/spdlog
+	url = https://github.com/g-martin772/spdlog
