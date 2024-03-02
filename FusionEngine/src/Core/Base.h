@@ -6,6 +6,8 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <unordered_set>
+#include <set>
 
 #ifdef FUSION_ENGINE
     #define FE_API __declspec(dllexport)

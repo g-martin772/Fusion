@@ -1,16 +1,6 @@
-[submodule "FusionEngine/dependencies/spdlog"]
-	path = FusionEngine/dependencies/spdlog
-	url = https://github.com/g-martin772/spdlog.git
-[submodule "FusionEngine/dependencies/GLFW"]
-	path = FusionEngine/dependencies/GLFW
-	url = https://github.com/g-martin772/glfw.git
-[submodule "FusionEngine/dependencies/imgui/imgui"]
-	path = FusionEngine/dependencies/imgui/imgui
-	url = https://github.com/g-martin772/imgui.git
-	branch = docking
-[submodule "FusionEngine/dependencies/EnTT/entt"]
-	path = FusionEngine/dependencies/EnTT/entt
-	url = https://github.com/g-martin772/entt.git
-[submodule "scripts/Dependencies/vscode"]
-	path = scripts/Dependencies/vscode
-	url = https://github.com/Enhex/premake-vscode
+[submodule "Dependencies/VulkanHpp"]
+	path = Dependencies/VulkanHpp
+	url = https://github.com/KhronosGroup/Vulkan-Hpp
+[submodule "Dependencies/spdlog"]
+	path = Dependencies/spdlog
+	url = https://github.com/g-martin772/spdlog
